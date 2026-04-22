@@ -159,8 +159,6 @@ textarea{resize:none;min-height:56px;}
 #sig-c{display:block;width:100%;height:110px;border:2px dashed var(--border);border-radius:8px;background:#fafaf8;touch-action:none;}
 
 /* MIC */
-#gmic{position:fixed;bottom:76px;right:12px;z-index:300;width:48px;height:48px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;}
-#gmic.on{background:#1a6a1a;animation:pulse .8s infinite;}
 
 /* PHOTOS */
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
@@ -200,10 +198,7 @@ textarea{resize:none;min-height:56px;}
   <div class="card">
     <div class="ctitle"><span class="ctitle-icon">🏡</span>Property</div>
     <div class="fg"><label class="lbl">Property Address</label><input type="text" id="f-addr" placeholder="123 Main St, Santa Rosa CA 95401"></div>
-    <div class="row2">
-      <div class="fg"><label class="lbl">Sq Ft</label><input type="number" id="f-sqft" placeholder="1450"></div>
-      <div class="fg"><label class="lbl">Year Built</label><input type="number" id="f-year" placeholder="1978"></div>
-    </div>
+    <!-- Sq Ft and Year Built auto-filled by Zillow integration in JobTread -->
     <div class="fg"><label class="lbl">Property Status</label>
       <select id="f-occ"><option value="Vacant">Vacant</option><option value="Occupied">Owner Occupied</option><option value="Tenant occupied">Tenant Occupied</option></select>
     </div>
@@ -382,7 +377,6 @@ textarea{resize:none;min-height:56px;}
   </div>
 </div>
 
-<button id="gmic" onclick="togMic()">🎤</button>
 <div class="bnav">
   <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
   <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
@@ -813,19 +807,16 @@ function bldRoom(r){
 
   // DOOR HARDWARE
   s+='<div class="sh">🚪 Door Hardware</div>';
-  s+='<div class="fg"><label class="lbl">Door Type</label><select onchange="setRV(\''+r.id+'\',\'doorType\',this.value);document.getElementById(\'dh-body-'+r.id+'\').style.display=this.value?\'block\':\'none\'">'
-    +'<option value="">None / Skip</option>'
-    +'<option value="passage"'+(d.doorType==='passage'?' selected':'')+'>Passage (Hall / Closet)</option>'
-    +'<option value="privacy"'+(d.doorType==='privacy'?' selected':'')+'>Privacy (Bed / Bath)</option>'
-    +'<option value="entry"'+(d.doorType==='entry'?' selected':'')+'>Entry / Exterior</option>'
-    +'</select></div>';
-  var dItems=d.doorType==='passage'?DOOR_PASS:d.doorType==='privacy'?DOOR_PRIV:d.doorType==='entry'?DOOR_ENTRY:null;
-  s+='<div id="dh-body-'+r.id+'" style="display:'+(d.doorType?'block':'none')+'">';
-  if(dItems){s+='<div class="pg2">'+dItems.map(function(item){return mkPcard(item,'doorHardwareId','pg2',r.id);}).join('')+'</div>';}
-  s+=qRow(r.id,'doorQty','Quantity','# of doors this type');
-  s+='</div>';
-
-  // LIGHTS
+  s+='<div class="a-info" style="font-size:10px;">Select each door type used in this room and enter qty for each.</div>';
+  s+='<div class="lbl" style="margin-bottom:5px;">Passage — Hall / Closet</div>';
+  s+='<div class="pg2">'+DOOR_PASS.map(function(item){return mkPcard(item,'passageId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'passageQty','Passage Qty','');
+  s+='<div class="lbl" style="margin:8px 0 5px;">Privacy — Bed / Bath</div>';
+  s+='<div class="pg2">'+DOOR_PRIV.map(function(item){return mkPcard(item,'privacyId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'privacyQty','Privacy Qty','');
+  s+='<div class="lbl" style="margin:8px 0 5px;">Entry / Exterior</div>';
+  s+='<div class="pg2">'+DOOR_ENTRY.map(function(item){return mkPcard(item,'entryId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'entryQty','Entry Qty','');
   s+='<div class="sh">💡 Lighting</div>';
 
   // Flush mount
@@ -1011,7 +1002,7 @@ function bldRoom(r){
   s+='<div class="sh">📷 Room Photos</div>';
   s+='<div class="photo-status" id="pstat-'+r.id+'">Tap + to add photos</div>';
   s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
-  s+='<label class="photo-add" onclick="triggerPhoto(\"'+r.id+'\")">'+'<span class="photo-add-icon">📷</span>Add Photo</label>';
+  s+='<button class="photo-add" onclick="document.getElementById(\'pinput-'+r.id+'\').click()">'+'<span class="photo-add-icon">📷</span>Add Photo</button>';
   s+='<input type="file" accept="image/*" capture="environment" id="pinput-'+r.id+'" style="display:none" onchange="handlePhoto(\"'+r.id+'\",this)">';
 
   s+='<div class="sh">📝 Notes</div>';
@@ -1219,8 +1210,6 @@ async function pushToJT(){
   if(aph.length===10)aph='+1'+aph;else if(aph.length===11)aph='+'+aph;else aph='';
   var aem=(document.getElementById('f-agent-email').value||'').trim().toLowerCase();
   var occ=document.getElementById('f-occ').value||'Vacant';
-  var sqft=(document.getElementById('f-sqft').value||'').trim();
-  var yr=(document.getElementById('f-year').value||'').trim();
   var access=(document.getElementById('f-access').value||'').trim();
   var listd=(document.getElementById('f-listdate').value||'').trim();
   var walknotes=(document.getElementById('f-walknotes').value||'').trim();
@@ -1309,10 +1298,11 @@ async function pushToJT(){
     if(totalPhotos>0)jl(totalPhotos+' room photos uploaded','ok');
 
     // 5. LOCATION FIELDS
-    if(locId&&(access||sqft||yr)){
-      try{var lcf={};if(access)lcf['Entry Code']=access;if(sqft)lcf['Living Area (sqft)']=sqft;if(yr)lcf['Year Built']=yr;
-        await jtQ({updateLocation:{'$':{id:locId,customFieldValues:lcf},updateLocation:{}}});jl('Location details set','ok');}
-      catch(e){jl('Location fields: '+e.message,'err');}
+    if(locId&&access){
+      try{
+        await jtQ({updateLocation:{'$':{id:locId,customFieldValues:{'Entry Code':access}},updateLocation:{}}});
+        jl('Entry code set','ok');
+      }catch(e){jl('Location fields: '+e.message,'err');}
     }
 
     // 6. BASE PACKAGE TEMPLATE
@@ -1370,8 +1360,10 @@ async function pushToJT(){
       var rn=r.name;
       function addRI(id,qty,grp,name){if(id&&qty>0)roomItems.push({id:id,qty:qty,grp:grp,name:rn+' \u2014 '+name,room:rn});}
 
-      // Door hardware
-      if(d.doorHardwareId&&d.doorQty>0)addRI(d.doorHardwareId,d.doorQty,G.door,'Door Hardware');
+      // Door hardware — all three types
+      if(d.passageId&&d.passageQty>0)addRI(d.passageId,d.passageQty,G.door,'Passage Hardware');
+      if(d.privacyId&&d.privacyQty>0)addRI(d.privacyId,d.privacyQty,G.door,'Privacy Hardware');
+      if(d.entryId&&d.entryQty>0)addRI(d.entryId,d.entryQty,G.door,'Entry Hardware');
       // Flush mount
       if(d.flushId&&d.flushQty>0)addRI(d.flushId,d.flushQty,G.light,'Ceiling Fixture');
       // Cans
@@ -1553,7 +1545,6 @@ function openRendr(){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
-  initMic();
   initHWToggles();
   bldThermGrid();
   document.addEventListener('touchstart',function(){},{passive:true});
