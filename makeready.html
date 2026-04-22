@@ -1320,17 +1320,17 @@ async function pushToJT(){
 
     function addHW(id,qty,grp,name){if(id&&qty>0)hwItems.push({id:id,qty:qty,grp:grp,name:name});}
 
-    if(document.getElementById('hw-whs').checked)addHW('22PVUrNpCa5',1,G.whs,'Water Heater Strapping');
-    if(document.getElementById('hw-pw').checked)addHW('22PVVUtC32cW',1,G.pw,'Power Washing Labor');
-    if(document.getElementById('hw-junk').checked)addHW('22PVVULtc5yT',(HW['hw-junk-qty']||1),G.debris,'Dump Run');
-    if(document.getElementById('hw-clean').checked)addHW('22PVVUq6fXxe',1,G.clean,'Deep Clean — Sub');
-    if(document.getElementById('hw-land').checked)addHW('22PVVUNCDK68',1,G.land,'Light Landscaping Labor');
-    if(document.getElementById('hw-caulk').checked)addHW('22PVVUryVciR',1,G.caulk,'Caulking and Sealing');
-    if(document.getElementById('hw-drywall').checked)addHW('22PVVUqh9XT5',1,G.drywall,'Drywall Repair');
+    if(document.getElementById('hw-whs').checked)addHW('22PVHNY7stDA',1,G.whs,'Water Heater Strapping Labor');addHW('22PVHNn4DFGm',1,G.whs,'Water Heater Strap Kit');
+    if(document.getElementById('hw-pw').checked)addHW('22PVHRGEjnsY',1,G.pw,'Power Washing Labor');
+    if(document.getElementById('hw-junk').checked)addHW('22PVGxVmrvAg',(HW['hw-junk-qty']||1),G.debris,'Dump Run');
+    if(document.getElementById('hw-clean').checked)addHW('22PVHCyJ2x5F',1,G.clean,'Deep Clean — Sub');
+    if(document.getElementById('hw-land').checked)addHW('22PVH45FXZXg',1,G.land,'Light Landscaping Labor');
+    if(document.getElementById('hw-caulk').checked)addHW('22PVHPf37uAc',1,G.caulk,'Caulking Labor');addHW('22PVHPs4AVFS',1,G.caulk,'Caulking Materials');
+    if(document.getElementById('hw-drywall').checked)addHW('22PVHMpGbDYU',1,G.drywall,'Drywall Repair Labor');addHW('22PVHN8LBdyx',1,G.drywall,'Drywall Repair Materials');
     if(S.thermostatId&&document.getElementById('hw-therm').checked)addHW(S.thermostatId,1,G.consumables,'Thermostat');
     var fsel=document.getElementById('hw-filter-sel').value;
-    if(fsel==='standard')addHW('22PVSnDyeNd7',1,G.consumables,'HVAC Filter Standard');
-    if(fsel==='allergen')addHW('22PVSnDyeNd8',1,G.consumables,'HVAC Filter Allergen');
+    if(fsel==='standard')addHW('22PVSnDxcVP5',1,G.consumables,'HVAC Filter Standard');
+    if(fsel==='allergen')addHW('22PVSnDxcVP5',1,G.consumables,'HVAC Filter Allergen');
     if(document.getElementById('hw-car')&&document.getElementById('hw-car').checked){
       var carQty=HW['hw-car-qty']||1;
       var carAction=document.getElementById('hw-car-action').value;
