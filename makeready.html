@@ -1304,13 +1304,13 @@ async function pushToJT(){
 
     function addHW(id,qty,grp,name){if(id&&qty>0)hwItems.push({id:id,qty:qty,grp:grp,name:name});}
 
-    if(document.getElementById('hw-whs').checked)addHW('22PVHNY7stDA',1,G.whs,'Water Heater Strapping Labor');addHW('22PVHNn4DFGm',1,G.whs,'Water Heater Strap Kit');
+    if(document.getElementById('hw-whs').checked){addHW('22PVHNY7stDA',1,G.whs,'Water Heater Strapping Labor');addHW('22PVHNn4DFGm',1,G.whs,'Water Heater Strap Kit');}
     if(document.getElementById('hw-pw').checked)addHW('22PVHRGEjnsY',1,G.pw,'Power Washing Labor');
     if(document.getElementById('hw-junk').checked)addHW('22PVGxVmrvAg',(HW['hw-junk-qty']||1),G.debris,'Dump Run');
     if(document.getElementById('hw-clean').checked)addHW('22PVHCyJ2x5F',1,G.clean,'Deep Clean — Sub');
     if(document.getElementById('hw-land').checked)addHW('22PVH45FXZXg',1,G.land,'Light Landscaping Labor');
-    if(document.getElementById('hw-caulk').checked)addHW('22PVHPf37uAc',1,G.caulk,'Caulking Labor');addHW('22PVHPs4AVFS',1,G.caulk,'Caulking Materials');
-    if(document.getElementById('hw-drywall').checked)addHW('22PVHMpGbDYU',1,G.drywall,'Drywall Repair Labor');addHW('22PVHN8LBdyx',1,G.drywall,'Drywall Repair Materials');
+    if(document.getElementById('hw-caulk').checked){addHW('22PVHPf37uAc',1,G.caulk,'Caulking Labor');addHW('22PVHPs4AVFS',1,G.caulk,'Caulking Materials');}
+    if(document.getElementById('hw-drywall').checked){addHW('22PVHMpGbDYU',1,G.drywall,'Drywall Repair Labor');addHW('22PVHN8LBdyx',1,G.drywall,'Drywall Repair Materials');}
     if(S.thermostatId&&document.getElementById('hw-therm').checked)addHW(S.thermostatId,1,G.consumables,'Thermostat');
     var fsel=document.getElementById('hw-filter-sel').value;
     if(fsel==='standard')addHW('22PVSnDwihu6',1,G.consumables,'HVAC Filter Standard');
@@ -1402,32 +1402,8 @@ async function pushToJT(){
     }
 
     // 10. DOCUMENTS
-    try{
-      await jtQ({createDocument:{'$':{
-        jobId:jobId,
-        type:'customerOrder',
-        documentTemplateId:'22PPCQZbCZSg',
-        name:'Proposal — Pre-Listing Market Prep',
-        accountId:custId,
-        fromName:'LMC Contracting',
-        toName:seller,
-        taxRate:0.0
-      },createdDocument:{id:{}}}});
-      jl('Proposal created','ok');
-    }catch(e){jl('Proposal: '+e.message,'err');}
-    try{
-      await jtQ({createDocument:{'$':{
-        jobId:jobId,
-        type:'vendorOrder',
-        documentTemplateId:'22PCgcVGSysM',
-        name:'PO — '+(addr.split(',')[0]||addr),
-        accountId:'22PEnZwGDc7H',
-        fromName:'LMC Contracting',
-        toName:'Home Depot',
-        taxRate:0.0
-      },createdDocument:{id:{}}}});
-      jl('Purchase Order created','ok');
-    }catch(e){jl('PO: '+e.message,'err');}
+    // Documents created manually in JobTread — API grant key cannot create docs
+    jl('\u2139 In JobTread: Documents tab → create Proposal & PO','info');
 
     jl('','');
     jl('\u2713 DONE! Open JobTread to review. Job: '+jobName,'ok');
@@ -1456,26 +1432,20 @@ async function handlePhoto(rid,input){
   if(!room)return;
   if(!room.photos)room.photos=[];
   var stat=document.getElementById('pstat-'+rid);
-  var btn=document.querySelector('#room-'+rid+' .photo-add');
   if(stat){stat.textContent='Uploading...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
-  if(btn)btn.disabled=true;
   try{
     var b64=await new Promise(function(res,rej){
       var reader=new FileReader();
       reader.onload=function(e){res(e.target.result.split(',')[1]);};
-      reader.onerror=function(){rej(new Error('Could not read photo file'));};
+      reader.onerror=function(){rej(new Error('Could not read photo'));};
       reader.readAsDataURL(file);
     });
-    // Use URLSearchParams instead of FormData for better iOS Safari compat
     var params=new URLSearchParams();
     params.append('key',IMGBB_KEY);
     params.append('image',b64);
     params.append('name','lmc-'+rid.slice(-4)+'-'+Date.now());
-    var resp=await fetch('https://api.imgbb.com/1/upload',{
-      method:'POST',
-      body:params
-    });
-    if(!resp.ok)throw new Error('Upload failed (HTTP '+resp.status+')');
+    var resp=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:params});
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
     var result=await resp.json();
     if(result.success&&result.data&&result.data.url){
       var url=result.data.url;
@@ -1483,19 +1453,15 @@ async function handlePhoto(rid,input){
       room.photos.push({url:url,thumb:thumb,room:room.name});
       renderPhotos(rid);
       var n=room.photos.length;
-      if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' ready to push';stat.style.color='green';stat.style.fontWeight='bold';}
+      if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' ready';stat.style.color='green';stat.style.fontWeight='bold';}
     } else {
-      var err=result.error?result.error.message:'Upload rejected';
-      throw new Error(err);
+      throw new Error(result.error?result.error.message:'Upload rejected');
     }
   }catch(e){
-    if(stat){stat.textContent='\u274c Error: '+e.message;stat.style.color='red';stat.style.fontWeight='bold';}
-    console.error('Photo error:',e.message);
-  } finally {
-    if(btn)btn.disabled=false;
+    if(stat){stat.textContent='\u274c '+e.message;stat.style.color='red';stat.style.fontWeight='bold';}
+    console.error('Photo:',e.message);
   }
 }
-
 
 function renderPhotos(rid){
   var room=S.rooms.find(function(r){return r.id===rid;});
