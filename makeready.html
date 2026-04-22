@@ -1,2012 +1,1492 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="apple-mobile-web-app-title" content="LMC Make Ready"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>LMC Make Ready</title>
 <style>
+:root{
+  --red:#B32025;--red2:#8a1a1d;--bg:#f2f0ec;--card:#fff;
+  --border:#e0ddd8;--muted:#888;--text:#1a1a1a;
+  --green:#2d6a2d;--orange:#c96a00;--blue:#1a4a8a;
+  --r:10px;--sh:0 2px 10px rgba(0,0,0,.07);
+  --sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{min-height:100%;background:#f4f4f2;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;font-size:14px;}
-:root{--red:#B32025;--black:#000;--white:#fff;--bg:#f4f4f2;--card:#fff;--border:#e2e2de;--muted:#777;--radius:10px;--rsm:7px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;padding-bottom:90px;}
 
 /* HEADER */
-.hdr{background:#000;padding:12px 14px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:200;}
-.hdr svg{flex-shrink:0;}
-.hdr-app{font-size:15px;font-weight:700;color:#fff;letter-spacing:.2px;}
-.hdr-sub{font-size:10px;color:var(--red);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
-.hdr-date{margin-left:auto;font-size:10px;color:#555;}
+.hdr{background:var(--red);color:#fff;padding:12px 16px;display:flex;align-items:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.hdr-logo{font-size:17px;font-weight:800;letter-spacing:.3px;}
+.hdr-sub{font-size:10px;opacity:.7;margin-top:1px;}
+.hdr-step{margin-left:auto;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;}
 
-/* STEP NAV */
-.snav{display:flex;background:#111;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+/* TABS */
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:50px;z-index:199;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{flex:1;min-width:56px;padding:8px 2px 6px;text-align:center;font-size:9px;font-weight:700;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;}
+.tab.on{color:var(--red);border-bottom-color:var(--red);}
+.tab span{display:block;font-size:17px;margin-bottom:2px;}
 
-/* FLOATING TOP NAV — shown on long pages when scrolled */
-.float-nav{position:fixed;top:0;left:0;right:0;z-index:199;background:rgba(0,0,0,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;gap:8px;padding:8px 12px;transform:translateY(-60px);transition:transform .2s;pointer-events:none;}
-.float-nav.visible{transform:translateY(0);pointer-events:all;}
-.float-nav-back{padding:8px 14px;background:#fff;color:#111;border:none;border-radius:6px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;}
-.float-nav-step{flex:1;font-size:11px;color:#888;text-align:center;}
-.float-nav-next{padding:8px 14px;background:var(--red);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;}
-.snav::-webkit-scrollbar{display:none;}
-.sb{flex:0 0 auto;padding:10px 13px;font-size:10px;color:#555;border:none;background:none;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;white-space:nowrap;font-weight:500;transition:color .15s;}
-.sb.on{color:#fff;border-bottom-color:var(--red);}
-.prog{height:3px;background:#ddd;}
-.prog-f{height:3px;background:var(--red);transition:width .3s;}
-
-/* PANES */
-.pane{display:none;padding:14px;padding-bottom:40px;}
-.pane.on{display:block;}
-
-/* TYPOGRAPHY */
-.sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 0 8px;}
-.sec:first-child{margin-top:0;}
-.lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block;}
-.mic-wrap{position:relative;display:flex;align-items:center;gap:6px;}
-.mic-wrap input,.mic-wrap textarea,.mic-wrap select{flex:1;}
-.mic-btn{width:36px;height:36px;border-radius:50%;border:none;background:#f0f0ee;color:#555;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
-.mic-btn.on{background:var(--red);color:#fff;animation:pulse .8s infinite;}
-@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
-
-/* FORMS */
-.fg{margin-bottom:12px;}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-input[type=text],input[type=tel],input[type=email],input[type=date],select,textarea{
-  width:100%;padding:10px 12px;font-size:13px;font-family:inherit;
-  background:#fff;color:#111;border:1px solid var(--border);border-radius:var(--rsm);
-  -webkit-appearance:none;appearance:none;}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);}
-textarea{resize:none;height:76px;line-height:1.5;}
+/* PAGES */
+.pg{display:none;padding:10px 10px 16px;}
+.pg.on{display:block;}
 
 /* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;}
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:12px;margin-bottom:8px;box-shadow:var(--sh);}
+.ctitle{font-weight:800;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ctitle-icon{font-size:15px;}
 
-/* BUTTONS */
-.btn-r{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:6px;}
-.btn-k{width:100%;padding:13px;background:#000;color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:6px;}
-.btn-o{width:100%;padding:11px;background:#fff;color:#111;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;cursor:pointer;margin-top:6px;}
-.nav-row{display:flex;gap:8px;margin-top:14px;}
-.back-btn{flex:0 0 76px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;cursor:pointer;color:#111;font-weight:500;}
+/* FORM */
+.fg{margin-bottom:9px;}
+.lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:block;}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;font-family:var(--sans);background:#fff;color:var(--text);-webkit-appearance:none;appearance:none;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);}
+textarea{resize:none;min-height:56px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+
+/* FINISH */
+.fin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.fin-opt{border:2px solid var(--border);border-radius:8px;padding:10px 4px;text-align:center;cursor:pointer;}
+.fin-opt.on{border-color:var(--red);background:#fff5f5;}
+.swatch{width:30px;height:30px;border-radius:50%;margin:0 auto 5px;border:2px solid rgba(0,0,0,.1);}
+.sw-sn{background:radial-gradient(circle at 35% 35%,#e8e4d8,#a8a49c,#8a8680);}
+.sw-mb{background:radial-gradient(circle at 35% 35%,#444,#222,#111);}
+.sw-vb{background:radial-gradient(circle at 35% 35%,#8b6914,#5c4409,#3d2c06);}
+.fin-name{font-size:11px;font-weight:700;}
+.fin-sub{font-size:9px;color:var(--muted);}
+
+/* ROOM CHIPS */
+.rtype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+.rchip{border:1.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;background:#fff;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.rchip span{display:block;font-size:20px;margin-bottom:3px;}
+.rchip:active{background:#f5f5f5;}
+
+/* ROOM CARDS */
+.rcard{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--sh);}
+.rcard-hdr{display:flex;align-items:center;padding:10px 12px;gap:8px;cursor:pointer;}
+.rcard-icon{font-size:22px;}
+.rcard-name{font-weight:800;font-size:14px;flex:1;}
+.rcard-sum{font-size:10px;color:var(--muted);margin-top:1px;}
+.rcard-body{padding:12px;border-top:1px solid var(--border);display:none;}
+.rcard-body.on{display:block;}
+.rcard-arrow{color:var(--muted);font-size:18px;transition:.2s;}
+.rcard-hdr.open .rcard-arrow{transform:rotate(90deg);}
+
+/* SECTION HEADERS */
+.sh{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;}
+
+/* PAINT TIERS */
+.pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px;}
+.pt{border:2px solid var(--border);border-radius:7px;padding:7px 4px;text-align:center;cursor:pointer;background:#fff;}
+.pt.on{border-color:var(--red);background:#fff5f5;}
+.pt-lbl{font-size:12px;font-weight:800;color:var(--red);}
+.pt-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* PRODUCT GRID */
+.pg2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px;}
+.pg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;}
+.pcard{border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff;transition:border-color .15s;}
+.pcard.on{border-color:var(--red);}
+.pcard-img{width:100%;aspect-ratio:1;object-fit:contain;background:#f8f7f4;padding:6px;}
+.pcard-ph{width:100%;aspect-ratio:1;background:#f0ede8;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.pcard-info{padding:5px 7px 7px;}
+.pcard-name{font-size:10px;font-weight:600;line-height:1.3;margin-bottom:2px;}
+.pcard-price{font-size:11px;color:var(--red);font-weight:800;}
+.pcard-fin{font-size:9px;color:var(--muted);}
+.pcard-chk{display:none;background:var(--red);color:#fff;text-align:center;font-size:9px;font-weight:800;padding:3px;}
+.pcard.on .pcard-chk{display:block;}
+
+/* QTY */
+.qrow{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.qlbl{flex:1;font-size:12px;font-weight:600;}
+.qlbl-sub{font-size:10px;color:var(--muted);font-weight:400;display:block;}
+.qctrl{display:flex;align-items:center;}
+.qbtn{width:30px;height:30px;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.qbtn:first-child{border-radius:7px 0 0 7px;}
+.qbtn:last-child{border-radius:0 7px 7px 0;}
+.qval{width:34px;height:30px;border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);border-left:none;border-right:none;text-align:center;font-size:13px;font-weight:800;background:#fff;display:flex;align-items:center;justify-content:center;}
+
+/* TOGGLE */
+.trow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #f0ede8;gap:8px;}
+.trow:last-child{border-bottom:none;}
+.tlbl{flex:1;font-size:12px;font-weight:600;}
+.tlbl-sub{font-size:10px;color:var(--muted);display:block;font-weight:400;}
+.tog{position:relative;width:42px;height:24px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.tog-sl{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:.2s;}
+.tog-sl:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+.tog input:checked+.tog-sl{background:var(--red);}
+.tog input:checked+.tog-sl:before{transform:translateX(18px);}
+
+/* VALVE */
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.vopt{border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;cursor:pointer;background:#fff;}
+.vopt.on{border-color:var(--red);background:#fff5f5;}
+.vopt.danger.on{border-color:var(--orange);background:#fff8f0;}
+.vname{font-size:11px;font-weight:700;margin-bottom:2px;}
+.vsub{font-size:9px;color:var(--muted);}
+.vbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;display:inline-block;margin-top:3px;}
+.vb-ok{background:#e8f5e8;color:var(--green);}
+.vb-chk{background:#fff3e0;color:var(--orange);}
+.vb-no{background:#fce8e8;color:var(--red);}
+
+/* ELEC SUB-SECTIONS */
+.esub{background:#f8f7f4;border-radius:8px;padding:8px 10px;margin-bottom:6px;}
+.esub-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
 
 /* ALERTS */
-.alert{padding:10px 12px;border-radius:var(--rsm);font-size:11px;margin-bottom:10px;line-height:1.55;}
-.a-info{background:#E6F1FB;color:#185FA5;}
-.a-ok{background:#EAF3DE;color:#27500A;}
-.a-warn{background:#FAEEDA;color:#854F0B;}
-.a-err{background:#FCEBEB;color:#A32D2D;}
+.a-info{background:#e8f0fb;color:var(--blue);border:1px solid #b8d0f0;padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;line-height:1.5;}
+.a-warn{background:#fff8e8;color:var(--orange);border:1px solid #f0d890;padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;line-height:1.5;}
+.a-ok{background:#e8f5e8;color:var(--green);border:1px solid #a8d8a8;padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;}
 
-/* ROOM BUILDER */
-.room-add-row{display:flex;gap:8px;margin-bottom:10px;}
-.room-add-row select{flex:1;}
-.room-chip{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:7px;}
-.room-chip-name{font-size:13px;font-weight:600;color:#111;flex:1;}
-.room-chip-meta{font-size:11px;color:var(--muted);}
-.room-chip-del{width:26px;height:26px;border:1px solid #f7c1c1;border-radius:5px;background:#FCEBEB;color:#A32D2D;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* LOG */
+#jt-log{display:none;margin-top:10px;background:#111;border-radius:8px;padding:10px;max-height:260px;overflow-y:auto;}
+#jt-log .ok{color:#4caf50;font-size:11px;padding:1px 0;}
+#jt-log .err{color:#f44336;font-size:11px;padding:1px 0;}
+#jt-log .info{color:#90caf9;font-size:11px;padding:1px 0;}
 
-/* PAINT TIER */
-.tier-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;}
-.tier-btn{padding:9px 4px;font-size:10px;font-weight:600;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;text-align:center;color:var(--muted);font-family:inherit;line-height:1.4;}
-.tier-btn.on{background:#000;color:#fff;border-color:#000;}
+/* BUTTONS */
+.btn{width:100%;padding:13px;border:none;border-radius:9px;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--sans);}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:disabled{background:#ccc;}
+.btn-out{background:transparent;border:2px solid var(--red);color:var(--red);}
+.btn-sm{padding:7px 12px;font-size:11px;width:auto;border-radius:7px;}
 
-/* FINISH SELECTOR */
-.fin-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px;}
-.fin-btn{padding:10px 4px;font-size:11px;font-weight:500;border:1.5px solid var(--border);border-radius:var(--rsm);background:#fff;cursor:pointer;text-align:center;color:#111;font-family:inherit;line-height:1.4;}
-.fin-btn.on{background:#000;color:#fff;border-color:#000;}
+/* SIG */
+#sig-c{display:block;width:100%;height:110px;border:2px dashed var(--border);border-radius:8px;background:#fafaf8;touch-action:none;}
 
-/* WALK ROOM CARDS */
-.walk-room{background:#fff;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
-.walk-room-hdr{background:#000;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;}
-.walk-room-title{font-size:13px;font-weight:600;color:#fff;}
-.walk-room-badge{font-size:10px;color:var(--red);font-weight:600;}
-.walk-section{padding:0 13px;}
-.walk-cat{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;padding:9px 0 5px;border-bottom:1px solid #f0eeea;color:var(--muted);}
-.walk-item{padding:9px 0;border-bottom:1px solid #f8f7f5;}
-.walk-item:last-child{border-bottom:none;}
-.walk-item-top{display:flex;align-items:flex-start;gap:8px;}
-.walk-item-name{font-size:12px;font-weight:500;color:#111;flex:1;line-height:1.5;}
-.walk-item-price{font-size:11px;color:var(--red);font-weight:600;white-space:nowrap;}
-.walk-item-note{font-size:10px;color:#854F0B;margin-top:1px;}
-.walk-item-controls{display:flex;align-items:center;gap:5px;margin-top:7px;}
-.wqb{width:28px;height:28px;border:1px solid var(--border);border-radius:5px;background:#fff;font-size:16px;cursor:pointer;color:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.wqn{font-size:14px;font-weight:700;min-width:22px;text-align:center;}
-.wflag{width:28px;height:28px;border:1px solid var(--border);border-radius:5px;background:#fff;font-size:11px;font-weight:700;cursor:pointer;color:#ccc;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.wflag.on{background:var(--red);border-color:var(--red);color:#fff;}
-.wnote{flex:1;padding:6px 8px;font-size:11px;border:1px solid var(--border);border-radius:5px;background:#fff;font-family:inherit;}
-.walk-custom{padding:10px 13px;border-top:1px solid #f0eeea;}
-.walk-custom-row{display:flex;gap:7px;margin-top:6px;}
-.walk-custom-row input{flex:1;padding:7px 9px;font-size:11px;}
+/* MIC */
+#gmic{position:fixed;bottom:76px;right:12px;z-index:300;width:48px;height:48px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;}
+#gmic.on{background:#1a6a1a;animation:pulse .8s infinite;}
 
-/* SELECTIONS PANEL */
-.sel-group{margin-bottom:16px;}
-.sel-group-title{font-size:11px;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #000;}
+/* PHOTOS */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;background:#f0ede8;}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.photo-add{aspect-ratio:1;border-radius:7px;border:2px dashed var(--border);background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);gap:4px;}
+.photo-add-icon{font-size:24px;}
+.photo-uploading{opacity:.5;}
+.photo-status{font-size:10px;color:var(--muted);margin-bottom:6px;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
 
-/* Accordion row — the section trigger */
-.sel-acc{background:#fff;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:6px;overflow:visible;}
-.sel-acc-hdr{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.sel-acc-hdr:active{background:#f9f9f7;}
-.sel-acc-label{flex:1;}
-.sel-acc-name{font-size:13px;font-weight:600;color:#111;line-height:1.4;}
-.sel-acc-note{font-size:10px;color:#854F0B;margin-top:2px;}
-.sel-acc-status{font-size:11px;color:var(--red);font-weight:600;white-space:nowrap;}
-.sel-acc-arrow{font-size:11px;color:#bbb;transition:transform .15s;flex-shrink:0;}
-.sel-acc-arrow.open{transform:rotate(180deg);}
-.sel-acc-body{display:none;border-top:1px solid #f0eeea;}
-.sel-acc-body.open{display:block;}
-
-/* Option rows inside the accordion */
-.sel-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-bottom:1px solid #f8f7f5;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.sel-opt:last-child{border-bottom:none;}
-.sel-opt:active{background:#fafaf8;}
-.sel-opt.on{background:#FFF5F5;}
-.sel-opt-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
-.sel-opt.on .sel-opt-radio{border-color:var(--red);background:var(--red);}
-.sel-opt-radio-dot{width:8px;height:8px;border-radius:50%;background:#fff;}
-.sel-opt-body{flex:1;}
-.sel-opt-name{font-size:12px;font-weight:600;color:#111;line-height:1.4;}
-.sel-opt-fin{font-size:11px;color:var(--muted);margin-top:1px;}
-.sel-opt-note{font-size:10px;color:#854F0B;margin-top:2px;}
-.sel-opt-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
-.sel-opt-price{font-size:12px;font-weight:700;color:var(--red);}
-.sel-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:10px;font-weight:600;}
-.sb-good{background:#EAF3DE;color:#27500A;}
-.sb-better{background:#E6F1FB;color:#185FA5;}
-.sb-best{background:#FAEEDA;color:#854F0B;}
-
-/* Selected item controls (qty + location) */
-.sel-controls{padding:10px 13px;background:#FFF5F5;border-top:1px solid #fce8e8;}
-.sel-qty-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.sel-qty-label{font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.4px;}
-.sel-qty-controls{display:flex;align-items:center;gap:6px;}
-.sqb{width:28px;height:28px;border:1px solid var(--border);border-radius:5px;background:#fff;font-size:16px;cursor:pointer;color:#111;display:flex;align-items:center;justify-content:center;}
-.sqn{font-size:14px;font-weight:700;min-width:22px;text-align:center;}
-.sel-remove{width:28px;height:28px;border:1px solid #f7c1c1;border-radius:5px;background:#FCEBEB;color:#A32D2D;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.sel-loc-row{display:flex;gap:7px;margin-top:6px;align-items:center;}
-.sel-loc-label{font-size:10px;color:var(--muted);white-space:nowrap;}
-.sel-loc-input{flex:1;padding:6px 9px;font-size:11px;border:1px solid var(--border);border-radius:5px;background:#fff;font-family:inherit;}
-.sel-subtotal{font-size:11px;font-weight:700;color:var(--red);margin-top:8px;text-align:right;}
-
-.sel-total-bar{background:#f9f9f7;border:1px solid var(--border);border-radius:var(--rsm);padding:10px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.sel-total-label{font-size:12px;color:var(--muted);}
-.sel-total-val{font-size:16px;font-weight:700;color:var(--red);}
-
-/* PHOTO GRID */
-.photo-zone{margin-bottom:12px;}
-.photo-zone-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-.ph{aspect-ratio:1;border-radius:var(--rsm);overflow:hidden;background:#eeeee8;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;}
-.ph img{width:100%;height:100%;object-fit:cover;}
-.ph-add{border:1.5px dashed var(--border);font-size:26px;color:#ccc;}
-.ph-del{position:absolute;top:4px;right:4px;width:20px;height:20px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:11px;cursor:pointer;font-weight:700;}
-
-/* PROPOSAL */
-.prop-section{border-top:1px solid var(--border);padding-top:10px;margin-top:10px;}
-.prop-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:#111;}
-.prop-row span:last-child{font-weight:600;color:var(--red);}
-.prop-divider{border-top:1.5px solid #111;margin:8px 0;}
-.prop-total{display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding:6px 0;}
-.prop-total span:last-child{color:var(--red);}
-
-/* SIGNATURE */
-#sig-canvas{display:block;width:100%;border:1.5px dashed var(--border);border-radius:var(--rsm);background:#fafaf8;touch-action:none;cursor:crosshair;}
-
-/* JT STATUS */
-.jt-log{background:#f9f9f7;border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px;font-size:11px;color:#555;line-height:1.7;margin-top:8px;display:none;max-height:220px;overflow-y:auto;}
-.jt-log .ok{color:#27500A;}
-.jt-log .err{color:#A32D2D;}
-.jt-log .info{color:#185FA5;}
-
-/* POLYCAM */
-.pcam-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:12px;}
-
-/* CAL MODAL */
-.cal-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center;}
-.cal-modal.open{display:flex;}
-.cal-sheet{background:#fff;width:100%;max-width:480px;border-radius:16px 16px 0 0;overflow:hidden;}
-.cal-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#000;}
-.cal-nav{background:none;border:none;color:#fff;font-size:26px;cursor:pointer;padding:0 4px;font-family:inherit;line-height:1;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;}
-.cal-title{font-size:14px;font-weight:600;color:#fff;}
-.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);background:#111;}
-.cal-dow div{text-align:center;padding:7px 0;font-size:10px;font-weight:600;color:#888;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#e2e2de;}
-.cal-foot{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);}
-.cal-done{padding:11px 24px;background:#000;color:#fff;border:none;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;font-weight:600;}
-.cal-clear-btn{padding:11px 16px;background:#fff;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;}
+/* BOT NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 10px;gap:8px;z-index:198;}
+.bbtn{flex:1;padding:10px;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:var(--sans);}
+.bb-back{background:#ede9e4;color:var(--text);}
+.bb-next{background:var(--red);color:#fff;}
 </style>
 </head>
 <body>
 
-<!-- FLOATING MIC BUTTON -->
-<button id="global-mic" onclick="toggleMic()" style="display:none;position:fixed;bottom:90px;right:16px;z-index:400;width:52px;height:52px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(179,32,37,.4);-webkit-tap-highlight-color:transparent;">🎤</button>
-
-<!-- FLOATING BACK/NEXT BAR (shows on scroll) -->
-<div class="float-nav" id="float-nav">
-  <button class="float-nav-back" id="float-back" onclick="floatBack()">&#8592; Back</button>
-  <div class="float-nav-step" id="float-step"></div>
-  <button class="float-nav-next" id="float-next" onclick="floatNext()">Next &#8594;</button>
-</div>
-
-<!-- HEADER -->
 <div class="hdr">
-  <svg width="30" height="30" viewBox="0 0 30 30">
-    <rect width="30" height="30" fill="#000" rx="5"/>
-    <polygon points="15,3 28,14 23,14 23,27 7,27 7,14 2,14" fill="#fff"/>
-    <polygon points="15,7 25,16 21,16 21,24 9,24 9,16 5,16" fill="#B32025"/>
-    <polygon points="15,11 21,16 21,19 18,16 15,13 12,16 9,19 9,16" fill="#fff"/>
-  </svg>
-  <div>
-    <div class="hdr-app">LMC Make Ready</div>
-    <div class="hdr-sub">Pre-Listing Sales Tool</div>
-  </div>
-  <div class="hdr-date" id="hdr-date"></div>
+  <div><div class="hdr-logo">LMC Contracting</div><div class="hdr-sub">Make Ready — Site Survey</div></div>
+  <div class="hdr-step" id="hdr-step">1 / 5</div>
 </div>
 
-<!-- STEP NAV -->
-<div class="snav">
-  <button class="sb on" ontouchend="tapGo(event,0)" onclick="go(0)">1 · Client</button>
-  <button class="sb" ontouchend="tapGo(event,1)" onclick="go(1)">2 · Rooms</button>
-  <button class="sb" ontouchend="tapGo(event,2)" onclick="go(2)">3 · Walk</button>
-  <button class="sb" ontouchend="tapGo(event,3)" onclick="go(3)">4 · Selections</button>
-  <button class="sb" ontouchend="tapGo(event,4)" onclick="go(4)">5 · Photos</button>
-  <button class="sb" ontouchend="tapGo(event,5)" onclick="go(5)">6 · Proposal</button>
-  <button class="sb" ontouchend="tapGo(event,6)" onclick="go(6)">7 · Sign & Push</button>
-</div>
-<div class="prog"><div class="prog-f" id="prog-f" style="width:14%"></div></div>
-
-<!-- ══════════════════════════════════
-     STEP 1 — CLIENT INFO
-══════════════════════════════════ -->
-<div id="p0" class="pane on">
-  <div class="alert a-info">Enter client and property details before starting the walk. Property data will auto-populate in JobTread via DataX Zillow integration after the job is pushed.</div>
-  <div class="fg"><label class="lbl">Property address</label><input type="text" id="f-addr" placeholder="123 Main St, Santa Rosa, CA 95401"/></div>
-  <div class="row2">
-    <div class="fg"><label class="lbl">Seller name</label><input type="text" id="f-seller" placeholder="Full name"/></div>
-    <div class="fg"><label class="lbl">Seller phone</label><input type="tel" id="f-phone" placeholder="(707) 000-0000"/></div>
-  </div>
-  <div class="fg"><label class="lbl">Seller email</label><input type="email" id="f-email" placeholder="email@example.com"/></div>
-  <div class="fg"><label class="lbl">Referring agent name</label><input type="text" id="f-agent" placeholder="Agent full name"/></div>
-  <div class="fg"><label class="lbl">Brokerage</label><input type="text" id="f-brokerage" placeholder="Brokerage name"/></div>
-  <div class="row2">
-    <div class="fg"><label class="lbl">Agent phone</label><input type="tel" id="f-agent-phone" placeholder="(707) 000-0000"/></div>
-    <div class="fg"><label class="lbl">Agent email</label><input type="email" id="f-agent-email" placeholder="agent@brokerage.com"/></div>
-  </div>
-  <div class="row2">
-    <div class="fg"><label class="lbl">Property status</label>
-      <select id="f-occ"><option>Occupied</option><option>Vacant</option><option>Tenant occupied</option></select>
-    </div>
-    <div class="fg"><label class="lbl">&nbsp;</label>
-      <div style="font-size:11px;color:var(--muted);padding-top:6px;">Listing status above</div>
-    </div>
-  </div>
-  <div class="fg">
-    <label class="lbl">Target list date</label>
-    <input type="hidden" id="f-listdate"/>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input type="text" id="f-listdate-disp" placeholder="Tap to select date" readonly onclick="toggleCal()" style="flex:1;cursor:pointer;min-height:44px;"/>
-      <button onclick="clearDate()" style="padding:10px 12px;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;flex-shrink:0;min-height:44px;">Clear</button>
-    </div>
-  </div>
-  <div class="row2">
-    <div class="fg"><label class="lbl">Sq ft (approx)</label><input type="text" id="f-sqft" placeholder="e.g. 1,450"/></div>
-    <div class="fg"><label class="lbl">Year built</label><input type="text" id="f-year" placeholder="e.g. 1987"/></div>
-  </div>
-  <div class="fg"><label class="lbl">Access notes</label><input type="text" id="f-access" placeholder="Gate code, dogs, lockbox..."/></div>
-  <div class="nav-row">
-    <button class="btn-r" style="flex:1;margin:0" ontouchend="tapGo(event,1)" onclick="go(1)">Next — Add rooms</button>
-  </div>
+<div class="tabs" id="tabs">
+  <button class="tab on" onclick="goTo(0)"><span>📋</span>Client</button>
+  <button class="tab" onclick="goTo(1)"><span>🏠</span>Rooms</button>
+  <button class="tab" onclick="goTo(2)"><span>🚶</span>Walk</button>
+  <button class="tab" onclick="goTo(3)"><span>👁</span>Review</button>
+  <button class="tab" onclick="goTo(4)"><span>✍️</span>Push</button>
 </div>
 
-<!-- ══════════════════════════════════
-     STEP 2 — ROOM SETUP
-══════════════════════════════════ -->
-<div id="p1" class="pane">
-  <div class="alert a-info">Add every room in the property. Paint tier is set per room. This drives all line items in the base package and the walk checklist.</div>
+<!-- PAGE 1 CLIENT -->
+<div class="pg on" id="pg0">
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏡</span>Property</div>
+    <div class="fg"><label class="lbl">Property Address</label><input type="text" id="f-addr" placeholder="123 Main St, Santa Rosa CA 95401"></div>
+    <div class="row2">
+      <div class="fg"><label class="lbl">Sq Ft</label><input type="number" id="f-sqft" placeholder="1450"></div>
+      <div class="fg"><label class="lbl">Year Built</label><input type="number" id="f-year" placeholder="1978"></div>
+    </div>
+    <div class="fg"><label class="lbl">Property Status</label>
+      <select id="f-occ"><option value="Vacant">Vacant</option><option value="Occupied">Owner Occupied</option><option value="Tenant occupied">Tenant Occupied</option></select>
+    </div>
+    <div class="fg"><label class="lbl">Entry / Access Code</label><input type="text" id="f-access" placeholder="Lockbox 1234 / Key under mat"></div>
+  </div>
 
-  <div class="sec">Add rooms</div>
-  <div class="room-add-row">
-    <select id="room-type-sel">
-      <option value="">Select room type...</option>
-      <option>Master Bedroom</option>
-      <option>Bedroom</option>
-      <option>Master Bathroom</option>
-      <option>Bathroom</option>
-      <option>Kitchen</option>
-      <option>Living Room</option>
-      <option>Dining Room</option>
-      <option>Den / Office</option>
-      <option>Hallway</option>
-      <option>Hall Closet</option>
-      <option>Laundry Room</option>
-      <option>Garage</option>
-      <option>Other</option>
-    </select>
-    <button onclick="addRoom()" style="padding:10px 16px;background:#000;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;">+ Add</button>
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">👤</span>Seller / Owner</div>
+    <div class="fg"><label class="lbl">Seller Name</label><input type="text" id="f-seller" placeholder="Full name"></div>
+    <div class="row2">
+      <div class="fg"><label class="lbl">Phone</label><input type="tel" id="f-phone" placeholder="(707) 000-0000"></div>
+      <div class="fg"><label class="lbl">Email</label><input type="email" id="f-email" placeholder="seller@email.com"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏷</span>Referring Agent</div>
+    <div class="fg"><label class="lbl">Agent Name</label><input type="text" id="f-agent" placeholder="Agent full name"></div>
+    <div class="fg"><label class="lbl">Brokerage</label><input type="text" id="f-brokerage" placeholder="Brokerage name"></div>
+    <div class="row2">
+      <div class="fg"><label class="lbl">Agent Phone</label><input type="tel" id="f-agent-phone" placeholder="(707) 000-0000"></div>
+      <div class="fg"><label class="lbl">Agent Email</label><input type="email" id="f-agent-email" placeholder="agent@brokerage.com"></div>
+    </div>
+    <div class="fg"><label class="lbl">Target List Date</label><input type="date" id="f-listdate"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🎨</span>Hardware Finish — Entire Home</div>
+    <div class="fin-grid">
+      <div class="fin-opt on" onclick="setFin(0,this)"><div class="swatch sw-sn"></div><div class="fin-name">Satin Nickel</div><div class="fin-sub">Most popular</div></div>
+      <div class="fin-opt" onclick="setFin(1,this)"><div class="swatch sw-mb"></div><div class="fin-name">Matte Black</div><div class="fin-sub">Modern</div></div>
+      <div class="fin-opt" onclick="setFin(2,this)"><div class="swatch sw-vb"></div><div class="fin-name">Venetian Bronze</div><div class="fin-sub">Wine country</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">📐</span>3D Scan — RENDR</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">Scan the property with RENDR first to capture floor plan and measurements. Sync the scan to JobTread, then return here to complete the walk.</p>
+    <button class="btn btn-out" style="margin-bottom:10px;" onclick="openRendr()">📐 Open RENDR to Scan</button>
+    <div class="fg"><label class="lbl">RENDR Scan Link (paste after scanning)</label><input type="text" id="f-rendr-link" placeholder="https://cloud.rendr.com/spaces/..."></div>
+    <div class="fg"><label class="lbl">RENDR Notes</label><input type="text" id="f-rendr-notes" placeholder="Scan complete, linked to job, approx sq ft..."></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏠</span>House-Wide Scope</div>
+
+    <div class="trow">
+      <div class="tlbl">💧 Water Heater Strapping<span class="tlbl-sub">CA seismic compliance — required for transfer</span></div>
+      <label class="tog"><input type="checkbox" id="hw-whs"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-whs-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" placeholder="Location / access notes (e.g. garage, closet)">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🚿 Pressure Washing<span class="tlbl-sub">Driveway, walkways, entry, hardscape</span></div>
+      <label class="tog"><input type="checkbox" id="hw-pw"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-pw-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-pw-txt" placeholder="Scope — driveway, patio, deck, walkways...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🗑 Debris & Junk Removal<span class="tlbl-sub">Include estimated load count</span></div>
+      <label class="tog"><input type="checkbox" id="hw-junk"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-junk-ctrl" style="display:none;padding:4px 0 8px;">
+      <div class="qrow"><div class="qlbl">Estimated Load Count</div><div class="qctrl"><button class="qbtn" onclick="adjH('hw-junk-qty',-1)">−</button><div class="qval" id="hw-junk-qty">1</div><button class="qbtn" onclick="adjH('hw-junk-qty',1)">+</button></div></div>
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🧹 Deep Clean<span class="tlbl-sub">Full interior by licensed cleaning sub</span></div>
+      <label class="tog"><input type="checkbox" id="hw-clean"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-clean-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-clean-txt" placeholder="Condition notes, special areas...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🌿 Light Landscaping<span class="tlbl-sub">Debris removal, edging, bed weeding</span></div>
+      <label class="tog"><input type="checkbox" id="hw-land"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-land-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-land-txt" placeholder="Scope notes...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🪟 Caulking & Sealing<span class="tlbl-sub">Windows, doors, trim, bath/kitchen fixtures</span></div>
+      <label class="tog"><input type="checkbox" id="hw-caulk"><span class="tog-sl"></span></label>
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🪣 Minor Drywall Repair<span class="tlbl-sub">Nail holes, dings, small patches</span></div>
+      <label class="tog"><input type="checkbox" id="hw-drywall"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-dw-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-dw-txt" placeholder="Location and scope notes...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">❄️ Cold Air Return<span class="tlbl-sub">Common areas, hallways, living rooms, kitchen</span></div>
+      <label class="tog"><input type="checkbox" id="hw-car" onchange="showHide('car-body',this.checked)"><span class="tog-sl"></span></label>
+    </div>
+    <div id="car-body" style="display:none;padding:6px 0 10px;">
+      <div class="fg"><label class="lbl">Location Description</label><input type="text" id="hw-car-loc" placeholder="e.g. Hallway near master, Living room east wall"></div>
+      <div class="fg"><label class="lbl">Action</label>
+        <select id="hw-car-action">
+          <option value="paint">Paint Existing Grille — Rust-Oleum Epoxy ($63)</option>
+          <option value="replace">Replace Grille — Allowance ($75)</option>
+          <option value="both">Paint some, Replace others</option>
+        </select>
+      </div>
+      <div class="qrow"><div class="qlbl">Quantity</div><div class="qctrl"><button class="qbtn" onclick="adjH('hw-car-qty',-1)">−</button><div class="qval" id="hw-car-qty">1</div><button class="qbtn" onclick="adjH('hw-car-qty',1)">+</button></div></div>
+    </div>
+
+    <div class="trow" style="border-bottom:none;">
+      <div class="tlbl">🌡 Thermostat Replacement<span class="tlbl-sub">Select model below</span></div>
+      <label class="tog"><input type="checkbox" id="hw-therm" onchange="showHide('therm-body',this.checked)"><span class="tog-sl"></span></label>
+    </div>
+    <div id="therm-body" style="display:none;padding-top:8px;">
+      <div class="pg2" id="therm-grid"></div>
+    </div>
+
+    <div class="fg" style="margin-top:10px;"><label class="lbl">HVAC Filter</label>
+      <select id="hw-filter-sel">
+        <option value="">No filter replacement</option>
+        <option value="standard">Standard Filter Replacement</option>
+        <option value="allergen">Allergen Defense Upgrade</option>
+      </select>
+    </div>
+    <div class="fg"><label class="lbl">Filter Size (confirm on site)</label><input type="text" id="hw-filter-size" placeholder="e.g. 16x25x1 or 20x25x4"></div>
+
+    <div class="fg"><label class="lbl">General Walk Notes</label><textarea id="f-walknotes" placeholder="Access issues, scope questions, overall condition, concerns..."></textarea></div>
+  </div>
+</div>
+
+<!-- PAGE 2 ROOMS -->
+<div class="pg" id="pg1">
+  <div class="a-info">Tap a room type to add it. Rename each room after adding.</div>
+  <div class="rtype-grid">
+    <button class="rchip" onclick="addRoom('bedroom','🛏','Bedroom')"><span>🛏</span>Bedroom</button>
+    <button class="rchip" onclick="addRoom('bathroom','🚿','Bathroom')"><span>🚿</span>Bathroom</button>
+    <button class="rchip" onclick="addRoom('kitchen','🍳','Kitchen')"><span>🍳</span>Kitchen</button>
+    <button class="rchip" onclick="addRoom('living','🛋','Living Room')"><span>🛋</span>Living</button>
+    <button class="rchip" onclick="addRoom('dining','🪑','Dining Room')"><span>🪑</span>Dining</button>
+    <button class="rchip" onclick="addRoom('hall','🚪','Hallway')"><span>🚪</span>Hall</button>
+    <button class="rchip" onclick="addRoom('laundry','🧺','Laundry')"><span>🧺</span>Laundry</button>
+    <button class="rchip" onclick="addRoom('office','💼','Office')"><span>💼</span>Office</button>
+    <button class="rchip" onclick="addRoom('garage','🚗','Garage')"><span>🚗</span>Garage</button>
   </div>
   <div id="room-list"></div>
-
-  <div class="sec">Hardware finish (global)</div>
-  <div class="fin-row">
-    <button class="fin-btn" id="fin0" onclick="selFin(0)">Satin<br>Nickel</button>
-    <button class="fin-btn" id="fin1" onclick="selFin(1)">Matte<br>Black</button>
-    <button class="fin-btn" id="fin2" onclick="selFin(2)">Venetian<br>Bronze</button>
-  </div>
-
-  <div class="nav-row">
-    <button class="back-btn" ontouchend="tapGo(event,0)" onclick="go(0)">Back</button>
-    <button class="btn-r" style="flex:1;margin:0" ontouchend="tapGo(event,2)" onclick="go(2)">Next — Job walk</button>
-  </div>
 </div>
 
-<!-- ══════════════════════════════════
-     STEP 3 — ROOM WALK
-══════════════════════════════════ -->
-<div id="p2" class="pane">
-  <div class="sec">Polycam scan</div>
-  <div class="pcam-box">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Launch Polycam to capture a 3D scan of the property before walking.</div>
-    <button class="btn-k" style="width:auto;padding:10px 22px;font-size:13px;margin:0;" onclick="window.location='polycam://'">Open Polycam</button>
-    <input type="text" id="f-polycam" placeholder="Paste Polycam share URL after scan" style="margin-top:8px;font-size:11px;"/>
-  </div>
-
-  <div class="sec">Room-by-room walk</div>
-  <div id="walk-cards"></div>
-  <div id="walk-empty" style="padding:16px;text-align:center;font-size:13px;color:var(--muted);background:#fff;border:1px dashed var(--border);border-radius:var(--radius);">No rooms added yet. Go back to Step 2.</div>
-
-  <div class="sec">General notes</div>
-  <textarea id="f-walknotes" placeholder="Overall property conditions, owner discussion, scope flags, access notes..."></textarea>
-
-  <div class="nav-row">
-    <button class="back-btn" ontouchend="tapGo(event,1)" onclick="go(1)">Back</button>
-    <button class="btn-r" style="flex:1;margin:0" ontouchend="tapGo(event,3)" onclick="go(3)">Next — Selections</button>
-  </div>
+<!-- PAGE 3 WALK -->
+<div class="pg" id="pg2">
+  <div class="a-info">Expand each room to fill in selections. Finish from Page 1 pre-filters items.</div>
+  <div id="walk-list"></div>
 </div>
 
-<!-- ══════════════════════════════════
-     STEP 4 — SELECTIONS
-══════════════════════════════════ -->
-<div id="p3" class="pane">
-  <div class="alert a-info">Select the specific products for each scope item. These are your actual JobTread catalog items with real pricing. Finish from Step 2 is pre-applied.</div>
+<!-- PAGE 4 REVIEW -->
+<div class="pg" id="pg3"><div id="rev-content"></div></div>
 
-  <div class="sel-total-bar">
-    <span class="sel-total-label">Selections total</span>
-    <span class="sel-total-val" id="sel-total">$0.00</span>
-  </div>
-
-  <div id="sel-sections"></div>
-
-  <div class="nav-row">
-    <button class="back-btn" ontouchend="tapGo(event,2)" onclick="go(2)">Back</button>
-    <button class="btn-r" style="flex:1;margin:0" ontouchend="tapGo(event,4)" onclick="go(4)">Next — Photos</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════
-     STEP 5 — PHOTOS
-══════════════════════════════════ -->
-<div id="p4" class="pane">
-  <div class="alert a-info">Tap + to capture with camera or choose from library. Photos save to this session.</div>
-  <div id="photo-zones"></div>
-  <input type="file" id="file-input" accept="image/*" capture="environment" multiple style="display:none"/>
-  <div class="nav-row">
-    <button class="back-btn" ontouchend="tapGo(event,3)" onclick="go(3)">Back</button>
-    <button class="btn-r" style="flex:1;margin:0" ontouchend="tapGo(event,5)" onclick="go(5)">Next — Proposal</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════
-     STEP 6 — PROPOSAL PREVIEW
-══════════════════════════════════ -->
-<div id="p5" class="pane">
-  <div class="sec">Proposal preview</div>
-  <div class="card" id="prop-card"></div>
-
-  <div class="alert a-info" style="font-size:11px;">This is a site survey summary only. The formal proposal and contract will be generated from JobTread and sent to the owner for approval. Payment terms will be set per California law (CA B&amp;P Code §7159.5) at that stage.</div>
-
-  <div class="sec">Additional scope notes</div>
-  <textarea id="f-propnotes" placeholder="Any scope clarifications, owner requests, special conditions..."></textarea>
-
-  <div class="nav-row">
-    <button class="back-btn" ontouchend="tapGo(event,4)" onclick="go(4)">Back</button>
-    <button class="btn-r" style="flex:1;margin:0" ontouchend="tapGo(event,6)" onclick="go(6)">Next — Sign & Push</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════
-     STEP 7 — SIGN & PUSH
-══════════════════════════════════ -->
-<div id="p6" class="pane">
-  <div class="sec">Client signature</div>
+<!-- PAGE 5 PUSH -->
+<div class="pg" id="pg4">
   <div class="card">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.55;">By signing below, client authorizes LMC Contracting to perform the scope of work described in this proposal per LMC standard terms. All change orders must be in writing.</div>
-    <canvas id="sig-canvas" width="320" height="110"></canvas>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="btn-o" style="flex:1;margin:0;padding:9px;font-size:12px;" onclick="clearSig()">Clear</button>
-      <button class="btn-k" style="flex:1;margin:0;padding:9px;font-size:12px;" onclick="acceptSig()">Accept</button>
-    </div>
-    <div id="sig-status" style="font-size:10px;color:var(--muted);margin-top:5px;text-align:center;"></div>
+    <div class="ctitle"><span class="ctitle-icon">✍️</span>Signature</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Sign to confirm survey is complete and accurate.</p>
+    <canvas id="sig-c"></canvas>
+    <button class="btn btn-out btn-sm" style="margin-top:8px;" onclick="clrSig()">Clear</button>
   </div>
-
-  <div class="sec">Push to JobTread</div>
   <div class="card">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
-      This will push the site survey to JobTread:<br>
-      1. Create the customer account and job<br>
-      2. Apply the <strong>Pre-Listing Market Prep</strong> budget template<br>
-      3. Set quantities for each scope item from the walk<br>
-      4. Add all selections linked to catalog IDs<br>
-      5. Create a draft proposal document in JobTread<br>
-      6. Create a Purchase Order for Home Depot<br><br>
-      <strong>The formal contract and payment terms will be set in JobTread before sending to the owner.</strong>
-    </div>
-    <button class="btn-r" onclick="pushToJT()" id="jt-btn">Push to JobTread</button>
-    <div class="jt-log" id="jt-log"></div>
+    <div class="ctitle"><span class="ctitle-icon">📤</span>Push to JobTread</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">Creates customer account, location, job, applies Pre-Listing Market Prep template, and adds all room selections to the budget.</p>
+    <button class="btn btn-red" id="jt-btn" onclick="pushToJT()">Push to JobTread</button>
+    <div id="jt-log"></div>
   </div>
-
-  <div class="sec">Email proposal</div>
-  <button class="btn-k" onclick="emailProposal()">Draft proposal email</button>
-
-  <div style="height:30px;"></div>
 </div>
 
-<script>// ═══════════════════════════════════════════════════════════
-// SPEECH RECOGNITION
-// ═══════════════════════════════════════════════════════════
-var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-var micRecognition = null;
-var micActive = false;
-var micTarget = null;
+<button id="gmic" onclick="togMic()">🎤</button>
+<div class="bnav">
+  <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
+  <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
+</div>
 
-function initMic(){
-  if(!SpeechRecognition){ console.log('Speech not supported'); return; }
-  var btn = document.getElementById('global-mic');
-  if(btn) btn.style.display = 'flex';
-  
-  // Show mic when any input/textarea is focused
-  document.addEventListener('focusin', function(e){
-    var tag = e.target.tagName;
-    if(tag === 'INPUT' || tag === 'TEXTAREA'){
-      micTarget = e.target;
-      var btn = document.getElementById('global-mic');
-      if(btn) btn.style.display = 'flex';
-    }
-  });
-}
+<script>
+// ═══════════ STATE ═══════════
+var CP=0;
+var S={finish:0,rooms:[],signed:false,thermostatId:null};
+var sigC,sigX,drawing=false,lx=0,ly=0;
 
-function toggleMic(){
-  if(!SpeechRecognition){
-    alert('Speech recognition is not supported in this browser. Use Safari on iOS 14.5+.');
-    return;
-  }
-  if(micActive){
-    stopMic();
-  } else {
-    startMic();
-  }
-}
+// House-wide qty tracking
+var HW={junkQty:1,'hw-car-qty':1,'hw-junk-qty':1};
 
-function startMic(){
-  if(!micTarget){
-    // Find the currently focused or last focused input
-    micTarget = document.activeElement;
-    if(!micTarget || (micTarget.tagName !== 'INPUT' && micTarget.tagName !== 'TEXTAREA')){
-      alert('Tap a field first, then tap the mic button.');
-      return;
-    }
-  }
-  
-  micRecognition = new SpeechRecognition();
-  micRecognition.continuous = false;
-  micRecognition.interimResults = false;
-  micRecognition.lang = 'en-US';
-  
-  micRecognition.onstart = function(){
-    micActive = true;
-    var btn = document.getElementById('global-mic');
-    if(btn){ btn.textContent = '⏹'; btn.style.background = '#27500A'; }
-  };
-  
-  micRecognition.onresult = function(e){
-    var transcript = e.results[0][0].transcript;
-    if(micTarget){
-      // Append to existing value with a space
-      var current = micTarget.value;
-      micTarget.value = current ? current + ' ' + transcript : transcript;
-      // Trigger oninput so state updates
-      micTarget.dispatchEvent(new Event('input', {bubbles:true}));
-    }
-  };
-  
-  micRecognition.onerror = function(e){
-    console.error('Mic error:', e.error);
-    if(e.error === 'not-allowed'){
-      alert('Microphone access denied. Go to Safari Settings → Microphone and allow access for this site.');
-    }
-    stopMic();
-  };
-  
-  micRecognition.onend = function(){
-    stopMic();
-  };
-  
-  try {
-    micRecognition.start();
-  } catch(e){
-    console.error('Mic start error:', e);
-    stopMic();
-  }
-}
-
-function stopMic(){
-  micActive = false;
-  var btn = document.getElementById('global-mic');
-  if(btn){ btn.textContent = '🎤'; btn.style.background = 'var(--red)'; }
-  if(micRecognition){
-    try { micRecognition.stop(); } catch(e){}
-    micRecognition = null;
-  }
-}
-
-// iOS compatibility polyfills
-function objVals(obj){
-  var arr=[];
-  for(var k in obj){ if(Object.prototype.hasOwnProperty.call(obj,k)) arr.push(obj[k]); }
-  return arr;
-}
-function objKeys(obj){
-  var arr=[];
-  for(var k in obj){ if(Object.prototype.hasOwnProperty.call(obj,k)) arr.push(k); }
-  return arr;
-}
-
-
-// ═══════════════════════════════════════════════════════════
-// CONSTANTS — real JobTread IDs
-// ═══════════════════════════════════════════════════════════
-var GK = '22TN3Z7ksd36UCwCpWJy2yAEppArgMHr2G';
-var ORG_ID = '22PCgcUejSvr';
-var JT = 'https://api.jobtread.com/pave';
-
-// Template IDs
-var TMPL_BASE_PKG = '22PVLUL5nzEk';       // Pre-Listing Market Prep - Base Package
-var TMPL_DOC_MARKET_PREP = '22PPCQZbCZSg'; // LMC Contracting Real Estate Market Prep Package doc template
-var TMPL_DOC_PO = '22PCgcVGSysM';          // Purchase Order template
-var VENDOR_HD = '22PEnZwGDc7H';            // Home Depot vendor
-
-// Cost code / type / unit IDs
-var CC_LABOR_TECH = '22PV6dcbCjTD';
-var CC_LABOR_APP = '22PV6dXE9gEv';
-var CC_LABOR_FORE = '22PV6dhmARjk';
-var CC_ELEC = '22PCgcVGSyrS';
-var CC_DOORS = '22PCgcVGSyrX';
-var CC_PLUMB = '22PCgcVGSyrT';
-var CC_MECH = '22PCgcVGSyrU';
-var CC_CAB = '22PCgcVGSyrb';
-var CC_PAINT = '22PCgcVGSyrf';
-var CC_FLOOR = '22PCgcVGSyrZ';
-var CC_MISC = '22PCgcVGSyrp';
-var CC_UNCAT = '22PCgcVGSyrG';
-var CT_LABOR = '22PCgcVGSyrq';
-var CT_MAT = '22PCgcVGSyrr';
-var CT_SUB = '22PCgcVGSyrs';
-var CT_ALLOW = '22PLi9UN7npb';
-var UNIT_EA = '22PCgcVGSyr7';
-var UNIT_HR = '22PCgcVGSyr9';
-var UNIT_LS = '22PCgcVGSyrB';
-var UNIT_RM = '22PVGnxPBwm3';
-var UNIT_SF = '22PCgcVGSyrD';
-
-// Base package cost group IDs (from template)
-var CG = {
-  setup:      '22PVVTPPJspN',
-  paint:      '22PVVTRNuTTs',
-  paintT1:    '22PVVUCjNegj',
-  paintT2:    '22PVVUDJw2JU',
-  paintT3:    '22PVVUDixuWF',
-  hardware:   '22PVVTReNLk5',
-  hardwareGrp:'22PVVUEFehGw',
-  fixtures:   '22PVVTRwwf7J',
-  fixtureGrp: '22PVVUEZYj7W',
-  devices:    '22PVVTSFp7JH',
-  debris:     '22PVVTSs97tf',
-  smco:       '22PVVTdFfSJi',
-  landscaping:'22PVVTdgFMqS',
-  consumables:'22PVVTeChLs5',
-  deepclean:  '22PVVTebQzJU',
-  drywall:    '22PVVTeziNw3',
-  whstrap:    '22PVVTfSmstz',
-  caulking:   '22PVVTfpwpBG',
-  bulbs:      '22PVVTgDvZFy',
-  pwash:      '22PVVTgbkqVd',
-  plumbing:   '22PVVThGrU5r',
-  cabinet:    '22PVVThmRBwq',
-};
-
-// Base package cost item IDs for quantity setting
-var CI = {
-  // Paint items (qty = rooms at that tier)
-  paintT1Labor: '22PVVUFVW6f2',
-  paintT1Mat:   '22PVVUFVW6f3',
-  paintT2Labor: '22PVVUHC4TCP',
-  paintT2Mat:   '22PVVUHC4TCQ',
-  paintT3Labor: '22PVVUHmdhTS',
-  paintT3Mat:   '22PVVUHmdhTT',
-  // Hardware
-  hwIntLabor:   '22PVVUJgYiEj',
-  hwExtLabor:   '22PVVUJgYiEk',
-  hwMat:        '22PVVUJgYiEm',
-  // Fixtures
-  fixLabor:     '22PVVUKKg4PF',
-  fixMat:       '22PVVUKKg4PG',
-  // Devices
-  devLabor:     '22PVVUL2xcBZ',
-  devMat:       '22PVVUL2xcBa',
-  // Cabinet
-  cabLabor:     '22PVVUuTqNL5',
-  cabMat:       '22PVVUuTqNL6',
+// ═══════════ CATALOG ═══════════
+var IMG={
+  // Door hardware
+  '22PVPLmRRLGA':'https://images.thdstatic.com/productImages/300772173/svn/product-image.jpg',
+  '22PVPKTZB6A7':'https://images.thdstatic.com/productImages/316628875/svn/product-image.jpg',
+  '22PVPTFTuMJp':'https://images.thdstatic.com/productImages/300772174/svn/product-image.jpg',
+  '22PPFiRxVCMd':'https://images.thdstatic.com/productImages/316628874/svn/product-image.jpg',
+  '22PPJPLR8AAu':'https://images.thdstatic.com/productImages/316628876/svn/product-image.jpg',
+  '22PPFiRvqpC8':'https://images.thdstatic.com/productImages/300772175/svn/product-image.jpg',
+  '22PPFjNK2qMn':'https://images.thdstatic.com/productImages/316628870/svn/product-image.jpg',
+  '22PPJQicPsZU':'https://images.thdstatic.com/productImages/316628871/svn/product-image.jpg',
+  // Flush mount
+  '22PVPuX7beu7':'https://images.thdstatic.com/productImages/336030843/svn/product-image.jpg',
+  '22PVPuX7beu8':'https://images.thdstatic.com/productImages/336030844/svn/product-image.jpg',
+  '22PVPuX7beu9':'https://images.thdstatic.com/productImages/202038674/svn/product-image.jpg',
+  '22PVPxpDcvV4':'https://images.thdstatic.com/productImages/321960710/svn/product-image.jpg',
+  '22PVPxpDcvV5':'https://images.thdstatic.com/productImages/328916280/svn/product-image.jpg',
+  // Can retrofit
+  '22PVPuX7beuA':'https://images.thdstatic.com/productImages/326582572/svn/product-image.jpg',
+  '22PVPuX7beuB':'https://images.thdstatic.com/productImages/205978327/svn/product-image.jpg',
+  // Vanity
+  '22PVPuX7beuC':'https://images.thdstatic.com/productImages/203789012/svn/product-image.jpg',
+  '22PVPuX7beuD':'https://images.thdstatic.com/productImages/323455273/svn/product-image.jpg',
+  '22PVPuX7beuE':'https://images.thdstatic.com/productImages/203789014/svn/product-image.jpg',
+  '22PVPxpDcvV6':'https://images.thdstatic.com/productImages/316691257/svn/product-image.jpg',
+  '22PVPxpDcvV7':'https://images.thdstatic.com/productImages/316704769/svn/product-image.jpg',
+  // Decorative
+  '22PVPyVmq8kS':'https://images.thdstatic.com/productImages/305973484/svn/product-image.jpg',
+  '22PVPzxqgdYz':'https://images.thdstatic.com/productImages/314605349/svn/product-image.jpg',
+  '22PVQ4skJPBQ':'https://images.thdstatic.com/productImages/306080280/svn/product-image.jpg',
+  '22PVQ5KgFvz2':'https://images.thdstatic.com/productImages/305973480/svn/product-image.jpg',
+  // Bulbs
+  '22PVPuX7beuF':'https://images.thdstatic.com/productImages/304116338/svn/product-image.jpg',
+  '22PVPuX7beuG':'https://images.thdstatic.com/productImages/317394857/svn/product-image.jpg',
+  '22PVQ4skJPBM':'https://images.thdstatic.com/productImages/316120743/svn/product-image.jpg',
+  '22PVQ4skJPBN':'https://images.thdstatic.com/productImages/304117143/svn/product-image.jpg',
+  '22PVQ4skJPBP':'https://images.thdstatic.com/productImages/304117103/svn/product-image.jpg',
+  // Bath hardware
+  '22PVTPwC2tQ2':'https://images.thdstatic.com/productImages/207053085/svn/product-image.jpg',
+  '22PVTPwC2tQ3':'https://images.thdstatic.com/productImages/320176798/svn/product-image.jpg',
+  '22PVTPwC2tQ4':'https://images.thdstatic.com/productImages/308036067/svn/product-image.jpg',
+  // Faucets
+  '22PVTXhdLTfs':'https://images.thdstatic.com/productImages/317296014/svn/product-image.jpg',
+  '22PVTXhdLTft':'https://images.thdstatic.com/productImages/317882981/svn/product-image.jpg',
+  '22PVTXwmntYs':'https://images.thdstatic.com/productImages/317267997/svn/product-image.jpg',
+  // Shower
+  '22PVTYN2tzs9':'https://images.thdstatic.com/productImages/305475615/svn/product-image.jpg',
+  '22PVTYf7Rjhf':'https://images.thdstatic.com/productImages/316235097/svn/product-image.jpg',
+  '22PVTYwYVTRS':'https://images.thdstatic.com/productImages/313294060/svn/product-image.jpg',
+  // Toilet seats
+  '22PVTZAEcb6m':'https://images.thdstatic.com/productImages/305423122/svn/product-image.jpg',
+  '22PVTZN7DzYg':'https://images.thdstatic.com/productImages/305423163/svn/product-image.jpg',
+  // Cabinet pulls
+  '22PVWU72XDUt':'https://images.thdstatic.com/productImages/314609557/svn/product-image.jpg',
+  '22PVWU72XDUu':'https://images.thdstatic.com/productImages/314609556/svn/product-image.jpg',
+  '22PVWU72XDUv':'https://images.thdstatic.com/productImages/314609561/svn/product-image.jpg',
   // Plumbing
-  plumbLabor:   '22PVVUtq6vhE',
-  plumbMat:     '22PVVUtq6vhF',
+  '22PLidsWNdYp':'https://images.thdstatic.com/productImages/317880869/svn/product-image.jpg',
+  '22PLictfFuRM':'https://images.thdstatic.com/productImages/317296015/svn/product-image.jpg',
+  '22PMzkaL2eTH':'https://images.thdstatic.com/productImages/100651880/svn/product-image.jpg',
+  '22PLihEi33Hz':'https://images.thdstatic.com/productImages/204279758/svn/product-image.jpg',
+  '22PLihfEsfeL':'https://images.thdstatic.com/productImages/100652318/svn/product-image.jpg',
+  '22PVVRMYQsFD':'https://images.thdstatic.com/productImages/319284721/svn/product-image.jpg',
+  '22PVVRLi8q6Z':'https://images.thdstatic.com/productImages/306339281/svn/product-image.jpg',
+  '22PMzpqhYMcA':'https://images.thdstatic.com/productImages/305423124/svn/product-image.jpg',
+  '22PVZGTXEgWu':'https://images.thdstatic.com/productImages/300539289/svn/product-image.jpg',
+  // Registers
+  '22PVScAuHEv7':'https://images.thdstatic.com/productImages/300539127/svn/product-image.jpg',
+  '22PVSdyhK8Te':'https://images.thdstatic.com/productImages/300713471/svn/product-image.jpg',
+  '22PVSdyhK8Tg':'https://images.thdstatic.com/productImages/300539267/svn/product-image.jpg',
+  '22PVSdyhKVN2':'https://images.thdstatic.com/productImages/300539139/svn/product-image.jpg',
+  '22PVSdyhKVN4':'https://images.thdstatic.com/productImages/300539306/svn/product-image.jpg',
+  '22PVSf6QFNqJ':'https://images.thdstatic.com/productImages/300539627/svn/product-image.jpg',
+  '22PVSfMg5CAM':'https://images.thdstatic.com/productImages/300539599/svn/product-image.jpg',
+  '22PVSfaDBtaX':'https://images.thdstatic.com/productImages/300539476/svn/product-image.jpg',
+  '22PVSf6QFNqL':'https://images.thdstatic.com/productImages/300539723/svn/product-image.jpg',
+  '22PVSg9vxALY':'https://images.thdstatic.com/productImages/300539147/svn/product-image.jpg',
+  '22PVSg9vxALa':'https://images.thdstatic.com/productImages/300539285/svn/product-image.jpg',
+  // HVAC
+  '22PVSni4KCbv':'https://images.thdstatic.com/productImages/333848560/svn/product-image.jpg',
+  '22PVSnyMHdaW':'https://images.thdstatic.com/productImages/308036068/svn/product-image.jpg',
+  // Smoke/CO
+  '22PVSCAcunNJ':'https://images.thdstatic.com/productImages/328175569/svn/product-image.jpg',
+  '22PVSCAcunNK':'https://images.thdstatic.com/productImages/328119795/svn/product-image.jpg',
+  '22PVSCAcunNL':'https://images.thdstatic.com/productImages/328175210/svn/product-image.jpg',
+  // Electrical devices
+  '22PVS5TxAw2p':'https://images.thdstatic.com/productImages/300716785/svn/product-image.jpg',
+  '22PVS5WFjGSZ':'https://images.thdstatic.com/productImages/300716786/svn/product-image.jpg',
+  '22PVS5dGjfn8':'https://images.thdstatic.com/productImages/331390311/svn/product-image.jpg',
+  '22PVS9QeGBHn':'https://images.thdstatic.com/productImages/300516291/svn/product-image.jpg',
+  '22PVS9QeGBHp':'https://images.thdstatic.com/productImages/308039127/svn/product-image.jpg',
+  '22PVS9r9RZSV':'https://images.thdstatic.com/productImages/300516290/svn/product-image.jpg',
+  '22PVSB6DDkWB':'https://images.thdstatic.com/productImages/339746722/svn/product-image.jpg',
 };
 
-// ═══════════════════════════════════════════════════════════
-// SELECTIONS CATALOG — real catalog item IDs with client prices
-// ═══════════════════════════════════════════════════════════
-var FINS = ['Satin Nickel','Matte Black','Venetian Bronze'];
+// ── DOOR HARDWARE ──
+var DOOR_PASS=[
+  {id:'22PVPLmRRLGA',name:'Kwikset Balboa Passage',price:33.81,fin:'Satin Nickel'},
+  {id:'22PVPKTZB6A7',name:'Kwikset Cove Passage',price:32.13,fin:'Matte Black'},
+  {id:'22PVPTFTuMJp',name:'Kwikset Balboa Passage',price:39.70,fin:'Venetian Bronze'}
+];
+var DOOR_PRIV=[
+  {id:'22PPFiRxVCMd',name:'Kwikset Cove Privacy',price:25.03,fin:'Satin Nickel'},
+  {id:'22PPJPLR8AAu',name:'Kwikset Cove Privacy',price:19.89,fin:'Matte Black'},
+  {id:'22PPFiRvqpC8',name:'Kwikset Balboa Privacy',price:32.74,fin:'Venetian Bronze'}
+];
+var DOOR_ENTRY=[
+  {id:'22PPFjNK2qMn',name:'Hartford Combo SN',price:40.47,fin:'Satin Nickel'},
+  {id:'22PPJQicPsZU',name:'B62 Deadbolt MB',price:54.39,fin:'Matte Black'},
+  {id:'22PVPTFTuMJp',name:'Kwikset Balboa VB',price:39.70,fin:'Venetian Bronze'}
+];
 
-var CATALOG = {
+// ── LIGHT FIXTURES (flush mount by finish) ──
+var FLUSH=[
+  [{id:'22PVPuX7beu7',name:'Hampton Bay Flaxmere 12" BN',price:39.33},{id:'22PVPxpDcvV4',name:'14" BN LED Flush Mount',price:64.94}],
+  [{id:'22PVPuX7beu8',name:'Hampton Bay Flaxmere 12" MB 2-Pack',price:70.83},{id:'22PVPxpDcvV5',name:'Flaxmere 14" MB',price:55.07}],
+  [{id:'22PVPuX7beu9',name:'Hampton Bay Chilton 15" ORB',price:62.96}]
+];
+// Decorative
+var DECO=[
+  {id:'22PVPyVmq8kS',name:'Castleford 3-Light Chandelier ORB',price:133.83},
+  {id:'22PVPzxqgdYz',name:'Southbourne Farmhouse Semi-Flush MB',price:141.70},
+  {id:'22PVQ4skJPBQ',name:'Moreland Wagon Wheel ORB',price:171.67},
+  {id:'22PVQ5KgFvz2',name:'Hastings Industrial Drum ORB',price:157.46}
+];
+// Can retrofit
+var CAN6={id:'22PVPuX7beuA',name:'HALO LT 5/6" LED Retrofit',price:20.43};
+var CAN4={id:'22PVPuX7beuB',name:'EnviroLite 4" LED Retrofit',price:14.24};
+// Vanity lights by finish
+var VANITY=[
+  [{id:'22PVPuX7beuC',name:'Ashhurst 3-Light BN',price:89.73},{id:'22PVPxpDcvV6',name:'Marsden 4-Light BN',price:141.70}],
+  [{id:'22PVPuX7beuD',name:'Eastburn 3-Light MB',price:110.20}],
+  [{id:'22PVPuX7beuE',name:'Ashhurst 3-Light ORB',price:89.73},{id:'22PVPxpDcvV7',name:'Ashhurst 4-Light ORB',price:110.20}]
+];
+// Bulbs
+var BULBS=[
+  {id:'22PVPuX7beuF',name:'Feit A19 Frosted 4-Pack',price:15.71},
+  {id:'22PVPuX7beuG',name:'Feit A19 Filament Clear 4-Pack',price:21.23},
+  {id:'22PVQ4skJPBM',name:'Feit Candelabra E12 4-Pack',price:25.17},
+  {id:'22PVQ4skJPBN',name:'Feit Globe G25 Clear 3-Pack',price:23.54},
+  {id:'22PVQ4skJPBP',name:'Feit Globe G25 Frosted 3-Pack',price:23.54}
+];
 
-  doorHardware: {
-    label: 'Door Hardware',
-    sections: [
-      {
-        label: 'Passage (Hall/Closet) — Knob',
-        items: [
-          {id:'22PVPJjAbv65', name:'Kwikset Cove Passage Knob', finish:'Satin Nickel', price:29.09, tier:''},
-          {id:'22PVPKTZB6A7', name:'Kwikset Cove Passage Knob', finish:'Matte Black', price:32.13, tier:''},
-          {id:'22PVPKxSsuQp', name:'Kwikset Polo Passage Knob', finish:'Venetian Bronze', price:34.46, tier:''},
-        ]
-      },
-      {
-        label: 'Passage (Hall/Closet) — Lever',
-        items: [
-          {id:'22PVPLmRRLGA', name:'Kwikset Balboa Passage Lever', finish:'Satin Nickel', price:33.81, tier:''},
-          {id:'22PVPStXy4eX', name:'Kwikset Balboa Passage Lever', finish:'Matte Black', price:39.70, tier:''},
-          {id:'22PVPTFTuMJp', name:'Kwikset Balboa Passage Lever', finish:'Venetian Bronze', price:39.70, tier:''},
-        ]
-      },
-      {
-        label: 'Privacy (Bed/Bath) — Knob',
-        items: [
-          {id:'22PVPUBefYmf', name:'Kwikset Cove Privacy Knob', finish:'Satin Nickel', price:30.67, tier:''},
-          {id:'22PVPUT5Fmhr', name:'Kwikset Cove Privacy Knob', finish:'Matte Black', price:30.46, tier:''},
-          {id:'22PVPVKkYh8j', name:'Kwikset Polo Privacy Knob', finish:'Venetian Bronze', price:25.76, tier:''},
-        ]
-      },
-      {
-        label: 'Privacy (Bed/Bath) — Lever',
-        items: [
-          {id:'22PVPVfemSs8', name:'Kwikset Balboa Privacy Lever', finish:'Satin Nickel', price:39.33, tier:''},
-          {id:'22PVPVzVA738', name:'Kwikset Balboa Privacy Lever', finish:'Matte Black', price:33.06, tier:''},
-          {id:'22PVPWGKYtVt', name:'Kwikset Balboa Privacy Lever', finish:'Venetian Bronze', price:43.27, tier:''},
-        ]
-      },
-      {
-        label: 'Exterior Entry — SmartKey (Keyed alike at install)',
-        note: 'One key operates front door, kitchen-to-garage, and garage-to-yard. No locksmith required.',
-        items: [
-          {id:'22PVPZ6kQA9P', name:'Kwikset Cove SmartKey Combo (Knob+Deadbolt)', finish:'Satin Nickel', price:56.66, tier:''},
-          {id:'22PTptZBnvH6', name:'Kwikset Sora SmartKey Combo (Knob+Deadbolt)', finish:'Matte Black', price:125.96, tier:''},
-          {id:'22PVPe6J5bDy', name:'Kwikset Cove SmartKey Project Pack (2-set)', finish:'Venetian Bronze', price:94.46, tier:''},
-        ]
-      },
-      {
-        label: 'Exterior Keypad Deadbolt — SmartKey',
-        note: 'No wifi. Reset code between tenants. Up to 16 user codes.',
-        items: [
-          {id:'22PVZ6S75gMr', name:'Kwikset 955 Keypad Deadbolt', finish:'Satin Nickel', price:181.12, tier:'Good'},
-          {id:'22PVZ6SrbgeW', name:'Kwikset 955 Keypad Deadbolt', finish:'Matte Black', price:155.93, tier:'Better'},
-          {id:'22PVZ6TXyCfd', name:'Kwikset 955 Keypad Deadbolt', finish:'Venetian Bronze', price:140.18, tier:'Best'},
-        ]
-      },
-    ]
-  },
+// ── SMOKE/CO DETECTORS ──
+var SMOKE=[
+  {id:'22PVSCAcunNJ',name:'Kidde 10-Year Smoke+CO Battery',price:95.67},
+  {id:'22PVSCAcunNK',name:'Kidde 10-Year Smoke Only Battery',price:51.14},
+  {id:'22PVSCAcunNL',name:'Kidde Hardwired Interconnected',price:44.84}
+];
 
-  lightFixtures: {
-    label: 'Light Fixtures',
-    sections: [
-      {
-        label: 'Flush Mount — 12" (Bedrooms, Hallways, Closets)',
-        items: [
-          {id:'22PVPnSWSU4k', name:'Hampton Bay Flaxmere 12" 5CCT', finish:'Brushed Nickel', price:39.33, tier:'Good'},
-          {id:'22PVPp8Eewuu', name:'Hampton Bay Flaxmere 12" 5CCT 2-Pack', finish:'Matte Black', price:70.83, tier:'Better', note:'2-pack — use when 2+ same-room fixtures'},
-          {id:'22PPJqU6sCF3', name:'Hampton Bay Chilton 15" Adj CCT', finish:'Brushed Nickel', price:65.67, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Flush Mount — 14" (Living, Dining, Large Rooms)',
-        items: [
-          {id:'22PVPxJ8tScf', name:'Hampton Bay Flaxmere 14" 3CCT', finish:'Matte Black', price:55.07, tier:'Better'},
-          {id:'22PPJqjvCHFH', name:'Hampton Bay Chilton 15" ORB', finish:'Oil Rubbed Bronze', price:62.96, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Vanity Light — 3-Light (Bathrooms)',
-        items: [
-          {id:'22PVPsPUbFQN', name:'Hampton Bay Ashhurst 3-Light Vanity', finish:'Brushed Nickel', price:89.73, tier:'Good'},
-          {id:'22PVPsdfCxbA', name:'Hampton Bay Eastburn 22" 3-Light Vanity', finish:'Matte Black', price:110.20, tier:'Better'},
-          {id:'22PVPt8M27q8', name:'Hampton Bay Ashhurst 3-Light Vanity', finish:'Oil Rubbed Bronze', price:89.73, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Vanity Light — 4-Light (Large Bathrooms)',
-        items: [
-          {id:'22PVPxWfVryJ', name:'Hampton Bay Marsden 32.5" 4-Light', finish:'Brushed Nickel', price:141.70, tier:'Good'},
-          {id:'22PVPxkm4KT8', name:'Hampton Bay Ashhurst 32.75" 4-Light', finish:'Oil Rubbed Bronze', price:110.20, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Chandelier (Dining Room, Entry, Large Bedroom)',
-        note: 'Verify ceiling height — standard chain suits 9ft+ ceilings.',
-        items: [
-          {id:'22PVPy2mm3fQ', name:'Hampton Bay Castleford 3-Light', finish:'Oil Rubbed Bronze', price:133.83, tier:'Good'},
-          {id:'22PVQ5CurkLj', name:'Hampton Bay Hastings 4-Light Drum', finish:'Oil Rubbed Bronze', price:157.46, tier:'Better'},
-          {id:'22PVQ42cRZKj', name:'Hampton Bay Moreland 5-Light Wagon Wheel', finish:'Oil Rubbed Bronze', price:171.67, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Semi-Flush / Farmhouse (Kitchen, Entry)',
-        items: [
-          {id:'22PVPzi7azZH', name:'Hampton Bay Southbourne 15.5" 3-Light Farmhouse', finish:'Matte Black', price:141.70, tier:''},
-        ]
-      },
-    ]
-  },
-
-  electricalDevices: {
-    label: 'Electrical Devices & Cover Plates',
-    sections: [
-      {
-        label: 'Outlets',
-        items: [
-          {id:'22PNUVgrq9cs', name:'Leviton Decora 15A TR Outlet (Tamper Resistant)', finish:'White', price:4.93, tier:''},
-          {id:'22PLy3vvsCHs', name:'GFCI 15A SmartlockPro (Baths, Kitchen, Exterior)', finish:'White', price:28.14, tier:''},
-        ]
-      },
-      {
-        label: 'Switches',
-        items: [
-          {id:'22PNURteXhDX', name:'Leviton Decora 15A Single-Pole Switch', finish:'White', price:4.00, tier:''},
-          {id:'22PTpjEDhV7g', name:'Leviton 3-Way Decora Switch', finish:'White', price:7.39, tier:''},
-          {id:'22PVSAzmQbWH', name:'Leviton Decora LED Dimmer DSL01 (SP or 3-Way)', finish:'White', price:36.99, tier:''},
-          {id:'22PNUSqWGJkf', name:'Leviton Humidity Sensor Fan Switch', finish:'White', price:46.14, tier:'', note:'Bathrooms only — auto on/off'},
-        ]
-      },
-      {
-        label: 'Cover Plates',
-        items: [
-          {id:'22PNUSTfVhGx', name:'Leviton 1-Gang Duplex Plate', finish:'White', price:1.29, tier:''},
-          {id:'22PNUST7QMYH', name:'Leviton 1-Gang Decora Plate', finish:'White', price:2.51, tier:''},
-          {id:'22PPFVqFkepG', name:'Leviton 2-Gang Duplex Plate', finish:'White', price:3.91, tier:''},
-          {id:'22PTpnhC7PiS', name:'Leviton 2-Gang Decora Plate', finish:'White', price:3.07, tier:''},
-          {id:'22PTpnC9hXqY', name:'Leviton 3-Gang Decora Plate', finish:'White', price:5.90, tier:''},
-          {id:'22PPFWLyyfFk', name:'Cover-Up Plate — Duplex Smooth', finish:'White', price:4.27, tier:'', note:'No electrical work — covers mismatched outlets'},
-          {id:'22PVPA4XbxLK', name:'Cover-Up Plate — Duplex Textured/Paintable', finish:'White', price:1.83, tier:''},
-          {id:'22PPFWuxJFdF', name:'Leviton 1-Gang Blank Plate', finish:'White', price:1.54, tier:''},
-        ]
-      },
-    ]
-  },
-
-  bathHardware: {
-    label: 'Bath Hardware',
-    sections: [
-      {
-        label: 'Bath Hardware Sets — 4-Piece (Towel Bar, Ring, TP Holder, Robe Hook)',
-        note: 'Coordinates with finish selection — Good=Brushed Nickel, Better=Matte Black, Best=Oil Rubbed Bronze',
-        items: [
-          {id:'22PVTCDxrEEM', name:'Moen Banbury 4-Piece Set', finish:'Brushed Nickel', price:145.61, tier:'Good'},
-          {id:'22PVTCEZzPTQ', name:'Moen Genta 3-Piece Set', finish:'Matte Black', price:133.84, tier:'Better'},
-          {id:'22PVTCFLGTC5', name:'Delta Porter 4-Piece Set', finish:'Oil Rubbed Bronze', price:126.31, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Bath Faucets (Per Sink)',
-        note: 'Verify hole spacing at walkthrough — 4" centerset standard.',
-        items: [
-          {id:'22PVTWT4Thqy', name:'Moen Banbury Faucet', finish:'Spot Resist Brushed Nickel', price:124.43, tier:'Good'},
-          {id:'22PVTWTm7Fhu', name:'Moen Banbury Faucet', finish:'Matte Black', price:124.43, tier:'Better'},
-          {id:'22PVTWgPLCMc', name:'Moen Banbury Faucet', finish:'Mediterranean Bronze', price:155.93, tier:'Best'},
-        ]
-      },
-    ]
-  },
-
-  cabinetHardware: {
-    label: 'Cabinet Hardware',
-    sections: [
-      {
-        label: 'Cabinet Knobs',
-        note: 'Verify existing hole size before ordering.',
-        items: [
-          {id:'22PVWQs8g5Qi', name:'Franklin Brass Fulton 1-3/16" Round Knob', finish:'Satin Nickel', price:1.89, tier:'Good'},
-          {id:'22PVWQstuK9s', name:'Franklin Brass Fulton 1-3/16" Round Knob', finish:'Matte Black', price:2.16, tier:'Better'},
-          {id:'22PVWQtaVqvm', name:'Franklin Brass 1-3/16" Round Knob', finish:'Champagne Bronze', price:1.72, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Cabinet Pulls — 3-3/4" (96mm) — Most Common Spacing',
-        note: 'Verify hole spacing (center-to-center) at walkthrough before ordering.',
-        items: [
-          {id:'22PVW5zmJMUy', name:'Square Bar Pull 96mm', finish:'Satin Nickel', price:10.47, tier:'Good'},
-          {id:'22PVVRNfS3fA', name:'Liberty Square Bar Pull 96mm', finish:'Matte Black', price:7.87, tier:'Better'},
-          {id:'22PQHy4LxSfj', name:'Solid Bar Pull 76mm', finish:'Champagne Bronze', price:10.93, tier:'Best'},
-        ]
-      },
-      {
-        label: 'Cabinet Pulls — 5-1/16" (128mm) — Large Drawers',
-        items: [
-          {id:'22PVW5zmJMUy', name:'Square Bar Pull 96mm Alt', finish:'Satin Nickel', price:10.47, tier:''},
-          {id:'22PVW5zkWR3S', name:'Solid Bar Pull 128mm', finish:'Matte Black', price:14.13, tier:''},
-          {id:'22PVW7qhE5Rn', name:'Liberty Solid Bar Pull 128mm', finish:'Stainless Steel', price:10.97, tier:''},
-        ]
-      },
-      {
-        label: 'Cabinet Hinges — Soft Close (Per Pair)',
-        note: 'Verify cup diameter (35mm standard) and overlay at walkthrough.',
-        items: [
-          {id:'22PVW2mhQs9V', name:'Everbilt 35mm Soft Close Hinge', finish:'Nickel', price:7.09, tier:''},
-          {id:'22PVW2nKrBms', name:'Everbilt 35mm Soft Close Hinge', finish:'Matte Black', price:7.09, tier:''},
-          {id:'22PVW2nxCq56', name:'Everbilt 35mm Soft Close Hinge', finish:'Oil Rubbed Bronze', price:7.09, tier:''},
-        ]
-      },
-    ]
-  },
-
-  hvac: {
-    label: 'HVAC & Comfort',
-    sections: [
-      {
-        label: 'Thermostat',
-        note: 'Verify HVAC compatibility at walkthrough. C-wire required for WiFi model.',
-        items: [
-          {id:'22PVSnfWPtFy', name:'Honeywell X1N Non-Programmable', finish:'White', price:55.10, tier:'Good — Most Chosen'},
-          {id:'22PVZHG7H8PW', name:'Honeywell RTH9585 WiFi Smart', finish:'White', price:281.93, tier:'Best', note:'Requires C-wire — verify at walkthrough'},
-        ]
-      },
-    ]
-  },
-
+// ── ELECTRICAL DEVICES ──
+var ELEC={
+  coverUp:[
+    {id:'22PVS5TxAw2p',name:'Duplex Cover-Up Textured/Paintable',price:1.83},
+    {id:'22PVS5WFjGSZ',name:'Duplex Cover-Up Smooth',price:4.27},
+    {id:'22PVS5dGjfn8',name:'Toggle Cover-Up Smooth',price:5.49}
+  ],
+  plates:[
+    {id:'22PVS5tp9qqJ',name:'1-Gang Duplex Outlet Plate',price:1.29},
+    {id:'22PVS5tp9qqK',name:'2-Gang Duplex Outlet Plate',price:3.91},
+    {id:'22PVS5yjafdW',name:'3-Gang Duplex Device Plate',price:7.70},
+    {id:'22PVS5dGjfn9',name:'1-Gang Blank Plate',price:1.54},
+    {id:'22PVS5dGjfnA',name:'1-Gang Decora Jumbo Plate',price:2.51},
+    {id:'22PVS5tp9qqL',name:'2-Gang Rocker Switch Plate',price:3.07},
+    {id:'22PVS6Yu4va9',name:'3-Gang Rocker/Toggle Plate',price:5.90},
+    {id:'22PVS85RMTLZ',name:'Phone Jack Plate',price:6.17},
+    {id:'22PVS9QeGBHm',name:'Coaxial Cable Plate',price:6.04}
+  ],
+  decora:[
+    {id:'22PVS9QeGBHn',name:'Leviton Decora 15A TR Outlet',price:4.93},
+    {id:'22PVS9QeGBHp',name:'Leviton GFCI Self-Test Outlet',price:28.14},
+    {id:'22PVS9r9RZSV',name:'Leviton Decora Single-Pole Switch',price:4.00},
+    {id:'22PVS9t8duUR',name:'Leviton 3-Way Decora Switch',price:7.39},
+    {id:'22PVSB6DDkWB',name:'Leviton LED Advanced Dimmer',price:36.99}
+  ],
+  standard:[
+    {id:'22PVS9QeGBHr',name:'Standard Duplex Outlet (broken swap)',price:1.53},
+    {id:'22PVS9kk6gG3',name:'Standard Toggle Switch (broken swap)',price:1.45}
+  ]
 };
 
-// Room type → which catalog sections are available + walk checklist items
-var ROOM_CATALOG = {
-  'Master Bedroom':   ['doorHardware','lightFixtures','electricalDevices'],
-  'Bedroom':          ['doorHardware','lightFixtures','electricalDevices'],
-  'Master Bathroom':  ['doorHardware','lightFixtures','electricalDevices','bathHardware'],
-  'Bathroom':         ['doorHardware','lightFixtures','electricalDevices','bathHardware'],
-  'Kitchen':          ['doorHardware','lightFixtures','electricalDevices','cabinetHardware'],
-  'Living Room':      ['doorHardware','lightFixtures','electricalDevices'],
-  'Dining Room':      ['doorHardware','lightFixtures','electricalDevices'],
-  'Den / Office':     ['doorHardware','lightFixtures','electricalDevices'],
-  'Hallway':          ['doorHardware','lightFixtures','electricalDevices'],
-  'Hall Closet':      ['doorHardware','lightFixtures','electricalDevices'],
-  'Laundry Room':     ['doorHardware','lightFixtures','electricalDevices'],
-  'Garage':           ['doorHardware','lightFixtures','electricalDevices'],
-  'Other':            ['doorHardware','lightFixtures','electricalDevices'],
+// ── BATH HARDWARE ──
+var BATH_HW=[
+  {id:'22PVTPwC2tQ2',name:'MOEN Banbury 4-pc w/ Robe Hook',price:145.61,fin:'Brushed Nickel'},
+  {id:'22PVTPwC2tQ3',name:'MOEN Genta 3-pc Set',price:133.84,fin:'Matte Black'},
+  {id:'22PVTPwC2tQ4',name:'Delta Porter 4-pc Set',price:126.31,fin:'Oil Rubbed Bronze'}
+];
+var BATH_FAU=[
+  {id:'22PVTXhdLTfs',name:'MOEN Banbury Centerset',price:124.43,fin:'Brushed Nickel'},
+  {id:'22PVTXhdLTft',name:'MOEN Banbury Centerset',price:124.43,fin:'Matte Black'},
+  {id:'22PVTXwmntYs',name:'MOEN Banbury Centerset',price:155.93,fin:'Mediterranean Bronze'}
+];
+var SHOWER_H=[
+  {id:'22PVTYN2tzs9',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Brushed Nickel'},
+  {id:'22PVTYf7Rjhf',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Matte Black'},
+  {id:'22PVTYwYVTRS',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Mediterranean Bronze'}
+];
+var TOILET_S=[
+  {id:'22PVTZAEcb6m',name:'BEMIS Weston Soft Close Elongated',price:69.27},
+  {id:'22PVTZN7DzYg',name:'BEMIS Weston Soft Close Round',price:59.81}
+];
+
+// ── CABINET PULLS ──
+var CAB_PULL=[
+  {id:'22PVWU72XDUt',name:'Franklin Brass Adjusta-Pull SN',price:7.00,fin:'Satin Nickel'},
+  {id:'22PVWU72XDUu',name:'Franklin Brass Adjusta-Pull MB',price:8.71,fin:'Matte Black'},
+  {id:'22PVWU72XDUv',name:'Franklin Brass Adjusta-Pull CZ',price:8.73,fin:'Champagne Bronze'}
+];
+
+// ── REGISTERS ──
+var REG_FL=[
+  {id:'22PVScAuHEv7',name:'Floor 4"x10"',price:25.17},
+  {id:'22PVSdyhK8Te',name:'Floor 4"x8"',price:31.37},
+  {id:'22PVSdyhK8Tg',name:'Floor 2"x10"',price:22.01},
+  {id:'22PVSdyhKVN2',name:'Floor 2"x12"',price:22.01},
+  {id:'22PVSdyhKVN4',name:'Floor 2"x14"',price:22.80}
+];
+var REG_WL=[
+  {id:'22PVSf6QFNqJ',name:'Wall 10"x4"',price:25.17},
+  {id:'22PVSfMg5CAM',name:'Wall 12"x4"',price:25.17},
+  {id:'22PVSfaDBtaX',name:'Wall 10"x6"',price:25.17},
+  {id:'22PVSf6QFNqL',name:'Wall 8"x6"',price:22.47},
+  {id:'22PVSg9vxALY',name:'Wall 14"x4"',price:25.17},
+  {id:'22PVSg9vxALa',name:'Wall 14"x6"',price:28.31}
+];
+
+// ── PLUMBING ──
+var PLB={
+  angleStop:{id:'22PLidsWNdYp',name:'SharkBite Angle Stop',price:21.09},
+  toiletAngle:{id:'22PLictfFuRM',name:'SharkBite Toilet Angle Stop',price:32.59},
+  supplyLine:{id:'22PMzkaL2eTH',name:'BrassCraft Supply Line 30"',price:15.59},
+  ptrap:{id:'22PLihEi33Hz',name:'P-Trap 1.5"',price:21.34},
+  escutcheon:{id:'22PLihfEsfeL',name:'Escutcheon Plate 1/2"',price:4.29},
+  popUpDrain:{id:'22PVVRMYQsFD',name:'Bathroom Sink Pop-Up Drain',price:27.03},
+  sinkStrainer:{id:'22PVVRLi8q6Z',name:'Sink Basket Strainer Stainless',price:26.24},
+  dishwasher:{id:'22PVZGTXEgWu',name:'Dishwasher Supply Line 3/8"',price:25.14},
+  snappyTrap:{id:'22PMzpqhYMcA',name:'Snappy Trap Double Bowl Kit',price:48.56}
 };
 
-// Global selections (not room-specific)
-var GLOBAL_CATALOG = {
-  'Cabinet Hardware': 'cabinetHardware',
-  'Bath Hardware': 'bathHardware',
-  'HVAC & Thermostat': 'hvac',
-};
+// ── THERMOSTATS ──
+var THERMOS=[
+  {id:'22PVSni4KCbv',name:'Honeywell X1N Non-Programmable',price:55.10},
+  {id:'22PVSnyMHdaW',name:'ecobee Smart Essential',price:220.49}
+];
 
-// Walk checklist items by room type
-var WALK_ITEMS = {
-  'Master Bedroom': [
-    {cat:'Paint',  name:'Wall condition', sub:'Scuffs, holes, stains — count locations'},
-    {cat:'Paint',  name:'Ceiling condition', sub:'Water stains, texture damage'},
-    {cat:'Paint',  name:'Trim & baseboards', sub:'Chips, peeling, gaps'},
-    {cat:'Flooring', name:'Carpet/flooring condition', sub:'Stains, wear, pet odor, lifting'},
-    {cat:'Hardware', name:'Privacy door hardware', sub:'Replace with selection'},
-    {cat:'Hardware', name:'Door hinges', sub:'Replace to match finish'},
-    {cat:'Electrical', name:'Light fixture', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Switches & outlets', sub:'Replace covers/devices'},
-    {cat:'Safety', name:'Smoke detector', sub:'CA law: required per bedroom'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-  ],
-  'Bedroom': [
-    {cat:'Paint',  name:'Wall condition', sub:'Scuffs, holes, stains — count locations'},
-    {cat:'Paint',  name:'Ceiling condition', sub:'Water stains, texture damage'},
-    {cat:'Paint',  name:'Trim & baseboards', sub:'Chips, peeling, gaps'},
-    {cat:'Flooring', name:'Carpet/flooring condition', sub:'Stains, wear, lifting'},
-    {cat:'Hardware', name:'Privacy door hardware', sub:'Replace with selection'},
-    {cat:'Hardware', name:'Door hinges', sub:'Replace to match finish'},
-    {cat:'Electrical', name:'Light fixture', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Switches & outlets', sub:'Replace covers/devices'},
-    {cat:'Safety', name:'Smoke detector', sub:'CA law: required per bedroom'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-  ],
-  'Master Bathroom': [
-    {cat:'Paint', name:'Wall condition', sub:'Moisture damage, peeling'},
-    {cat:'Paint', name:'Ceiling condition', sub:'Water stains, mold risk'},
-    {cat:'Flooring', name:'Tile/floor condition', sub:'Cracked grout, loose tile, LVP'},
-    {cat:'Hardware', name:'Privacy door hardware', sub:'Replace with selection'},
-    {cat:'Hardware', name:'Door hinges', sub:'Replace to match finish'},
-    {cat:'Bath', name:'Bath hardware set', sub:'Towel bar, TP holder, robe hook'},
-    {cat:'Bath', name:'Faucet condition', sub:'Replace with selection'},
-    {cat:'Bath', name:'Mirror / medicine cabinet', sub:'Condition, size, replace?'},
-    {cat:'Electrical', name:'Vanity light', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Exhaust fan', sub:'Functioning? Replace with humidity sensor?'},
-    {cat:'Electrical', name:'GFCI outlet', sub:'Required — replace if missing'},
-    {cat:'Plumbing', name:'Caulking — tub, shower, sink', sub:'Cracked, moldy, missing'},
-    {cat:'Safety', name:'Smoke detector', sub:'Note if needed per floor plan'},
-  ],
-  'Bathroom': [
-    {cat:'Paint', name:'Wall condition', sub:'Moisture damage, peeling'},
-    {cat:'Paint', name:'Ceiling condition', sub:'Water stains, mold risk'},
-    {cat:'Flooring', name:'Tile/floor condition', sub:'Cracked grout, loose tile, LVP'},
-    {cat:'Hardware', name:'Privacy door hardware', sub:'Replace with selection'},
-    {cat:'Hardware', name:'Door hinges', sub:'Replace to match finish'},
-    {cat:'Bath', name:'Bath hardware set', sub:'Towel bar, TP holder, robe hook'},
-    {cat:'Bath', name:'Faucet condition', sub:'Replace with selection'},
-    {cat:'Bath', name:'Mirror / medicine cabinet', sub:'Condition, replace?'},
-    {cat:'Electrical', name:'Vanity light', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Exhaust fan', sub:'Functioning? Humidity sensor?'},
-    {cat:'Electrical', name:'GFCI outlet', sub:'Required — replace if missing'},
-    {cat:'Plumbing', name:'Caulking — tub, shower, sink', sub:'Cracked, moldy, missing'},
-  ],
-  'Kitchen': [
-    {cat:'Paint', name:'Wall condition', sub:'Grease stains, scuffs, moisture'},
-    {cat:'Paint', name:'Ceiling condition', sub:'Water stains, grease'},
-    {cat:'Flooring', name:'Floor condition', sub:'Tile, LVP, grout cracks'},
-    {cat:'Hardware', name:'Cabinet hardware', sub:'Pulls, knobs — note hole spacing'},
-    {cat:'Hardware', name:'Cabinet hinges', sub:'Soft-close, alignment'},
-    {cat:'Hardware', name:'Door hardware — pantry / garage', sub:'Passage or SmartKey'},
-    {cat:'Electrical', name:'Light fixture(s)', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Outlets & switches', sub:'GFCI at countertop — required'},
-    {cat:'Plumbing', name:'Kitchen faucet', sub:'Condition — replace with selection'},
-    {cat:'Plumbing', name:'Under-sink — angle stops, supply lines, p-trap', sub:'Corrosion visible?'},
-    {cat:'Safety', name:'Smoke detector', sub:'Required — floor check'},
-    {cat:'Safety', name:'CO detector', sub:'Required — near sleeping areas'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-  ],
-  'Living Room': [
-    {cat:'Paint', name:'Wall condition', sub:'Scuffs, holes, stains'},
-    {cat:'Paint', name:'Ceiling condition', sub:'Water stains, cracks'},
-    {cat:'Paint', name:'Trim & baseboards', sub:'Chips, gaps'},
-    {cat:'Flooring', name:'Floor condition', sub:'Carpet, LVP, hardwood'},
-    {cat:'Hardware', name:'Door hardware / hinges', sub:'Passage, hinges'},
-    {cat:'Electrical', name:'Light fixture(s)', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Switches & outlets', sub:'Covers, dimmers'},
-    {cat:'HVAC', name:'Thermostat', sub:'Type, age — replace?'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-    {cat:'Safety', name:'Smoke / CO detector', sub:'Per floor required'},
-  ],
-  'Dining Room': [
-    {cat:'Paint', name:'Wall condition', sub:'Scuffs, damage'},
-    {cat:'Paint', name:'Ceiling & trim', sub:'Condition'},
-    {cat:'Flooring', name:'Floor condition', sub:'LVP, carpet, hardwood'},
-    {cat:'Electrical', name:'Chandelier / fixture', sub:'Replace with selection — verify ceiling height'},
-    {cat:'Electrical', name:'Switches', sub:'Dimmer recommended for dining'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-  ],
-  'Den / Office': [
-    {cat:'Paint', name:'Wall & ceiling condition', sub:'Scuffs, holes'},
-    {cat:'Flooring', name:'Floor condition', sub:'Carpet, LVP'},
-    {cat:'Hardware', name:'Door hardware', sub:'Passage or privacy'},
-    {cat:'Electrical', name:'Light fixture', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Switches & outlets', sub:'Covers, dimmers'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-  ],
-  'Hallway': [
-    {cat:'Paint', name:'Wall & ceiling condition', sub:'High-traffic — scuffs, dings'},
-    {cat:'Flooring', name:'Floor condition', sub:'LVP, carpet, hardwood transitions'},
-    {cat:'Hardware', name:'Passage hardware', sub:'Hall closet doors'},
-    {cat:'Electrical', name:'Light fixture', sub:'Replace with selection'},
-    {cat:'Electrical', name:'Switches', sub:'3-way common in halls'},
-    {cat:'Safety', name:'Smoke detector', sub:'CA law: one per floor minimum'},
-  ],
-  'Hall Closet': [
-    {cat:'Hardware', name:'Passage door hardware', sub:'Replace with selection'},
-    {cat:'Hardware', name:'Door hinges', sub:'Replace to match finish'},
-    {cat:'Electrical', name:'Light fixture', sub:'Replace with selection'},
-    {cat:'Paint', name:'Interior condition', sub:'Paint if visible from hall'},
-  ],
-  'Laundry Room': [
-    {cat:'Paint', name:'Wall & ceiling condition', sub:'Moisture, peeling'},
-    {cat:'Flooring', name:'Floor condition', sub:'LVP, tile'},
-    {cat:'Hardware', name:'Door hardware', sub:'Passage'},
-    {cat:'Electrical', name:'Light fixture', sub:'Replace with selection'},
-    {cat:'Electrical', name:'20A outlet', sub:'Required for washer'},
-    {cat:'HVAC', name:'Floor register', sub:'Clean or replace'},
-  ],
-  'Garage': [
-    {cat:'Hardware', name:'SmartKey entry — kitchen door', sub:'Keyed alike at install'},
-    {cat:'Hardware', name:'SmartKey entry — yard door', sub:'Keyed alike at install'},
-    {cat:'Electrical', name:'Light fixture(s)', sub:'Replace with selection'},
-    {cat:'Paint', name:'Wall condition', sub:'Paint if listing condition warrants'},
-    {cat:'Safety', name:'Smoke / CO detector', sub:'Required — attached garage'},
-    {cat:'Safety', name:'Water heater strapping', sub:'CA seismic required at sale'},
-  ],
-  'Other': [
-    {cat:'General', name:'Condition notes', sub:'Document condition and needed work'},
-    {cat:'Paint', name:'Paint condition', sub:'Walls, ceiling, trim'},
-    {cat:'Electrical', name:'Electrical devices', sub:'Switches, outlets, fixtures'},
-  ],
-};
+// ── VALVE BRANDS ──
+var VALVES=[
+  {k:'moen-positempo',n:'Moen Posi-Temp',s:'Single handle round',b:'vb-chk',bt:'Verify trim'},
+  {k:'moen-mpact',n:'Moen M-Pact',s:'Universal valve',b:'vb-ok',bt:'Upgradeable ✓'},
+  {k:'delta-monitor',n:'Delta Monitor',s:'Single handle',b:'vb-chk',bt:'Verify trim'},
+  {k:'delta-multichoice',n:'Delta MultiChoice',s:'Universal valve',b:'vb-ok',bt:'Upgradeable ✓'},
+  {k:'pfister',n:'Pfister',s:'Various models',b:'vb-chk',bt:'Verify trim'},
+  {k:'kohler',n:'Kohler',s:'Various models',b:'vb-chk',bt:'Verify trim'},
+  {k:'american-standard',n:'American Standard',s:'Various models',b:'vb-chk',bt:'Verify trim'},
+  {k:'unknown',n:'Unknown Brand',s:'Needs ID on site',b:'vb-chk',bt:'Field verify'},
+  {k:'not-upgradeable',n:'⚠️ Not Upgradeable',s:'Custom / discontinued',b:'vb-no',bt:'Lock out trim',danger:true}
+];
 
-// ═══════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════
-var S = {
-  fin: -1,
-  rooms: [],       // [{id, type, label, paintTier, walkItems:[{qty,flag,note}], customItems:[]}]
-  selections: {},  // {itemId: {id, name, finish, price, qty, locations:[], catKey}}
-  globalSels: {},  // same structure for global items
-  photos: {},      // {zone: [dataURL]}
-  signed: false,
-  jobId: null,
-  custId: null,
-};
-
-// ═══════════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════════
-var PROG = [14,28,43,57,71,85,100];
-
-function tapGo(e,n){
-  if(e && e.cancelable) e.preventDefault();
-  go(n);
+// ═══════════ HELPERS ═══════════
+function pImg(id){
+  var u=IMG[id];
+  if(u) return '<img class="pcard-img" src="'+u+'" onerror="this.parentNode.innerHTML=\'<div class=pcard-ph>📦</div>\'">';
+  return '<div class="pcard-ph">📦</div>';
+}
+function mkPcard(item,selId,groupSel,rid){
+  var isSel=rid?getR(rid)[selId]===item.id:false;
+  return '<div class="pcard'+(isSel?' on':'')+'" onclick="selProd(\''+rid+'\',\''+selId+'\',\''+item.id+'\',this,\''+groupSel+'\')">'
+    +pImg(item.id)
+    +'<div class="pcard-info"><div class="pcard-name">'+item.name+'</div>'
+    +'<div class="pcard-price">$'+item.price.toFixed(2)+'</div>'
+    +(item.fin?'<div class="pcard-fin">'+item.fin+'</div>':'')
+    +'</div><div class="pcard-chk">✓ Selected</div></div>';
+}
+function qRow(rid,key,lbl,sub){
+  var r=getR(rid),v=r[key]||0;
+  return '<div class="qrow"><div class="qlbl">'+lbl+(sub?'<span class="qlbl-sub">'+sub+'</span>':'')+'</div>'
+    +'<div class="qctrl"><button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\''+',-1)">−</button>'
+    +'<div class="qval" id="qv-'+rid+'-'+key+'">'+v+'</div>'
+    +'<button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\',1)">+</button></div></div>';
+}
+function togRow(rid,key,lbl,sub,showId){
+  var r=getR(rid),v=r[key]?'checked':'';
+  var si=showId?' onchange="showHide(\''+showId+'\',this.checked)"':'';
+  return '<div class="trow"><div class="tlbl">'+lbl+(sub?'<span class="tlbl-sub">'+sub+'</span>':'')+'</div>'
+    +'<label class="tog"><input type="checkbox" '+v+si+' onchange="setRV(\''+rid+'\',\''+key+'\',this.checked)">'
+    +'<span class="tog-sl"></span></label></div>';
+}
+function getR(rid){return S.rooms.find(function(r){return r.id===rid;})||{};}
+function setRV(rid,key,val){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
+function adjR(rid,key,d){
+  var r=getR(rid);if(!r)return;
+  r.d[key]=Math.max(0,(r.d[key]||0)+d);
+  var el=document.getElementById('qv-'+rid+'-'+key);
+  if(el)el.textContent=r.d[key];
+  updSum(rid);
+}
+function adjH(id,d){
+  HW[id]=Math.max(0,(HW[id]||1)+d);
+  var el=document.getElementById(id);
+  if(el)el.textContent=HW[id];
+}
+function showHide(id,show){var el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+function selProd(rid,key,val,el,grp){
+  if(rid){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
+  var container=el.parentNode;
+  container.querySelectorAll('.pcard').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+}
+function setPT(rid,tier,el){
+  var r=getR(rid);if(!r)return;
+  r.d.paintTier=tier;
+  el.parentNode.querySelectorAll('.pt').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  updSum(rid);
+}
+function setFin(idx,el){
+  S.finish=idx;
+  document.querySelectorAll('.fin-opt').forEach(function(o){o.classList.remove('on');});
+  el.classList.add('on');
+}
+function setValve(rid,k,el){
+  var r=getR(rid);if(!r)return;
+  r.d.valve=k;
+  var locked=k==='not-upgradeable';
+  var sb=document.getElementById('shower-body-'+rid);
+  if(sb){sb.style.opacity=locked?'0.4':'1';sb.style.pointerEvents=locked?'none':'';}
+  el.parentNode.querySelectorAll('.vopt').forEach(function(v){v.classList.remove('on');});
+  el.classList.add('on');
+  updSum(rid);
+}
+function updSum(rid){
+  var r=getR(rid);if(!r)return;
+  var d=r.d,p=[];
+  if(d.paintTier)p.push('T'+d.paintTier+' Paint');
+  if(d.doorQty)p.push(d.doorQty+' Door HW');
+  if(d.flushId)p.push('Fixture');
+  if(d.can6Qty||d.can4Qty)p.push('Cans');
+  if(d.faucet)p.push('Faucet');
+  if(d.bathHW)p.push('Bath HW');
+  if(d.toiletSeat)p.push('Toilet Seat');
+  if(d.showerHead)p.push('Shower');
+  if(d.cabPullId)p.push('Cabinet HW');
+  var el=document.getElementById('rsum-'+rid);
+  if(el)el.textContent=p.length?p.join(' · '):'Tap to expand';
 }
 
-function go(n){
-  document.querySelectorAll('.pane').forEach(function(p,i){ p.classList.toggle('on',i===n); });
-  document.querySelectorAll('.sb').forEach(function(b,i){ b.classList.toggle('on',i===n); });
-  var pf=document.getElementById('prog-f'); if(pf) pf.style.width=PROG[n]+'%';
+// ═══════════ NAVIGATION ═══════════
+function goTo(n){
+  if(n<0||n>4)return;
+  if(n===2)bldWalk();
+  if(n===3)bldReview();
+  if(n===4)setTimeout(initSig,150);
+  document.querySelectorAll('.pg').forEach(function(p,i){p.classList.toggle('on',i===n);});
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
+  CP=n;
+  document.getElementById('btn-back').style.display=n>0?'block':'none';
+  document.getElementById('btn-next').textContent=n===3?'Sign & Push →':'Next →';
+  document.getElementById('hdr-step').textContent=(n+1)+' / 5';
   window.scrollTo(0,0);
-  try{ if(n===2) buildWalkCards(); } catch(e){ console.error('buildWalkCards',e); }
-  try{ if(n===3) buildSelections(); } catch(e){ console.error('buildSelections',e); }
-  try{ if(n===4) buildPhotoZones(); } catch(e){ console.error('buildPhotoZones',e); }
-  try{ if(n===5) buildProposal(); } catch(e){ console.error('buildProposal',e); }
-  try{ updateFloatNav(n); } catch(e){}
-  // Hide float nav on scroll-to-top
-  var fn=document.getElementById('float-nav');
-  if(fn) fn.classList.remove('visible');
 }
 
-// ═══════════════════════════════════════════════════════════
-// FINISH
-// ═══════════════════════════════════════════════════════════
-function selFin(i){
-  S.fin=i;
-  document.querySelectorAll('.fin-btn').forEach(function(b,j){ b.classList.toggle('on',j===i); });
+// ═══════════ ROOMS ═══════════
+function addRoom(type,icon,name){
+  S.rooms.push({id:'r'+Date.now(),type:type,icon:icon,name:name,d:{}});
+  renderRooms();
 }
-
-// ═══════════════════════════════════════════════════════════
-// ROOM MANAGEMENT
-// ═══════════════════════════════════════════════════════════
-function addRoom(){
-  var sel=document.getElementById('room-type-sel');
-  var type=sel.value;
-  if(!type){ alert('Select a room type.'); return; }
-  var items=WALK_ITEMS[type]||[];
-  var room={
-    id:'r'+Date.now(),
-    type:type,
-    label:type,
-    paintTier:0,
-    walkItems:items.map(function(){ return {qty:0,flag:false,note:''}; }),
-    customItems:[]
-  };
-  S.rooms.push(room);
-  sel.value='';
-  renderRoomList();
-}
-
-function renderRoomList(){
+function removeRoom(id){S.rooms=S.rooms.filter(function(r){return r.id!==id;});renderRooms();}
+function renderRooms(){
   var el=document.getElementById('room-list');
-  if(!S.rooms.length){
-    el.innerHTML='<div style="padding:12px;text-align:center;font-size:12px;color:var(--muted);border:1px dashed var(--border);border-radius:8px;">No rooms added yet</div>';
-    return;
-  }
-  var html='';
-  S.rooms.forEach(function(room,idx){
-    var flagged=room.walkItems.filter(function(wi){ return wi.qty>0||wi.flag; }).length;
-    html+='<div class="room-chip">'
-      +'<div>'
-        +'<div class="room-chip-name">'+(idx+1)+'. '+room.label+'</div>'
-        +(flagged?'<div class="room-chip-meta">'+flagged+' items noted</div>':'<div class="room-chip-meta" style="color:#ccc">Not walked yet</div>')
-      +'</div>'
-      +'<div class="tier-row" style="flex:1;max-width:180px;">'
-        +'<button class="tier-btn '+(room.paintTier===1?'on':'')+'" data-ri="'+idx+'" data-tier="1" onclick="setPaint(this)">Touch-up<br>T1</button>'
-        +'<button class="tier-btn '+(room.paintTier===2?'on':'')+'" data-ri="'+idx+'" data-tier="2" onclick="setPaint(this)">Walls<br>T2</button>'
-        +'<button class="tier-btn '+(room.paintTier===3?'on':'')+'" data-ri="'+idx+'" data-tier="3" onclick="setPaint(this)">Full<br>T3</button>'
-      +'</div>'
-      +'<button class="room-chip-del" data-ri="'+idx+'" onclick="removeRoom(this)">&#10005;</button>'
-    +'</div>';
-  });
-  el.innerHTML=html;
-}
-
-function setPaint(btn){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  var tier=parseInt(btn.getAttribute('data-tier'));
-  S.rooms[ri].paintTier=(S.rooms[ri].paintTier===tier?0:tier);
-  renderRoomList();
-}
-
-function removeRoom(btn){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  S.rooms.splice(ri,1);
-  renderRoomList();
-}
-
-// ═══════════════════════════════════════════════════════════
-// WALK CARDS
-// ═══════════════════════════════════════════════════════════
-function buildWalkCards(){
-  var container=document.getElementById('walk-cards');
-  var empty=document.getElementById('walk-empty');
-  if(!S.rooms.length){ container.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  var html='';
-  S.rooms.forEach(function(room,ri){
-    var items=WALK_ITEMS[room.type]||[];
-    var bycat={};
-    items.forEach(function(item,ii){
-      if(!bycat[item.cat]) bycat[item.cat]=[];
-      bycat[item.cat].push({item:item,ii:ii});
-    });
-    html+='<div class="walk-room">'
-      +'<div class="walk-room-hdr">'
-        +'<div class="walk-room-title">'+(ri+1)+'. '+room.label+'</div>'
-        +'<div class="walk-room-badge">'+room.type+'</div>'
+  if(!S.rooms.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No rooms yet.<br>Tap a type above to add.</div>';return;}
+  el.innerHTML=S.rooms.map(function(r,i){
+    return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;">'
+      +'<span style="font-size:22px;">'+r.icon+'</span>'
+      +'<input value="'+r.name+'" style="flex:1;border:none;font-size:14px;font-weight:700;padding:4px;background:transparent;" onchange="S.rooms['+i+'].name=this.value">'
+      +'<button onclick="removeRoom(\''+r.id+'\')" style="border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer;">×</button>'
       +'</div>';
-    objKeys(bycat).forEach(function(cat){
-      html+='<div class="walk-section"><div class="walk-cat">'+cat+'</div>';
-      bycat[cat].forEach(function(entry){
-        var ii=entry.ii;
-        var item=entry.item;
-        var wi=room.walkItems[ii]||{qty:0,flag:false,note:''};
-        html+='<div class="walk-item">'
-          +'<div class="walk-item-top">'
-            +'<div><div class="walk-item-name">'+item.name+'</div>'
-            +(item.sub?'<div class="walk-item-note">'+item.sub+'</div>':'')
-            +'</div>'
-          +'</div>'
-          +'<div class="walk-item-controls">'
-            +'<button class="wqb" data-ri="'+ri+'" data-ii="'+ii+'" onclick="adjWalk(this,-1)">&#8722;</button>'
-            +'<span class="wqn" id="wq_'+ri+'_'+ii+'" style="color:'+(wi.qty>0?'var(--red)':'#ccc')+'">'+wi.qty+'</span>'
-            +'<button class="wqb" data-ri="'+ri+'" data-ii="'+ii+'" onclick="adjWalk(this,1)">&#43;</button>'
-            +'<button class="wflag '+(wi.flag?'on':'')+'" data-ri="'+ri+'" data-ii="'+ii+'" onclick="toggleFlag(this)">!</button>'
-            +'<input class="wnote" type="text" value="'+wi.note.replace(/"/g,'&quot;')+'" placeholder="Note..." data-ri="'+ri+'" data-ii="'+ii+'" oninput="setWalkNote(this)"/>'
-          +'</div>'
-        +'</div>';
-      });
-      html+='</div>';
-    });
-    // Custom items
-    var cItems=room.customItems||[];
-    cItems.forEach(function(ci,ci_i){
-      html+='<div class="walk-section" style="padding-bottom:4px;">'
-        +'<div class="walk-item">'
-          +'<div class="walk-item-top"><div class="walk-item-name">'+ci.name+'</div></div>'
-          +'<div class="walk-item-controls">'
-            +'<button class="wqb" data-ri="'+ri+'" data-ci="'+ci_i+'" onclick="adjCustom(this,-1)">&#8722;</button>'
-            +'<span class="wqn" id="wcq_'+ri+'_'+ci_i+'" style="color:'+(ci.qty>0?'var(--red)':'#ccc')+'">'+ci.qty+'</span>'
-            +'<button class="wqb" data-ri="'+ri+'" data-ci="'+ci_i+'" onclick="adjCustom(this,1)">&#43;</button>'
-            +'<button class="wflag '+(ci.flag?'on':'')+'" data-ri="'+ri+'" data-ci="'+ci_i+'" onclick="toggleCustomFlag(this)" title="Flag">!</button>'
-            +'<input class="wnote" type="text" value="'+ci.note.replace(/"/g,'&quot;')+'" placeholder="Note..." data-ri="'+ri+'" data-ci="'+ci_i+'" oninput="setCustomNote(this)"/>'
-          +'</div>'
-        +'</div>'
-      +'</div>';
-    });
-    // Add custom
-    html+='<div class="walk-custom">'
-      +'<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Add item</div>'
-      +'<div class="walk-custom-row">'
-        +'<input type="text" id="custom_'+ri+'" placeholder="Custom item..." style="flex:1;padding:7px 9px;font-size:11px;"/>'
-        +'<button data-ri="'+ri+'" onclick="addCustomItem(this)" style="padding:7px 12px;background:#000;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;">Add</button>'
-      +'</div>'
+  }).join('');
+}
+
+// ═══════════ WALK BUILD ═══════════
+function bldWalk(){
+  var el=document.getElementById('walk-list');
+  if(!S.rooms.length){el.innerHTML='<div class="a-warn">No rooms added. Go to Page 2 and add rooms first.</div>';return;}
+  el.innerHTML=S.rooms.map(function(r){return bldRoom(r);}).join('');
+  // Init thermostat grid on page 1
+  bldThermGrid();
+}
+
+function bldThermGrid(){
+  var g=document.getElementById('therm-grid');
+  if(!g)return;
+  g.innerHTML=THERMOS.map(function(t){
+    var sel=S.thermostatId===t.id;
+    return '<div class="pcard'+(sel?' on':'')+'" onclick="S.thermostatId=\''+t.id+'\';selProd(null,null,null,this,null)">'
+      +pImg(t.id)+'<div class="pcard-info"><div class="pcard-name">'+t.name+'</div><div class="pcard-price">$'+t.price.toFixed(2)+'</div></div>'
+      +'<div class="pcard-chk">✓ Selected</div></div>';
+  }).join('');
+}
+
+function bldRoom(r){
+  var d=r.d;
+  var fin=S.finish;
+  var s='';
+
+  // PAINT
+  s+='<div class="sh">🎨 Paint</div>';
+  s+='<div class="pt-grid">';
+  [1,2,3].forEach(function(t){
+    s+='<div class="pt'+(d.paintTier===t?' on':'')+'" onclick="setPT(\''+r.id+'\','+t+',this)">'
+      +'<div class="pt-lbl">T'+t+'</div>'
+      +'<div class="pt-sub">'+(t===1?'Touch-up':t===2?'Walls Only':'Full Room')+'</div></div>';
+  });
+  s+='</div>';
+
+  // DOOR HARDWARE
+  s+='<div class="sh">🚪 Door Hardware</div>';
+  s+='<div class="fg"><label class="lbl">Door Type</label><select onchange="setRV(\''+r.id+'\',\'doorType\',this.value);document.getElementById(\'dh-body-'+r.id+'\').style.display=this.value?\'block\':\'none\'">'
+    +'<option value="">None / Skip</option>'
+    +'<option value="passage"'+(d.doorType==='passage'?' selected':'')+'>Passage (Hall / Closet)</option>'
+    +'<option value="privacy"'+(d.doorType==='privacy'?' selected':'')+'>Privacy (Bed / Bath)</option>'
+    +'<option value="entry"'+(d.doorType==='entry'?' selected':'')+'>Entry / Exterior</option>'
+    +'</select></div>';
+  var dItems=d.doorType==='passage'?DOOR_PASS:d.doorType==='privacy'?DOOR_PRIV:d.doorType==='entry'?DOOR_ENTRY:null;
+  s+='<div id="dh-body-'+r.id+'" style="display:'+(d.doorType?'block':'none')+'">';
+  if(dItems){s+='<div class="pg2">'+dItems.map(function(item){return mkPcard(item,'doorHardwareId','pg2',r.id);}).join('')+'</div>';}
+  s+=qRow(r.id,'doorQty','Quantity','# of doors this type');
+  s+='</div>';
+
+  // LIGHTS
+  s+='<div class="sh">💡 Lighting</div>';
+
+  // Flush mount
+  s+='<div class="lbl" style="margin-bottom:6px;">Ceiling Fixture (flush mount)</div>';
+  var flushItems=FLUSH[fin]||FLUSH[0];
+  s+='<div class="pg2">'+flushItems.map(function(item){return mkPcard(item,'flushId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'flushQty','Quantity','# of ceiling fixtures');
+
+  // Recessed cans
+  s+='<div class="lbl" style="margin:8px 0 6px;">Recessed Can Retrofit</div>';
+  s+='<div class="pg2">'
+    +'<div class="pcard'+(d.can6Id?'on':'')+'" onclick="setRV(\''+r.id+'\',\'can6Id\',\''+CAN6.id+'\');selProd(\''+r.id+'\',\'can6Id\',\''+CAN6.id+'\',this,null)">'
+    +pImg(CAN6.id)+'<div class="pcard-info"><div class="pcard-name">'+CAN6.name+'</div><div class="pcard-price">$'+CAN6.price.toFixed(2)+'</div><div class="pcard-fin">5/6" — most common</div></div>'
+    +'<div class="pcard-chk">✓ Selected</div></div>'
+    +'<div class="pcard'+(d.can4Id?'on':'')+'" onclick="setRV(\''+r.id+'\',\'can4Id\',\''+CAN4.id+'\');selProd(\''+r.id+'\',\'can4Id\',\''+CAN4.id+'\',this,null)">'
+    +pImg(CAN4.id)+'<div class="pcard-info"><div class="pcard-name">'+CAN4.name+'</div><div class="pcard-price">$'+CAN4.price.toFixed(2)+'</div><div class="pcard-fin">4" only</div></div>'
+    +'<div class="pcard-chk">✓ Selected</div></div>'
     +'</div>';
-    html+='</div>';
-  });
-  container.innerHTML=html;
-}
+  s+=qRow(r.id,'can6Qty','6" Can Qty','');
+  s+=qRow(r.id,'can4Qty','4" Can Qty','');
 
-function adjWalk(btn,d){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  var ii=parseInt(btn.getAttribute('data-ii'));
-  var wi=S.rooms[ri].walkItems[ii];
-  wi.qty=Math.max(0,wi.qty+d);
-  var el=document.getElementById('wq_'+ri+'_'+ii);
-  if(el){ el.textContent=wi.qty; el.style.color=wi.qty>0?'var(--red)':'#ccc'; }
-  renderRoomList();
-}
-
-function toggleFlag(btn){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  var ii=parseInt(btn.getAttribute('data-ii'));
-  S.rooms[ri].walkItems[ii].flag=!S.rooms[ri].walkItems[ii].flag;
-  btn.classList.toggle('on',S.rooms[ri].walkItems[ii].flag);
-}
-
-function setWalkNote(inp){
-  var ri=parseInt(inp.getAttribute('data-ri'));
-  var ii=parseInt(inp.getAttribute('data-ii'));
-  S.rooms[ri].walkItems[ii].note=inp.value;
-}
-
-function adjCustom(btn,d){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  var ci=parseInt(btn.getAttribute('data-ci'));
-  S.rooms[ri].customItems[ci].qty=Math.max(0,S.rooms[ri].customItems[ci].qty+d);
-  var el=document.getElementById('wcq_'+ri+'_'+ci);
-  if(el){ el.textContent=S.rooms[ri].customItems[ci].qty; el.style.color=S.rooms[ri].customItems[ci].qty>0?'var(--red)':'#ccc'; }
-}
-
-function toggleCustomFlag(btn){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  var ci=parseInt(btn.getAttribute('data-ci'));
-  S.rooms[ri].customItems[ci].flag=!S.rooms[ri].customItems[ci].flag;
-  btn.classList.toggle('on',S.rooms[ri].customItems[ci].flag);
-}
-
-function setCustomNote(inp){
-  var ri=parseInt(inp.getAttribute('data-ri'));
-  var ci=parseInt(inp.getAttribute('data-ci'));
-  S.rooms[ri].customItems[ci].note=inp.value;
-}
-
-function addCustomItem(btn){
-  var ri=parseInt(btn.getAttribute('data-ri'));
-  var inp=document.getElementById('custom_'+ri);
-  if(!inp||!inp.value.trim()) return;
-  S.rooms[ri].customItems.push({name:inp.value.trim(),qty:1,flag:false,note:''});
-  inp.value='';
-  buildWalkCards();
-}
-
-// ═══════════════════════════════════════════════════════════
-// SELECTIONS
-// ═══════════════════════════════════════════════════════════
-// Track which accordion sections are open
-var ACC_OPEN = {};
-
-function buildSelections(){
-  var neededSections={};
-  S.rooms.forEach(function(room){
-    var cats=ROOM_CATALOG[room.type]||[];
-    cats.forEach(function(c){ neededSections[c]=true; });
-  });
-  objVals(GLOBAL_CATALOG).forEach(function(c){ neededSections[c]=true; });
-
-  var html='';
-  objKeys(CATALOG).forEach(function(catKey){
-    if(!neededSections[catKey]) return;
-    var cat=CATALOG[catKey];
-    html+='<div class="sel-group"><div class="sel-group-title">'+cat.label+'</div>';
-
-    cat.sections.forEach(function(sec,si){
-      var accId=catKey+'_'+si;
-      var isOpen=!!ACC_OPEN[accId];
-
-      // Find if any item in this section is selected
-      var selectedItem=null;
-      sec.items.forEach(function(item){
-        if(S.selections[item.id]) selectedItem=S.selections[item.id];
-      });
-      var statusTxt=selectedItem
-        ? selectedItem.name+' — '+selectedItem.finish+(selectedItem.qty>1?' ×'+selectedItem.qty:'')
-        : '';
-
-      html+='<div class="sel-acc" id="acc_'+accId+'">';
-
-      // Header row — tapping opens/closes the dropdown
-      html+='<div class="sel-acc-hdr" data-accid="'+accId+'" onclick="toggleAcc(this)">';
-      html+='<div class="sel-acc-label">';
-      html+='<div class="sel-acc-name">'+sec.label+'</div>';
-      if(sec.note) html+='<div class="sel-acc-note">'+sec.note+'</div>';
-      html+='</div>';
-      if(statusTxt){
-        html+='<div class="sel-acc-status" style="max-width:120px;text-align:right;font-size:10px;line-height:1.3;">'+statusTxt+'</div>';
-      }
-      html+='<div class="sel-acc-arrow '+(isOpen?'open':'')+'" id="arr_'+accId+'">&#9660;</div>';
-      html+='</div>';
-
-      // Body — the option list, shown/hidden
-      html+='<div class="sel-acc-body '+(isOpen?'open':'')+'" id="body_'+accId+'">';
-      sec.items.forEach(function(item){
-        var sel=S.selections[item.id];
-        var on=!!sel;
-        html+='<div class="sel-opt '+(on?'on':'')+'" data-selid="'+item.id+'" data-catkey="'+catKey+'" onclick="pickOpt(this)">';
-        html+='<div class="sel-opt-radio"><div class="sel-opt-radio-dot" '+(on?'':'style="display:none;"')+'></div></div>';
-        html+='<div class="sel-opt-body">';
-        html+='<div class="sel-opt-name">'+item.name+'</div>';
-        html+='<div class="sel-opt-fin">'+item.finish+'</div>';
-        if(item.note) html+='<div class="sel-opt-note">'+item.note+'</div>';
-        html+='</div>';
-        html+='<div class="sel-opt-right">';
-        html+='<div class="sel-opt-price">$'+item.price.toFixed(2)+'</div>';
-        if(item.tier) html+='<span class="sel-badge '+(item.tier==='Good'?'sb-good':item.tier==='Better'?'sb-better':'sb-best')+'">'+item.tier+'</span>';
-        html+='</div>';
-        html+='</div>';
-
-        // Controls shown inline under selected item
-        if(on){
-          var qty=sel.qty||1;
-          var locs=sel.locations||[''];
-          while(locs.length<qty) locs.push('');
-          html+='<div class="sel-controls">';
-          html+='<div class="sel-qty-row">';
-          html+='<span class="sel-qty-label">Qty</span>';
-          html+='<div class="sel-qty-controls">';
-          html+='<button class="sqb" data-selid="'+item.id+'" onclick="adjSelQty(event,this,-1)">&#8722;</button>';
-          html+='<span class="sqn" id="sqn_'+item.id+'">'+qty+'</span>';
-          html+='<button class="sqb" data-selid="'+item.id+'" onclick="adjSelQty(event,this,1)">&#43;</button>';
-          html+='<button class="sel-remove" data-selid="'+item.id+'" onclick="removeSel(event,this)">&#10005;</button>';
-          html+='</div></div>';
-          for(var li=0;li<qty;li++){
-            html+='<div class="sel-loc-row">';
-            html+='<span class="sel-loc-label">'+(qty>1?'Unit '+(li+1):'')+' Location:</span>';
-            html+='<input class="sel-loc-input" type="text" value="'+locs[li].replace(/"/g,'&quot;')+'" placeholder="Room — e.g. Master Bath" data-selid="'+item.id+'" data-li="'+li+'" oninput="setSelLoc(this)"/>';
-            html+='</div>';
-          }
-          html+='<div class="sel-subtotal">$'+(item.price*qty).toFixed(2)+'</div>';
-          html+='</div>';
-        }
-      });
-      html+='</div>'; // body
-      html+='</div>'; // acc
-    });
-    html+='</div>'; // group
-  });
-
-  document.getElementById('sel-sections').innerHTML=html;
-  updateSelTotal();
-}
-
-function toggleAcc(hdr){
-  var id=hdr.getAttribute('data-accid');
-  ACC_OPEN[id]=!ACC_OPEN[id];
-  var body=document.getElementById('body_'+id);
-  var arr=document.getElementById('arr_'+id);
-  if(body){ body.classList.toggle('open',ACC_OPEN[id]); }
-  if(arr){ arr.classList.toggle('open',ACC_OPEN[id]); }
-}
-
-function pickOpt(el){
-  event.stopPropagation();
-  var id=el.getAttribute('data-selid');
-  var catKey=el.getAttribute('data-catkey');
-  if(!id||!catKey) return;
-
-  // Find item details
-  var price=0; var name=''; var finish='';
-  if(CATALOG[catKey]){
-    CATALOG[catKey].sections.forEach(function(sec){
-      sec.items.forEach(function(item){
-        if(item.id===id){ price=item.price; name=item.name; finish=item.finish; }
-      });
-    });
+  // Decorative (living/dining only)
+  if(r.type==='living'||r.type==='dining'){
+    s+='<div class="lbl" style="margin:8px 0 6px;">Decorative Fixture (optional)</div>';
+    s+='<div class="pg2">'+DECO.map(function(item){return mkPcard(item,'decoId','pg2',r.id);}).join('')+'</div>';
   }
 
-  // If already selected, deselect (toggle off)
-  if(S.selections[id]){
-    delete S.selections[id];
-  } else {
-    // Deselect any other item in the same section first (radio behavior)
-    if(CATALOG[catKey]){
-      CATALOG[catKey].sections.forEach(function(sec){
-        var inThisSec=sec.items.some(function(item){ return item.id===id; });
-        if(inThisSec){
-          sec.items.forEach(function(item){
-            if(item.id!==id&&S.selections[item.id]) delete S.selections[item.id];
-          });
-        }
-      });
-    }
-    S.selections[id]={id:id,name:name,finish:finish,price:price,qty:1,locations:[''],catKey:catKey};
-  }
-  buildSelections();
-  // Re-open the accordion after rebuild
-  var accId=catKey+'_'+findSecIdx(catKey,id);
-  ACC_OPEN[accId]=true;
-  var body=document.getElementById('body_'+accId);
-  var arr=document.getElementById('arr_'+accId);
-  if(body) body.classList.add('open');
-  if(arr) arr.classList.add('open');
-}
+  // Bulbs
+  s+='<div class="lbl" style="margin:8px 0 6px;">Bulb Type</div>';
+  s+='<div class="pg3">'+BULBS.map(function(item){return mkPcard(item,'bulbId','pg3',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'bulbQty','Bulb Packs Needed','count packs not individual bulbs');
 
-function findSecIdx(catKey,itemId){
-  var idx=0;
-  if(CATALOG[catKey]){
-    CATALOG[catKey].sections.forEach(function(sec,si){
-      sec.items.forEach(function(item){
-        if(item.id===itemId) idx=si;
-      });
-    });
-  }
-  return idx;
-}
+  // ELECTRICAL DEVICES
+  s+='<div class="sh">🔌 Electrical Devices</div>';
 
-function adjSelQty(ev,btn,d){
-  ev.stopPropagation();
-  var id=btn.getAttribute('data-selid');
-  if(!S.selections[id]) return;
-  S.selections[id].qty=Math.max(1,S.selections[id].qty+d);
-  while(S.selections[id].locations.length<S.selections[id].qty) S.selections[id].locations.push('');
-  if(S.selections[id].locations.length>S.selections[id].qty) S.selections[id].locations.length=S.selections[id].qty;
-  // Keep section open
-  var catKey=S.selections[id].catKey;
-  var accId=catKey+'_'+findSecIdx(catKey,id);
-  ACC_OPEN[accId]=true;
-  buildSelections();
-}
-
-function removeSel(ev,btn){
-  ev.stopPropagation();
-  var id=btn.getAttribute('data-selid');
-  if(S.selections[id]) delete S.selections[id];
-  buildSelections();
-}
-
-function setSelLoc(inp){
-  var id=inp.getAttribute('data-selid');
-  var li=parseInt(inp.getAttribute('data-li'));
-  if(!S.selections[id]) return;
-  while(S.selections[id].locations.length<=li) S.selections[id].locations.push('');
-  S.selections[id].locations[li]=inp.value;
-  updateSelTotal();
-}
-
-function updateSelTotal(){
-  var total=0;
-  objVals(S.selections).forEach(function(s){ total+=s.price*s.qty; });
-  var el=document.getElementById('sel-total');
-  if(el) el.textContent='$'+total.toFixed(2);
-}
-
-// Legacy toggleSel kept for any stray references
-function toggleSel(el){ pickOpt(el); }
-
-// ═══════════════════════════════════════════════════════════
-// PHOTOS
-// ═══════════════════════════════════════════════════════════
-var PHOTO_ZONES=['Front Exterior','Living Areas','Kitchen','Bedrooms','Bathrooms','Issues & Damage','Hardware & Fixtures','Flooring'];
-var activeZone='';
-
-function buildPhotoZones(){
-  var html='';
-  PHOTO_ZONES.forEach(function(zone){
-    var photos=S.photos[zone]||[];
-    html+='<div class="photo-zone"><div class="photo-zone-title">'+zone+'</div><div class="photo-grid">';
-    photos.forEach(function(src,i){
-      html+='<div class="ph"><img src="'+src+'"/><button class="ph-del" data-zone="'+zone.replace(/"/g,'&quot;')+'" data-i="'+i+'" onclick="delPhoto(this)">&#10005;</button></div>';
-    });
-    html+='<div class="ph ph-add" data-zone="'+zone.replace(/"/g,'&quot;')+'" onclick="addPhoto(this)"><span>+</span></div>';
-    html+='</div></div>';
+  s+='<div class="esub"><div class="esub-title">Cover-Up Plates (no electrical work)</div>';
+  ELEC.coverUp.forEach(function(item){
+    s+=qRow(r.id,'cup_'+item.id,item.name,'Snaps over existing — no wiring');
   });
-  document.getElementById('photo-zones').innerHTML=html;
-}
+  s+='</div>';
 
-function addPhoto(el){
-  activeZone=el.getAttribute('data-zone');
-  var fi=document.getElementById('file-input');
-  fi.value=''; fi.click();
-}
-function delPhoto(btn){
-  var zone=btn.getAttribute('data-zone');
-  var i=parseInt(btn.getAttribute('data-i'));
-  S.photos[zone].splice(i,1);
-  buildPhotoZones();
-}
-document.getElementById('file-input').addEventListener('change',function(){
-  Array.from(this.files).forEach(function(f){
-    var r=new FileReader();
-    r.onload=function(e){
-      if(!S.photos[activeZone]) S.photos[activeZone]=[];
-      S.photos[activeZone].push(e.target.result);
-      buildPhotoZones();
-    };
-    r.readAsDataURL(f);
+  s+='<div class="esub"><div class="esub-title">Wall Plates (cosmetic replacement)</div>';
+  ELEC.plates.forEach(function(item){
+    s+=qRow(r.id,'plt_'+item.id,item.name,'');
   });
-});
+  s+='</div>';
 
-// ═══════════════════════════════════════════════════════════
-// PROPOSAL
-// ═══════════════════════════════════════════════════════════
-var PKG_SCOPE=['Market Prep 1 — Setup, walkthrough & coordination','Market Prep 2 — Paint & surface prep (per room tier)','Market Prep 3 — Door hardware replacement','Market Prep 4 — Light fixture replacement','Market Prep 5 — Electrical device cover plates','Market Prep 6 — Debris & junk removal','Market Prep 7 — Smoke & CO compliance','Market Prep 8 — Light landscaping','Market Prep 9 — Consumables & fasteners','Market Prep 10 — Deep clean','Market Prep 11 — Minor drywall repair','Market Prep 12 — Water heater strapping','Market Prep 13 — Caulking & sealing','Market Prep 14 — LED bulb replacement','Market Prep 15 — Power washing','Market Prep 16 — Plumbing trim','Market Prep 17 — Cabinet hardware'];
+  s+='<div class="esub"><div class="esub-title">Decora Devices (licensed electrical)</div>';
+  ELEC.decora.forEach(function(item){
+    s+=qRow(r.id,'dev_'+item.id,item.name,'');
+  });
+  s+='</div>';
 
-function buildProposal(){
-  var addr=document.getElementById('f-addr').value||'[Address]';
-  var seller=document.getElementById('f-seller').value||'[Seller]';
-  var agent=document.getElementById('f-agent').value||'[Agent]';
-  var listd=document.getElementById('f-listdate').value;
-  var fld=listd?new Date(listd+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'TBD';
-  var fin=S.fin>=0?FINS[S.fin]:'Not selected';
-  var t1=S.rooms.filter(function(r){ return r.paintTier===1; }).length;
-  var t2=S.rooms.filter(function(r){ return r.paintTier===2; }).length;
-  var t3=S.rooms.filter(function(r){ return r.paintTier===3; }).length;
-  var totalRooms=S.rooms.length;
-  var sels=objVals(S.selections);
-  var selTotal=sels.reduce(function(a,s){ return a+(s.price*s.qty); },0);
-  var totalPhotos=objVals(S.photos).reduce(function(a,v){ return a+v.length; },0);
+  s+='<div class="esub"><div class="esub-title">Standard Device Swap (broken only)</div>';
+  ELEC.standard.forEach(function(item){
+    s+=qRow(r.id,'std_'+item.id,item.name,'Direct replacement for broken device');
+  });
+  s+='</div>';
 
-  var html='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">'
-    +'<div><div style="font-size:15px;font-weight:700;color:#111;">Pre-Listing Market Prep</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+addr+'</div></div>'
-    +'<span style="font-size:9px;background:#FCEBEB;color:#A32D2D;padding:3px 8px;border-radius:10px;font-weight:600;">DRAFT</span></div>';
-  html+='<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Seller: '+seller+' &nbsp;·&nbsp; Agent: '+agent+' &nbsp;·&nbsp; List: '+fld+'</div>';
-  html+='<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+totalRooms+' rooms &nbsp;·&nbsp; Finish: '+fin+'</div>';
+  // HEAT REGISTER
+  s+='<div class="sh">🌡 Heat Register</div>';
+  s+='<div class="fg"><label class="lbl">Register Type</label><select onchange="setRV(\''+r.id+'\',\'regType\',this.value);document.getElementById(\'reg-body-'+r.id+'\').style.display=this.value?\'block\':\'none\'">'
+    +'<option value="">None</option>'
+    +'<option value="floor"'+(d.regType==='floor'?' selected':'')+'>Floor Register</option>'
+    +'<option value="wall"'+(d.regType==='wall'?' selected':'')+'>Wall / Ceiling Register</option>'
+    +'</select></div>';
+  s+='<div id="reg-body-'+r.id+'" style="display:'+(d.regType?'block':'none')+'">';
+  var regItems=d.regType==='floor'?REG_FL:REG_WL;
+  s+='<div class="pg3">'+regItems.map(function(item){return mkPcard(item,'regId','pg3',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'regQty','Quantity','# of registers this size');
+  s+='</div>';
 
-  html+='<div class="prop-section"><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Base Package Scope (17 items)</div>';
-  PKG_SCOPE.forEach(function(s){ html+='<div style="font-size:11px;padding:2px 0;color:#111;">• '+s+'</div>'; });
-  html+='</div>';
-
-  if(t1||t2||t3){
-    html+='<div class="prop-section"><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Paint Scope</div>';
-    if(t1) html+='<div class="prop-row"><span>Tier 1 Touch-up</span><span>'+t1+' room'+(t1>1?'s':'')+'</span></div>';
-    if(t2) html+='<div class="prop-row"><span>Tier 2 Walls Only</span><span>'+t2+' room'+(t2>1?'s':'')+'</span></div>';
-    if(t3) html+='<div class="prop-row"><span>Tier 3 Full Room</span><span>'+t3+' room'+(t3>1?'s':'')+'</span></div>';
-    html+='</div>';
+  // COLD AIR RETURN
+    // Cold air return moved to house-wide
+  // SMOKE / CO (bedrooms and hallways only)
+  if(r.type==='bedroom'||r.type==='hall'){
+    s+='<div class="sh">🔥 Smoke / CO Detector</div>';
+    s+='<div class="a-info" style="font-size:10px;">CA law: Smoke detector required in each bedroom and hallway leading to sleeping areas.</div>';
+    s+='<div class="pg2">'+SMOKE.map(function(item){return mkPcard(item,'smokeId','pg2',r.id);}).join('')+'</div>';
   }
 
-  if(sels.length){
-    html+='<div class="prop-section"><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Selections ('+sels.length+' items)</div>';
-    sels.forEach(function(s){
-      var locs=s.locations.filter(function(l){ return l; });
-      html+='<div class="prop-row"><span>'+s.name+' — '+s.finish+(s.qty>1?' ×'+s.qty:'')+'</span><span>$'+(s.price*s.qty).toFixed(2)+'</span></div>';
-      if(locs.length) html+='<div style="font-size:10px;color:var(--muted);margin-bottom:2px;padding-left:4px;">'+locs.join(', ')+'</div>';
+  // ── BATHROOM ──
+  if(r.type==='bathroom'){
+    s+='<div class="sh">🚿 Bathroom Fixtures</div>';
+
+    // Vanity light
+    s+='<div class="lbl" style="margin-bottom:6px;">Vanity Light Bar</div>';
+    var vanItems=VANITY[fin]||VANITY[0];
+    s+='<div class="pg2">'+vanItems.map(function(item){return mkPcard(item,'vanityId','pg2',r.id);}).join('')+'</div>';
+    s+=togRow(r.id,'hasVanityLight','Vanity Light Replacement','','');
+
+    // Faucet
+    s+='<div class="lbl" style="margin:8px 0 6px;">Vanity Faucet</div>';
+    s+='<div class="trow"><div class="tlbl">Faucet Replacement</div>'
+      +'<label class="tog"><input type="checkbox"'+(d.faucet?' checked':'')+' onchange="setRV(\''+r.id+'\',\'faucet\',this.checked);showHide(\'fau-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="fau-body-'+r.id+'" style="display:'+(d.faucet?'block':'none')+'">';
+    s+='<div class="pg2">'+BATH_FAU.map(function(item){return mkPcard(item,'faucetId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+
+    // Bath hardware
+    s+='<div class="lbl" style="margin:8px 0 6px;">Bath Hardware Set</div>';
+    s+='<div class="trow"><div class="tlbl">Bath Hardware Set<span class="tlbl-sub">Towel bar, TP holder, robe hook</span></div>'
+      +'<label class="tog"><input type="checkbox"'+(d.bathHW?' checked':'')+' onchange="setRV(\''+r.id+'\',\'bathHW\',this.checked);showHide(\'bhw-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="bhw-body-'+r.id+'" style="display:'+(d.bathHW?'block':'none')+'">';
+    s+='<div class="pg2">'+BATH_HW.map(function(item){return mkPcard(item,'bathHWId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+
+    // Toilet seat
+    s+='<div class="lbl" style="margin:8px 0 6px;">Toilet Seat</div>';
+    s+='<div class="trow"><div class="tlbl">Toilet Seat Replacement</div>'
+      +'<label class="tog"><input type="checkbox"'+(d.toiletSeat?' checked':'')+' onchange="setRV(\''+r.id+'\',\'toiletSeat\',this.checked);showHide(\'ts-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="ts-body-'+r.id+'" style="display:'+(d.toiletSeat?'block':'none')+'">';
+    s+='<div class="pg2">'+TOILET_S.map(function(item){return mkPcard(item,'toiletSeatId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+
+    // Shower / Tub valve
+    s+='<div class="sh">🚿 Shower / Tub</div>';
+    s+='<div class="a-warn" style="font-size:10px;">⚠️ Identify valve before selecting trim. Unknown or discontinued valves cannot be upgraded.</div>';
+    s+='<div class="lbl" style="margin-bottom:6px;">Valve Brand / Type</div>';
+    s+='<div class="vgrid">';
+    VALVES.forEach(function(v){
+      s+='<div class="vopt'+(v.danger?' danger':'')+(d.valve===v.k?' on':'')+'" onclick="setValve(\''+r.id+'\',\''+v.k+'\',this)">'
+        +'<div class="vname">'+v.n+'</div><div class="vsub">'+v.s+'</div>'
+        +'<span class="vbadge '+v.b+'">'+v.bt+'</span></div>';
     });
-    html+='<div class="prop-divider"></div><div class="prop-total"><span>Selections subtotal</span><span>$'+selTotal.toFixed(2)+'</span></div>';
-    html+='</div>';
+    s+='</div>';
+
+    var locked=d.valve==='not-upgradeable';
+    s+='<div id="shower-body-'+r.id+'" style="'+(locked?'opacity:.4;pointer-events:none':'')+'">';
+    s+='<div class="trow"><div class="tlbl">Shower Head Replacement</div>'
+      +'<label class="tog"><input type="checkbox"'+(d.showerHead?' checked':'')+' onchange="setRV(\''+r.id+'\',\'showerHead\',this.checked);showHide(\'sh-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="sh-body-'+r.id+'" style="display:'+(d.showerHead&&!locked?'block':'none')+'">';
+    s+='<div class="pg2">'+SHOWER_H.map(function(item){return mkPcard(item,'showerHeadId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+    s+=togRow(r.id,'tubSpout','Tub Spout Replacement','Placeholder — office orders after valve confirmed','');
+    s+='</div>';
+
+    // Plumbing trim
+    s+='<div class="sh">🔧 Plumbing Trim</div>';
+    s+=qRow(r.id,'angleStopQty','Angle Stops (vanity)','Under-sink shutoff valves');
+    s+=qRow(r.id,'toiletAngleQty','Toilet Angle Stops','');
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','Faucet supply lines');
+    s+=togRow(r.id,'ptrap','P-Trap Replacement','Under vanity sink','');
+    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','Pipe cover rings');
+    s+=togRow(r.id,'popUpDrain','Pop-Up Drain Replacement','Bathroom sink drain','');
   }
 
-  html+='<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-size:10px;color:var(--muted);">Photos: '+totalPhotos+' &nbsp;·&nbsp; Signed: '+(S.signed?'Yes':'Pending')+'<br>Site survey only — formal proposal and contract to follow from JobTread.</div>';
+  // ── KITCHEN ──
+  if(r.type==='kitchen'){
+    s+='<div class="sh">🍳 Cabinet Hardware</div>';
+    s+='<div class="pg2">'+CAB_PULL.map(function(item){return mkPcard(item,'cabPullId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="fg"><label class="lbl">Hole Spacing</label>'
+      +'<select onchange="setRV(\''+r.id+'\',\'holeSpacing\',this.value)">'
+      +'<option value="">Not measured yet</option>'
+      +'<option value="96mm"'+(d.holeSpacing==='96mm'?' selected':'')+'>96mm (3-3/4")</option>'
+      +'<option value="128mm"'+(d.holeSpacing==='128mm'?' selected':'')+'>128mm (5-1/16")</option>'
+      +'<option value="160mm"'+(d.holeSpacing==='160mm'?' selected':'')+'>160mm (6-5/16")</option>'
+      +'<option value="adjusta"'+(d.holeSpacing==='adjusta'?' selected':'')+'>Adjusta-Pull (any spacing)</option>'
+      +'<option value="measure"'+(d.holeSpacing==='measure'?' selected':'')+'>⚠️ Needs measuring</option>'
+      +'</select></div>';
+    s+=qRow(r.id,'drawerPullQty','Drawer Pulls','');
+    s+=qRow(r.id,'doorPullQty','Cabinet Door Pulls','');
 
-  document.getElementById('prop-card').innerHTML=html;
+    s+='<div class="sh">🔧 Kitchen Plumbing Trim</div>';
+    s+=qRow(r.id,'angleStopQty','Angle Stops','Under-sink shutoff valves');
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','');
+    s+=togRow(r.id,'ptrap','P-Trap Replacement','','');
+    s+=togRow(r.id,'snappyTrap','Snappy Trap Kit (double bowl)','','');
+    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','');
+    s+=togRow(r.id,'sinkStrainer','Sink Basket Strainer','','');
+    s+=togRow(r.id,'dishwasher','Dishwasher Supply Line','','');
+  }
+
+  // ── LAUNDRY ──
+  if(r.type==='laundry'){
+    s+='<div class="sh">🧺 Laundry Plumbing</div>';
+    s+=qRow(r.id,'angleStopQty','Angle Stops (washer valves)','');
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','');
+  }
+
+  // NOTES
+  // PHOTOS
+  s+='<div class="sh">📷 Room Photos</div>';
+  s+='<div class="photo-status" id="pstat-'+r.id+'">Tap + to add photos</div>';
+  s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
+  s+='<label class="photo-add" onclick="triggerPhoto(\"'+r.id+'\")">'+'<span class="photo-add-icon">📷</span>Add Photo</label>';
+  s+='<input type="file" accept="image/*" capture="environment" id="pinput-'+r.id+'" style="display:none" onchange="handlePhoto(\"'+r.id+'\",this)">';
+
+  s+='<div class="sh">📝 Notes</div>';
+  s+='<textarea placeholder="Room notes, flags, conditions..." onchange="setRV(\''+r.id+'\',\'notes\',this.value)">'+(d.notes||'')+'</textarea>';
+
+  return '<div class="rcard" id="rcard-'+r.id+'">'
+    +'<div class="rcard-hdr" id="rhdr-'+r.id+'" onclick="togRoom(\''+r.id+'\')">'
+    +'<span class="rcard-icon">'+r.icon+'</span>'
+    +'<div><div class="rcard-name">'+r.name+'</div><div class="rcard-sum" id="rsum-'+r.id+'">Tap to expand</div></div>'
+    +'<span class="rcard-arrow">›</span></div>'
+    +'<div class="rcard-body" id="rbody-'+r.id+'">'+s+'</div></div>';
 }
 
-// ═══════════════════════════════════════════════════════════
-// SIGNATURE
-// ═══════════════════════════════════════════════════════════
-var sigCanvas,sigCtx,drawing=false,lx=0,ly=0;
+function togRoom(rid){
+  var body=document.getElementById('rbody-'+rid);
+  var hdr=document.getElementById('rhdr-'+rid);
+  if(body){var open=body.classList.toggle('on');if(hdr)hdr.classList.toggle('open',open);}
+}
+
+// ═══════════ REVIEW ═══════════
+function bldReview(){
+  var el=document.getElementById('rev-content');
+  var addr=document.getElementById('f-addr').value||'[No address]';
+  var seller=document.getElementById('f-seller').value||'[No seller]';
+  var fins=['Satin Nickel','Matte Black','Venetian Bronze'];
+  var h='<div class="card"><div class="ctitle">📋 Summary</div><div style="font-size:13px;line-height:2;">';
+  h+='<b>Property:</b> '+addr+'<br><b>Seller:</b> '+seller+'<br><b>Finish:</b> '+fins[S.finish]+'<br><b>Rooms:</b> '+S.rooms.length+'</div></div>';
+  S.rooms.forEach(function(r){
+    var d=r.d;
+    h+='<div class="card"><div class="ctitle">'+r.icon+' '+r.name+'</div><div style="font-size:11px;line-height:1.9;color:#444;">';
+    if(d.paintTier)h+='Paint: Tier '+d.paintTier+'<br>';
+    if(d.doorType&&d.doorQty)h+='Door HW: '+d.doorQty+' '+d.doorType+'<br>';
+    if(d.flushId)h+='Ceiling Fixture: Yes (qty '+d.flushQty+')<br>';
+    if(d.can6Qty)h+='6" Can Retrofit: '+d.can6Qty+'<br>';
+    if(d.can4Qty)h+='4" Can Retrofit: '+d.can4Qty+'<br>';
+    if(d.bulbQty)h+='Bulb Packs: '+d.bulbQty+'<br>';
+    if(d.smokeId)h+='Smoke/CO Detector: Yes<br>';
+    if(d.regId&&d.regQty)h+='Register: '+d.regQty+'<br>';
+    if(d.carPaint||d.carReplace)h+='Cold Air Return: '+(d.carPaint?'Paint ':'')+(d.carReplace?'Replace ':'')+' ('+d.carQty+')<br>';
+    if(d.faucet)h+='Faucet: Yes<br>';
+    if(d.bathHW)h+='Bath HW: Yes<br>';
+    if(d.toiletSeat)h+='Toilet Seat: Yes<br>';
+    if(d.valve)h+='Valve: '+d.valve+'<br>';
+    if(d.showerHead)h+='Shower Head: Yes<br>';
+    if(d.cabPullId)h+='Cabinet Pulls ('+d.holeSpacing+'): Drawer='+d.drawerPullQty+' Door='+d.doorPullQty+'<br>';
+    if(d.angleStopQty)h+='Angle Stops: '+d.angleStopQty+'<br>';
+    if(d.notes)h+='Notes: '+d.notes+'<br>';
+    h+='</div></div>';
+  });
+  el.innerHTML=h;
+}
+
+// ═══════════ SIG ═══════════
 function initSig(){
-  sigCanvas=document.getElementById('sig-canvas');
-  if(!sigCanvas) return;
-  // Size the canvas when it becomes visible (Step 6)
-  function resizeSig(){
-    var W=sigCanvas.parentElement.offsetWidth-30;
-    if(W>0 && sigCanvas.width !== W){
-      sigCanvas.width=W; sigCanvas.height=120;
-      if(sigCtx){ sigCtx.strokeStyle='#111'; sigCtx.lineWidth=2.5; sigCtx.lineCap='round'; sigCtx.lineJoin='round'; }
-    }
-  }
-  sigCtx=sigCanvas.getContext('2d');
-  sigCtx.strokeStyle='#111'; sigCtx.lineWidth=2.5; sigCtx.lineCap='round'; sigCtx.lineJoin='round';
-  function getSigPos(e,el){
-    var r=el.getBoundingClientRect();
-    var src=e.touches?e.touches[0]:e;
-    return[src.clientX-r.left, src.clientY-r.top];
-  }
-  sigCanvas.addEventListener('mousedown',function(e){ resizeSig(); drawing=true; var p=getSigPos(e,sigCanvas); lx=p[0]; ly=p[1]; });
-  sigCanvas.addEventListener('mousemove',function(e){ if(!drawing)return; var p=getSigPos(e,sigCanvas); sigCtx.beginPath(); sigCtx.moveTo(lx,ly); sigCtx.lineTo(p[0],p[1]); sigCtx.stroke(); lx=p[0]; ly=p[1]; });
-  sigCanvas.addEventListener('mouseup',function(){ drawing=false; });
-  sigCanvas.addEventListener('touchstart',function(e){ e.preventDefault(); resizeSig(); drawing=true; var p=getSigPos(e,sigCanvas); lx=p[0]; ly=p[1]; },{passive:false});
-  sigCanvas.addEventListener('touchmove',function(e){ e.preventDefault(); if(!drawing)return; var p=getSigPos(e,sigCanvas); sigCtx.beginPath(); sigCtx.moveTo(lx,ly); sigCtx.lineTo(p[0],p[1]); sigCtx.stroke(); lx=p[0]; ly=p[1]; },{passive:false});
-  sigCanvas.addEventListener('touchend',function(){ drawing=false; });
+  sigC=document.getElementById('sig-c');if(!sigC)return;
+  var W=sigC.parentElement.offsetWidth-28;
+  if(W>0){sigC.width=W;sigC.height=110;}
+  sigX=sigC.getContext('2d');
+  sigX.strokeStyle='#111';sigX.lineWidth=2.5;sigX.lineCap='round';sigX.lineJoin='round';
+  function pos(e,el){var r=el.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return[s.clientX-r.left,s.clientY-r.top];}
+  sigC.addEventListener('mousedown',function(e){drawing=true;var p=pos(e,sigC);lx=p[0];ly=p[1];});
+  sigC.addEventListener('mousemove',function(e){if(!drawing)return;var p=pos(e,sigC);sigX.beginPath();sigX.moveTo(lx,ly);sigX.lineTo(p[0],p[1]);sigX.stroke();lx=p[0];ly=p[1];});
+  sigC.addEventListener('mouseup',function(){drawing=false;S.signed=true;});
+  sigC.addEventListener('touchstart',function(e){e.preventDefault();drawing=true;var p=pos(e,sigC);lx=p[0];ly=p[1];},{passive:false});
+  sigC.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;var p=pos(e,sigC);sigX.beginPath();sigX.moveTo(lx,ly);sigX.lineTo(p[0],p[1]);sigX.stroke();lx=p[0];ly=p[1];},{passive:false});
+  sigC.addEventListener('touchend',function(){drawing=false;S.signed=true;});
 }
-function clearSig(){ if(sigCtx)sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);S.signed=false;document.getElementById('sig-status').textContent=''; }
-function acceptSig(){ S.signed=true;document.getElementById('sig-status').textContent='Signed '+new Date().toLocaleString(); }
+function clrSig(){if(sigX)sigX.clearRect(0,0,sigC.width,sigC.height);S.signed=false;}
 
-// ═══════════════════════════════════════════════════════════
-// JOBTREAD PUSH
-// ═══════════════════════════════════════════════════════════
-function jtQ(query){ return fetch(JT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query})}).then(function(r){ return r.json(); }); }
+// ═══════════ MIC ═══════════
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition,micR=null,micOn=false,micTgt=null;
+function initMic(){
+  if(!SR)return;
+  var b=document.getElementById('gmic');if(b)b.style.display='flex';
+  document.addEventListener('focusin',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')micTgt=e.target;});
+}
+function togMic(){if(!SR){alert('Use Safari on iOS 14.5+');return;}micOn?stopMic():startMic();}
+function startMic(){
+  if(!micTgt){micTgt=document.activeElement;if(!micTgt||(micTgt.tagName!=='INPUT'&&micTgt.tagName!=='TEXTAREA')){alert('Tap a field first');return;}}
+  micR=new SR();micR.continuous=false;micR.interimResults=false;micR.lang='en-US';
+  micR.onstart=function(){micOn=true;var b=document.getElementById('gmic');if(b)b.classList.add('on');};
+  micR.onresult=function(e){var t=e.results[0][0].transcript;if(micTgt){micTgt.value=(micTgt.value?micTgt.value+' ':'')+t;micTgt.dispatchEvent(new Event('input',{bubbles:true}));}};
+  micR.onerror=function(e){if(e.error==='not-allowed')alert('Mic denied. Check Safari settings.');stopMic();};
+  micR.onend=function(){stopMic();};
+  try{micR.start();}catch(e){stopMic();}
+}
+function stopMic(){micOn=false;var b=document.getElementById('gmic');if(b)b.classList.remove('on');if(micR){try{micR.stop();}catch(e){}micR=null;}}
 
-function jlog(msg,cls){
-  var el=document.getElementById('jt-log');
-  el.style.display='block';
-  el.innerHTML+='<div class="'+(cls||'info')+'">'+msg+'</div>';
-  el.scrollTop=el.scrollHeight;
+// ═══════════ HOUSE-WIDE TOGGLES ═══════════
+function initHWToggles(){
+  var pairs=[
+    ['hw-whs','hw-whs-note'],['hw-pw','hw-pw-note'],
+    ['hw-junk','hw-junk-ctrl'],['hw-clean','hw-clean-note'],
+    ['hw-land','hw-land-note'],['hw-drywall','hw-dw-note']
+  ];
+  pairs.forEach(function(p){
+    var cb=document.getElementById(p[0]);
+    var nb=document.getElementById(p[1]);
+    if(cb&&nb)cb.addEventListener('change',function(){nb.style.display=this.checked?'block':'none';});
+  });
 }
 
+// ═══════════ PUSH TO JOBTREAD ═══════════
 async function pushToJT(){
   var btn=document.getElementById('jt-btn');
   var log=document.getElementById('jt-log');
-  btn.disabled=true; btn.textContent='Pushing...';
-  log.style.display='block'; log.innerHTML='';
+  btn.disabled=true;btn.textContent='Pushing...';
+  log.style.display='block';log.innerHTML='';
 
   var GK='22TN7BjW2xxVRX5wKXnkeRKu9TUwacQyKw';
   var ORG='22PCgcUejSvr';
   var JT='https://api.jobtread.com/pave';
+  var fins=['Satin Nickel','Matte Black','Venetian Bronze'];
+  var finName=fins[S.finish];
 
-  function jl(msg,cls){
-    var d=document.createElement('div');
-    d.className=cls||'info'; d.textContent=msg;
-    log.appendChild(d); log.scrollTop=log.scrollHeight;
+  function jl(msg,cls){var d=document.createElement('div');d.className=cls||'info';d.textContent=msg;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+
+  async function jtQ(q){
+    var r=await fetch(JT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:Object.assign({'$':{grantKey:GK}},q)})});
+    var t=await r.text();var j;try{j=JSON.parse(t);}catch(e){throw new Error('Bad JSON: '+t.substring(0,80));}
+    if(j.errors)throw new Error(JSON.stringify(j.errors));
+    return j;
   }
+  function gc(r,k){var d=r.data||r,n=d[k]||{};return n.createdAccount||n.createdLocation||n.createdJob||n.createdContact||n.createdCostGroup||n.createdCostItem||n.createdDocument||n.createdComment||n;}
 
-  async function jtQ(query){
-    var resp=await fetch(JT,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:Object.assign({'$':{grantKey:GK}},query)})
-    });
-    var text=await resp.text();
-    var r;
-    try{ r=JSON.parse(text); }catch(e){ throw new Error('Bad JSON: '+text.substring(0,100)); }
-    if(r.errors) throw new Error(JSON.stringify(r.errors));
-    return r;
-  }
-
-  function getNode(r,key){
-    var d=r.data||r;
-    var node=d[key]||{};
-    return node.createdAccount||node.createdLocation||node.createdJob||node.createdContact||node.createdCostGroup||node.createdCostItem||node.createdDocument||node.createdComment||node;
-  }
-
-  var addr=document.getElementById('f-addr').value||'[Address]';
-  var seller=document.getElementById('f-seller').value||'Client';
-  var email=document.getElementById('f-email').value||'';
-  var phone=document.getElementById('f-phone').value||'';
-  var agentEl=document.getElementById('f-agent');
-  var agent=agentEl?agentEl.value||'':'';
-  var brokerageEl=document.getElementById('f-brokerage');
-  var brokerage=brokerageEl?brokerageEl.value||'':'';
-  var agentPhoneEl=document.getElementById('f-agent-phone');
-  var agentPhone=agentPhoneEl?agentPhoneEl.value||'':'';
-  var agentEmailEl=document.getElementById('f-agent-email');
-  var agentEmail=agentEmailEl?agentEmailEl.value||'':'';
+  var addr=(document.getElementById('f-addr').value||'').trim()||'[Address]';
+  var seller=(document.getElementById('f-seller').value||'').trim()||'Client';
+  var phone=(document.getElementById('f-phone').value||'').replace(/[^0-9]/g,'');
+  if(phone.length===10)phone='+1'+phone;else if(phone.length===11)phone='+'+phone;else phone='';
+  var email=(document.getElementById('f-email').value||'').trim().toLowerCase();
+  var agent=(document.getElementById('f-agent').value||'').trim();
+  var brok=(document.getElementById('f-brokerage').value||'').trim();
+  var aph=(document.getElementById('f-agent-phone').value||'').replace(/[^0-9]/g,'');
+  if(aph.length===10)aph='+1'+aph;else if(aph.length===11)aph='+'+aph;else aph='';
+  var aem=(document.getElementById('f-agent-email').value||'').trim().toLowerCase();
   var occ=document.getElementById('f-occ').value||'Vacant';
-  var sqft=document.getElementById('f-sqft').value||'';
-  var yearbuilt=document.getElementById('f-year').value||'';
-  var access=document.getElementById('f-access').value||'';
-  var listd=document.getElementById('f-listdate').value||'';
-  var fin=S.fin>=0?['Satin Nickel','Matte Black','Venetian Bronze'][S.fin]:'Not selected';
-  var walknotes=document.getElementById('f-walknotes')?document.getElementById('f-walknotes').value||'':'';
-  var propnotes=document.getElementById('f-propnotes')?document.getElementById('f-propnotes').value||'':'';
-
-  var occMap={'Occupied':'Owner Occupied','Vacant':'Vacant','Tenant occupied':'Tenant Occupied'};
-
-  var catToGroup={
-    'doorHardware':'Market Prep 3 - Door Hardware',
-    'lightFixtures':'Market Prep 4 - Light Fixture Replacement',
-    'electricalDevices':'Market Prep 5 - Device Replacement',
-    'bathHardware':'Market Prep 16 — Plumbing Trim',
-    'cabinetHardware':'Market Prep 17 — Cabinet Hardware',
-    'hvac':'Market Prep 9 — Consumables and Fasteners'
-  };
+  var sqft=(document.getElementById('f-sqft').value||'').trim();
+  var yr=(document.getElementById('f-year').value||'').trim();
+  var access=(document.getElementById('f-access').value||'').trim();
+  var listd=(document.getElementById('f-listdate').value||'').trim();
+  var walknotes=(document.getElementById('f-walknotes').value||'').trim();
+  var occMap={'Vacant':'Vacant','Occupied':'Owner Occupied','Tenant occupied':'Tenant Occupied'};
 
   try{
-    // 1. Create seller account
+    // 1. SELLER ACCOUNT
     jl('Creating customer account...','info');
-    var r1=await jtQ({createAccount:{'$':{
-      organizationId:ORG,name:seller,type:'customer',
-      customFieldValues:{
-        'Needs':'Other','Lead score':'⭐⭐⭐',
-        'Areas To Renovate (All That Apply)':'Whole House',
-        'Budget Range':'Under $15,000','Start Timeline':'ASAP (within 2 weeks)',
-        'Goal':'Sell / List','Property Currently Occupied?':occMap[occ]||'Vacant',
-        'Package Interest':'Home Refresh','Lead Source':'Referral'
-      }
-    },createdAccount:{id:{},name:{}}}});
-    var custId=getNode(r1,'createAccount').id;
-    if(!custId) throw new Error('No account ID returned');
+    var r1=await jtQ({createAccount:{'$':{organizationId:ORG,name:seller,type:'customer',customFieldValues:{'Needs':'Other','Lead score':'\u2b50\u2b50\u2b50','Areas To Renovate (All That Apply)':'Whole House','Budget Range':'Under $15,000','Start Timeline':'ASAP (within 2 weeks)','Goal':'Sell / List','Property Currently Occupied?':occMap[occ]||'Vacant','Package Interest':'Home Refresh','Lead Source':'Referral'}},createdAccount:{id:{},name:{}}}});
+    var custId=gc(r1,'createAccount').id;
+    if(!custId)throw new Error('No account ID');
     jl('Customer account created','ok');
 
-    // 2. Create location
+    // 2. LOCATION
     jl('Creating property location...','info');
     var locId=null;
     try{
       var r2=await jtQ({createLocation:{'$':{accountId:custId,name:addr,address:addr},createdLocation:{id:{}}}});
-      locId=getNode(r2,'createLocation').id;
-      if(locId) jl('Property location created','ok');
-    }catch(e){ jl('Location warning: '+e.message,'err'); }
+      locId=gc(r2,'createLocation').id;
+      if(locId)jl('Property location created','ok');
+    }catch(e){jl('Location: '+e.message,'err');}
 
-    // 3. Create job
+    // 3. JOB
+    if(!locId)throw new Error('Cannot create job — location failed. Enter a valid address.');
     jl('Creating job...','info');
-    if(!locId) throw new Error('Cannot create job without a location. Please enter a property address.');
-    var t1=S.rooms.filter(function(r){return r.paintTier===1;}).length;
-    var t2=S.rooms.filter(function(r){return r.paintTier===2;}).length;
-    var t3=S.rooms.filter(function(r){return r.paintTier===3;}).length;
-    var roomSummary=S.rooms.map(function(r,i){return (i+1)+'. '+r.label+(r.paintTier?' (T'+r.paintTier+')':'');}).join(', ')||'No rooms added';
-    var sels=objVals(S.selections);
-    var selSummary=sels.length?sels.map(function(s){return s.name+' ('+s.finish+') x'+s.qty;}).join(', '):'None';
-    var desc='PRE-LISTING MARKET PREP\nFINISH: '+fin+'\nROOMS: '+roomSummary+'\nPAINT: T1='+t1+' T2='+t2+' T3='+t3+'\nSELECTIONS: '+selSummary+(walknotes?'\nNOTES: '+walknotes:'');
+    var roomDesc=S.rooms.map(function(r){return r.name+(r.d.paintTier?' T'+r.d.paintTier:'');}).join(', ');
+    var desc='PRE-LISTING MARKET PREP\nFinish: '+finName+'\nRooms: '+roomDesc+(walknotes?'\nNotes: '+walknotes:'');
     var jobName=(addr.split(',')[0]||addr).substring(0,26)+' MP';
-    var jobCF={'Sales Rep':'Lou','Status':'New Lead'};
-    if(listd) jobCF['Target List Date']=listd;
-    if(agent) jobCF['Referring Agent']=agent;
-    if(brokerage) jobCF['Agent Brokerage']=brokerage;
-    if(agentPhone) jobCF['Agent Phone']=agentPhone;
-    if(agentEmail) jobCF['Agent Email']=agentEmail;
-    var r3=await jtQ({createJob:{'$':{locationId:locId,name:jobName,description:desc,customFieldValues:jobCF},createdJob:{id:{},name:{}}}});
-    var jobId=getNode(r3,'createJob').id;
-    if(!jobId) throw new Error('No job ID returned');
+    var jcf={'Sales Rep':'Lou','Status':'New Lead'};
+    if(listd)jcf['Target List Date']=listd;
+    if(agent)jcf['Referring Agent']=agent;
+    if(brok)jcf['Agent Brokerage']=brok;
+    if(aph)jcf['Agent Phone']=aph;
+    if(aem)jcf['Agent Email']=aem;
+    var r3=await jtQ({createJob:{'$':{locationId:locId,name:jobName,description:desc,customFieldValues:jcf},createdJob:{id:{},name:{}}}});
+    var jobId=gc(r3,'createJob').id;
+    if(!jobId)throw new Error('No job ID');
     jl('Job created: '+jobName,'ok');
 
-    // 4. Seller contact
+    // 4. CONTACTS
     if(phone||email){
-      try{
-        var cf={};
-        if(phone) cf['Phone']=phone;
-        if(email) cf['Email']=email;
-        await jtQ({createContact:{'$':{accountId:custId,name:seller,customFieldValues:cf},createdContact:{id:{}}}});
-        jl('Seller contact added','ok');
-      }catch(e){ jl('Contact: '+e.message,'err'); }
+      try{var cf={};if(phone)cf['Phone']=phone;if(email)cf['Email']=email;await jtQ({createContact:{'$':{accountId:custId,name:seller,customFieldValues:cf},createdContact:{id:{}}}});jl('Seller contact added','ok');}
+      catch(e){jl('Contact: '+e.message,'err');}
     }
 
-    // 5. Location fields
-    if(locId&&(access||sqft||yearbuilt)){
+    // 4b. RENDR scan link — add as pinned comment on job
+    var rendrLink=(document.getElementById('f-rendr-link').value||'').trim();
+    var rendrNotes=(document.getElementById('f-rendr-notes').value||'').trim();
+    if(rendrLink){
       try{
-        var lcf={};
-        if(access) lcf['Entry Code']=access;
-        if(sqft) lcf['Living Area (sqft)']=sqft.replace(/[^0-9.]/g,'');
-        if(yearbuilt) lcf['Year Built']=yearbuilt;
-        await jtQ({updateLocation:{'$':{id:locId,customFieldValues:lcf},updateLocation:{}}});
-        jl('Location details set','ok');
-      }catch(e){ jl('Location fields: '+e.message,'err'); }
+        var rendrMsg='RENDR SCAN: '+rendrLink+(rendrNotes?' — '+rendrNotes:'');
+        await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:rendrMsg,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+        jl('RENDR scan link added to job','ok');
+      }catch(e){jl('RENDR link: '+e.message,'err');}
     }
 
-    // 6. Apply base package template
-    jl('Applying Pre-Listing Market Prep template...','info');
-    try{
-      await jtQ({createCostGroup:{'$':{jobId:jobId,name:'Pre-Listing Market Prep - Base Package',organizationCostGroupId:'22PVLUL5nzEk'},createdCostGroup:{id:{}}}});
-      jl('Base package template applied','ok');
-    }catch(e){ jl('Template: '+e.message,'err'); }
-
-    // 7. Agent account
-    if(agent){
-      try{
-        var ra=await jtQ({createAccount:{'$':{
-          organizationId:ORG,name:agent+(brokerage?' — '+brokerage:''),type:'customer',
-          customFieldValues:{'Needs':'Other','Lead score':'⭐⭐⭐','Areas To Renovate (All That Apply)':'Other','Budget Range':'Under $15,000','Start Timeline':'Just exploring','Goal':'Sell / List','Property Currently Occupied?':'Vacant'}
-        },createdAccount:{id:{}}}});
-        var agentId=getNode(ra,'createAccount').id;
-        if(agentId){
-          var acf={};
-          if(agentPhone) acf['Phone']=agentPhone;
-          if(agentEmail) acf['Email']=agentEmail;
-          if(brokerage) acf['Notes']='Brokerage: '+brokerage;
-          await jtQ({createContact:{'$':{accountId:agentId,name:agent,title:'Referring Agent',customFieldValues:acf},createdContact:{id:{}}}});
-          var note='REFERRING AGENT: '+agent+(brokerage?' | '+brokerage:'')+(agentPhone?' | '+agentPhone:'')+(agentEmail?' | '+agentEmail:'');
-          await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:note,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
-          jl('Agent account created and linked','ok');
-        }
-      }catch(e){ jl('Agent: '+e.message,'err'); }
-    }
-
-    // 8. Selections
-    if(sels.length){
-      jl('Adding '+sels.length+' selections...','info');
-      for(var si=0;si<sels.length;si++){
-        var sel=sels[si];
+    // 4c. Upload room photos to JobTread
+    var totalPhotos=0;
+    for(var pi=0;pi<S.rooms.length;pi++){
+      var pr=S.rooms[pi];
+      if(!pr.photos||!pr.photos.length)continue;
+      for(var pj=0;pj<pr.photos.length;pj++){
+        var photo=pr.photos[pj];
         try{
-          var locs=(sel.locations||[]).filter(function(l){return l;}).join(', ')||'TBD';
-          var grp=catToGroup[sel.catKey]||'Selections';
-          var sdesc='Style: '+(sel.name||'')+'\nFinish: '+(sel.finish||'')+'\nQty: '+(sel.qty||1)+'\nLocation: '+locs+'\nUnit: $'+(sel.price?sel.price.toFixed(2):'0.00')+'\nTotal: $'+(sel.price&&sel.qty?(sel.price*sel.qty).toFixed(2):'0.00');
-          await jtQ({createCostItem:{'$':{jobId:jobId,name:sel.name||'Selection',organizationCostItemId:sel.id,quantity:sel.qty||1,description:sdesc,groupName:grp,showDescription:true,showQuantity:true},createdCostItem:{id:{}}}});
-          jl(sel.name+' x'+(sel.qty||1)+' added','ok');
-        }catch(e){ jl('Selection '+sel.name+': '+e.message,'err'); }
+          await jtQ({createFile:{'$':{
+            targetType:'job',
+            targetId:jobId,
+            url:photo.url,
+            name:pr.name+' - Photo '+(pj+1)+'.jpg',
+            folder:'Site Survey Photos'
+          },createdFile:{id:{}}}});
+          totalPhotos++;
+        }catch(e){
+          // Try alternate file upload approach
+          try{
+            await jtQ({createComment:{'$':{
+              targetType:'job',targetId:jobId,
+              message:'Photo — '+pr.name+': '+photo.url,
+              isVisibleToInternalRoles:true
+            },createdComment:{id:{}}}});
+            totalPhotos++;
+          }catch(e2){jl('Photo upload: '+e2.message,'err');}
+        }
       }
     }
+    if(totalPhotos>0)jl(totalPhotos+' room photos uploaded','ok');
 
-    // 9. Proposal
-    try{
-      await jtQ({createDocument:{'$':{jobId:jobId,type:'customerOrder',documentTemplateId:'22PPCQZbCZSg',name:'Proposal — Pre-Listing Market Prep',accountId:custId,fromName:'LMC Contracting',taxRate:0},createdDocument:{id:{}}}});
-      jl('Proposal document created','ok');
-    }catch(e){ jl('Proposal: '+e.message,'err'); }
+    // 5. LOCATION FIELDS
+    if(locId&&(access||sqft||yr)){
+      try{var lcf={};if(access)lcf['Entry Code']=access;if(sqft)lcf['Living Area (sqft)']=sqft;if(yr)lcf['Year Built']=yr;
+        await jtQ({updateLocation:{'$':{id:locId,customFieldValues:lcf},updateLocation:{}}});jl('Location details set','ok');}
+      catch(e){jl('Location fields: '+e.message,'err');}
+    }
 
-    // 10. Purchase Order
-    try{
-      await jtQ({createDocument:{'$':{jobId:jobId,type:'vendorOrder',documentTemplateId:'22PCgcVGSysM',name:'PO — '+(addr.split(',')[0]||addr),accountId:'22PEnZwGDc7H',fromName:'LMC Contracting',taxRate:0},createdDocument:{id:{}}}});
-      jl('Purchase Order created','ok');
-    }catch(e){ jl('PO: '+e.message,'err'); }
+    // 6. BASE PACKAGE TEMPLATE
+    jl('Applying Pre-Listing Market Prep template...','info');
+    try{await jtQ({createCostGroup:{'$':{jobId:jobId,name:'Pre-Listing Market Prep - Base Package'},createdCostGroup:{id:{}}}});jl('Base package applied','ok');}
+    catch(e){jl('Template: '+e.message,'err');}
 
-    S.jobId=jobId;
+    // 7. HOUSE-WIDE ITEMS
+    var hwItems=[];
+    var G={
+      setup:'Market Prep 1 - Setup and Oversight',
+      paint:'Market Prep 2 - Paint and Surface Prep',
+      door:'Market Prep 3 - Door Hardware',
+      light:'Market Prep 4 - Light Fixture Replacement',
+      device:'Market Prep 5 - Device Replacement',
+      debris:'Market Prep 6 - Debris and Junk Removal',
+      smoke:'Market Prep 7 \u2014 Smoke and CO Compliance',
+      land:'Market Prep 8 - Light Landscaping',
+      consumables:'Market Prep 9 \u2014 Consumables and Fasteners',
+      clean:'Market Prep 10 \u2014 Deep Clean',
+      drywall:'Market Prep 11 \u2014 Minor Drywall Repair',
+      whs:'Market Prep 12 \u2014 Water Heater Strapping',
+      caulk:'Market Prep 13 \u2014 Caulking and Sealing',
+      bulbs:'Market Prep 14 \u2014 Bulb Replacement',
+      pw:'Market Prep 15 \u2014 Power Washing',
+      plumbing:'Market Prep 16 \u2014 Plumbing Trim',
+      cabinet:'Market Prep 17 \u2014 Cabinet Hardware'
+    };
+
+    function addHW(id,qty,grp,name){if(id&&qty>0)hwItems.push({id:id,qty:qty,grp:grp,name:name});}
+
+    if(document.getElementById('hw-whs').checked)addHW('22PVUrNpCa5',1,G.whs,'Water Heater Strapping');
+    if(document.getElementById('hw-pw').checked)addHW('22PVVUtC32cW',1,G.pw,'Power Washing Labor');
+    if(document.getElementById('hw-junk').checked)addHW('22PVVULtc5yT',(HW['hw-junk-qty']||1),G.debris,'Dump Run');
+    if(document.getElementById('hw-clean').checked)addHW('22PVVUq6fXxe',1,G.clean,'Deep Clean — Sub');
+    if(document.getElementById('hw-land').checked)addHW('22PVVUNCDK68',1,G.land,'Light Landscaping Labor');
+    if(document.getElementById('hw-caulk').checked)addHW('22PVVUryVciR',1,G.caulk,'Caulking and Sealing');
+    if(document.getElementById('hw-drywall').checked)addHW('22PVVUqh9XT5',1,G.drywall,'Drywall Repair');
+    if(S.thermostatId&&document.getElementById('hw-therm').checked)addHW(S.thermostatId,1,G.consumables,'Thermostat');
+    var fsel=document.getElementById('hw-filter-sel').value;
+    if(fsel==='standard')addHW('22PVSnDyeNd7',1,G.consumables,'HVAC Filter Standard');
+    if(fsel==='allergen')addHW('22PVSnDyeNd8',1,G.consumables,'HVAC Filter Allergen');
+    if(document.getElementById('hw-car')&&document.getElementById('hw-car').checked){
+      var carQty=HW['hw-car-qty']||1;
+      var carAction=document.getElementById('hw-car-action').value;
+      var carLoc=(document.getElementById('hw-car-loc').value||'').trim();
+      if(carAction==='paint'||carAction==='both')addHW('22PVSimvwVnh',carQty,G.consumables,'Cold Air Return — Paint'+(carLoc?' ('+carLoc+')':''));
+      if(carAction==='replace'||carAction==='both')addHW('22PVSkPpj488',carQty,G.consumables,'Cold Air Return — Replace'+(carLoc?' ('+carLoc+')':''));
+    }
+
+    // 8. ROOM ITEMS
+    var roomItems=[];
+    S.rooms.forEach(function(r){
+      var d=r.d;
+      var rn=r.name;
+      function addRI(id,qty,grp,name){if(id&&qty>0)roomItems.push({id:id,qty:qty,grp:grp,name:rn+' \u2014 '+name,room:rn});}
+
+      // Door hardware
+      if(d.doorHardwareId&&d.doorQty>0)addRI(d.doorHardwareId,d.doorQty,G.door,'Door Hardware');
+      // Flush mount
+      if(d.flushId&&d.flushQty>0)addRI(d.flushId,d.flushQty,G.light,'Ceiling Fixture');
+      // Cans
+      if(d.can6Qty>0)addRI(CAN6.id,d.can6Qty,G.light,'6" Can Retrofit');
+      if(d.can4Qty>0)addRI(CAN4.id,d.can4Qty,G.light,'4" Can Retrofit');
+      // Decorative
+      if(d.decoId)addRI(d.decoId,1,G.light,'Decorative Fixture');
+      // Bulbs
+      if(d.bulbId&&d.bulbQty>0)addRI(d.bulbId,d.bulbQty,G.bulbs,'Bulbs');
+      // Smoke/CO
+      if(d.smokeId)addRI(d.smokeId,1,G.smoke,'Smoke/CO Detector');
+      // Register
+      if(d.regId&&d.regQty>0)addRI(d.regId,d.regQty,G.consumables,'Register');
+      // Cold air return handled house-wide
+
+      // Electrical devices
+      ELEC.coverUp.forEach(function(item){if(d['cup_'+item.id]>0)addRI(item.id,d['cup_'+item.id],G.device,'Cover-Up: '+item.name);});
+      ELEC.plates.forEach(function(item){if(d['plt_'+item.id]>0)addRI(item.id,d['plt_'+item.id],G.device,'Plate: '+item.name);});
+      ELEC.decora.forEach(function(item){if(d['dev_'+item.id]>0)addRI(item.id,d['dev_'+item.id],G.device,'Device: '+item.name);});
+      ELEC.standard.forEach(function(item){if(d['std_'+item.id]>0)addRI(item.id,d['std_'+item.id],G.device,'Std: '+item.name);});
+
+      // Bath
+      if(d.vanityId&&d.hasVanityLight)addRI(d.vanityId,1,G.light,'Vanity Light Bar');
+      if(d.faucetId)addRI(d.faucetId,1,G.plumbing,'Faucet');
+      if(d.bathHWId)addRI(d.bathHWId,1,G.plumbing,'Bath Hardware Set');
+      if(d.toiletSeatId)addRI(d.toiletSeatId,1,G.plumbing,'Toilet Seat');
+      if(d.showerHeadId)addRI(d.showerHeadId,1,G.plumbing,'Shower Head');
+      if(d.tubSpout)addRI('22PVVRcJQ6pd',1,G.plumbing,'Tub Spout — Verify');
+      // Plumbing trim
+      if(d.angleStopQty>0)addRI(PLB.angleStop.id,d.angleStopQty,G.plumbing,'Angle Stops');
+      if(d.toiletAngleQty>0)addRI(PLB.toiletAngle.id,d.toiletAngleQty,G.plumbing,'Toilet Angle Stops');
+      if(d.supplyLineQty>0)addRI(PLB.supplyLine.id,d.supplyLineQty,G.plumbing,'Supply Lines');
+      if(d.ptrap)addRI(PLB.ptrap.id,1,G.plumbing,'P-Trap');
+      if(d.escutcheonQty>0)addRI(PLB.escutcheon.id,d.escutcheonQty,G.plumbing,'Escutcheons');
+      if(d.popUpDrain)addRI(PLB.popUpDrain.id,1,G.plumbing,'Pop-Up Drain');
+      // Kitchen
+      if(d.cabPullId){var pqty=(d.drawerPullQty||0)+(d.doorPullQty||0);if(pqty>0)addRI(d.cabPullId,pqty,G.cabinet,'Cabinet Pulls ('+d.holeSpacing+')');}
+      if(d.sinkStrainer)addRI(PLB.sinkStrainer.id,1,G.plumbing,'Sink Strainer');
+      if(d.dishwasher)addRI(PLB.dishwasher.id,1,G.plumbing,'Dishwasher Line');
+      if(d.snappyTrap)addRI(PLB.snappyTrap.id,1,G.plumbing,'Snappy Trap Kit');
+    });
+
+    // Push all items
+    var allItems=hwItems.concat(roomItems);
+    jl('Adding '+allItems.length+' items to budget...','info');
+    for(var i=0;i<allItems.length;i++){
+      var item=allItems[i];
+      try{
+        await jtQ({createCostItem:{'$':{jobId:jobId,name:item.name||'Item',organizationCostItemId:item.id,quantity:item.qty||1,description:'Finish: '+finName+(item.room?' | Room: '+item.room:''),showDescription:true,showQuantity:true},createdCostItem:{id:{}}}});
+        jl('\u2713 '+item.name,'ok');
+      }catch(e){jl('\u26a0 '+item.name+': '+e.message,'err');}
+    }
+
+    // 9. AGENT
+    if(agent){
+      try{
+        var ra=await jtQ({createAccount:{'$':{organizationId:ORG,name:agent+(brok?' \u2014 '+brok:''),type:'customer',customFieldValues:{'Needs':'Other','Lead score':'\u2b50\u2b50\u2b50','Areas To Renovate (All That Apply)':'Other','Budget Range':'Under $15,000','Start Timeline':'Just exploring','Goal':'Sell / List','Property Currently Occupied?':'Vacant'}},createdAccount:{id:{}}}});
+        var aid=gc(ra,'createAccount').id;
+        if(aid){
+          var acf={};if(aph)acf['Phone']=aph;if(aem)acf['Email']=aem;if(brok)acf['Notes']='Brokerage: '+brok;
+          await jtQ({createContact:{'$':{accountId:aid,name:agent,title:'Referring Agent',customFieldValues:acf},createdContact:{id:{}}}});
+          await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:'REFERRING AGENT: '+agent+(brok?' | '+brok:'')+(aph?' | '+aph:'')+(aem?' | '+aem:''),isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+          jl('Agent account created and linked','ok');
+        }
+      }catch(e){jl('Agent: '+e.message,'err');}
+    }
+
+    // 10. DOCUMENTS
+    try{await jtQ({createDocument:{'$':{jobId:jobId,type:'customerOrder',documentTemplateId:'22PPCQZbCZSg',name:'Proposal \u2014 Pre-Listing Market Prep',accountId:custId,fromName:'LMC Contracting',toName:seller,taxRate:0},createdDocument:{id:{}}}});jl('Proposal created','ok');}
+    catch(e){jl('Proposal: '+e.message,'err');}
+    try{await jtQ({createDocument:{'$':{jobId:jobId,type:'vendorOrder',documentTemplateId:'22PCgcVGSysM',name:'PO \u2014 '+(addr.split(',')[0]||addr),accountId:'22PEnZwGDc7H',fromName:'LMC Contracting',toName:'Home Depot',taxRate:0},createdDocument:{id:{}}}});jl('Purchase Order created','ok');}
+    catch(e){jl('PO: '+e.message,'err');}
+
     jl('','');
-    jl('✓ Done! Open JobTread to review. Job: '+jobName,'ok');
-    btn.textContent='Pushed ✓';
-
+    jl('\u2713 DONE! Open JobTread to review. Job: '+jobName,'ok');
+    btn.textContent='Pushed \u2713';
   }catch(e){
     jl('Error: '+e.message,'err');
-    btn.disabled=false;
-    btn.textContent='Retry';
+    btn.disabled=false;btn.textContent='Retry';
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// EMAIL PROPOSAL
-// ═══════════════════════════════════════════════════════════
-function emailProposal(){
-  var addr=document.getElementById('f-addr').value||'the property';
-  var seller=document.getElementById('f-seller').value||'';
-  var email=document.getElementById('f-email').value||'';
-  var fin=S.fin>=0?FINS[S.fin]:'';
-  var listd=document.getElementById('f-listdate').value;
-  var fld=listd?new Date(listd+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'TBD';
-  var sels=objVals(S.selections);
-  var lines=['Hi '+(seller||'there')+',','','Thank you for your time today. Here is your LMC Contracting proposal for '+addr+'.',''];
-  lines.push('PACKAGE: Pre-Listing Market Prep - Base Package');
-  lines.push('HARDWARE FINISH: '+fin);
-  lines.push('TARGET LIST DATE: '+fld);
-  if(sels.length){ lines.push(''); lines.push('SELECTIONS:'); sels.forEach(function(s){ lines.push('  - '+s.name+' ('+s.finish+') x'+s.qty+(s.locations.filter(function(l){return l;}).length?' - '+s.locations.filter(function(l){return l;}).join(', '):'')+'  $'+(s.price*s.qty).toFixed(2)); }); }
-  lines.push(''); lines.push('NOTE: This is a preliminary site survey summary only.');
-  lines.push('A formal proposal and contract will follow from our office.');
-  lines.push('');
-  lines.push('Lou Casazza'); lines.push('LMC Contracting - General Contractor'); lines.push('707-774-1957 | www.lmccontract.com | Lic. #603383');
-  var body=lines.join('\n');
-  window.location.href='mailto:'+email+'?subject=LMC Contracting Proposal - '+encodeURIComponent(addr)+'&body='+encodeURIComponent(body);
+// ═══════════ INIT ═══════════
+// ═══════════ PHOTOS ═══════════
+var IMGBB_KEY = 'b8468e0310bc7c2bc4dfbdde92c87e90'; // Replace with your imgbb API key
+
+function triggerPhoto(rid){
+  var inp=document.getElementById('pinput-'+rid);
+  if(inp)inp.click();
 }
 
+async function handlePhoto(rid,input){
+  if(!input.files||!input.files.length)return;
+  var file=input.files[0];
+  input.value=''; // reset so same photo can be re-selected
 
-// ═══════════════════════════════════════════════════════════
-// FLOATING NAV
-// ═══════════════════════════════════════════════════════════
-var STEP_LABELS = ['1 · Client','2 · Rooms','3 · Walk','4 · Selections','5 · Photos','6 · Proposal','7 · Sign & Push'];
-var STEP_PREV =   [null, 0, 1, 2, 3, 4, 5];
-var STEP_NEXT_N = [1, 2, 3, 4, 5, 6, null];
-var currentStep = 0;
+  var room=S.rooms.find(function(r){return r.id===rid;});
+  if(!room)return;
+  if(!room.photos)room.photos=[];
 
-function updateFloatNav(n){
-  currentStep = n;
-  var fn = document.getElementById('float-nav');
-  var fb = document.getElementById('float-back');
-  var fs = document.getElementById('float-step');
-  var fnx = document.getElementById('float-next');
-  if(!fn) return;
-  if(fs) fs.textContent = STEP_LABELS[n] || '';
-  if(fb) fb.style.visibility = STEP_PREV[n] !== null ? 'visible' : 'hidden';
-  if(fnx) fnx.style.visibility = STEP_NEXT_N[n] !== null ? 'visible' : 'hidden';
+  // Show uploading state
+  var stat=document.getElementById('pstat-'+rid);
+  if(stat)stat.textContent='Uploading...';
+
+  try{
+    // Read file as base64
+    var b64=await new Promise(function(res,rej){
+      var reader=new FileReader();
+      reader.onload=function(e){res(e.target.result.split(',')[1]);};
+      reader.onerror=rej;
+      reader.readAsDataURL(file);
+    });
+
+    // Upload to imgbb
+    var fd=new FormData();
+    fd.append('key',IMGBB_KEY);
+    fd.append('image',b64);
+    fd.append('name',rid+'-'+Date.now());
+
+    var resp=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
+    var result=await resp.json();
+
+    if(result.success){
+      var url=result.data.url;
+      var thumb=result.data.thumb?result.data.thumb.url:url;
+      room.photos.push({url:url,thumb:thumb,room:room.name});
+      renderPhotos(rid);
+      if(stat)stat.textContent=room.photos.length+' photo'+(room.photos.length!==1?'s':'');
+    } else {
+      if(stat)stat.textContent='Upload failed — try again';
+      console.error('imgbb error:',result);
+    }
+  }catch(e){
+    console.error('Photo upload error:',e);
+    if(stat)stat.textContent='Error: '+e.message;
+  }
 }
 
-function floatBack(){
-  if(STEP_PREV[currentStep] !== null) go(STEP_PREV[currentStep]);
+function renderPhotos(rid){
+  var room=S.rooms.find(function(r){return r.id===rid;});
+  if(!room||!room.photos)return;
+  var grid=document.getElementById('pgrid-'+rid);
+  if(!grid)return;
+  grid.innerHTML=room.photos.map(function(p,i){
+    return '<div class="photo-thumb">'
+      +'<img src="'+p.thumb+'" loading="lazy">'
+      +'<button class="photo-del" onclick="delPhoto(\"'+rid+'\",'+i+')">×</button>'
+      +'</div>';
+  }).join('');
 }
-function floatNext(){
-  if(STEP_NEXT_N[currentStep] !== null) go(STEP_NEXT_N[currentStep]);
+
+function delPhoto(rid,idx){
+  var room=S.rooms.find(function(r){return r.id===rid;});
+  if(!room||!room.photos)return;
+  room.photos.splice(idx,1);
+  renderPhotos(rid);
+  var stat=document.getElementById('pstat-'+rid);
+  var n=room.photos.length;
+  if(stat)stat.textContent=n?n+' photo'+(n!==1?'s':''):'Tap + to add photos';
 }
 
-// Show float nav when scrolled past the sticky header (~60px)
-window.addEventListener('scroll', function(){
-  var fn = document.getElementById('float-nav');
-  if(!fn) return;
-  fn.classList.toggle('visible', window.scrollY > 80);
-}, {passive:true});
-
-// ═══════════════════════════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════════════════════════
-var calY, calM, calSel = null;
-
-function pad2(n){ return n < 10 ? '0'+n : ''+n; }
-function calInit(){ var n=new Date(); calY=n.getFullYear(); calM=n.getMonth(); }
-
-function toggleCal(){
-  var modal = document.getElementById('cal-modal');
-  if(!modal) return;
-  var isOpen = modal.style.display === 'flex';
-  if(isOpen){
-    modal.style.display = 'none';
+// RENDR deep link
+function openRendr(){
+  // Try RENDR app deep link first, fallback to website
+  var ua=navigator.userAgent.toLowerCase();
+  var isAndroid=ua.indexOf('android')>-1;
+  var isIOS=/iphone|ipad|ipod/.test(ua);
+  if(isIOS){
+    // Try to open RENDR app, fallback to App Store
+    window.location='rendr://';
+    setTimeout(function(){
+      window.location='https://apps.apple.com/us/app/rendr/id1439499554';
+    },1500);
+  } else if(isAndroid){
+    window.location='https://play.google.com/store/apps/details?id=com.rendr.app';
   } else {
-    modal.style.display = 'flex';
-    calRender();
+    window.open('https://cloud.rendr.com','_blank');
   }
 }
 
-function calModalBgClick(e){
-  if(e.target === document.getElementById('cal-modal')){
-    var modal = document.getElementById('cal-modal');
-    if(modal) modal.style.display = 'none';
-  }
-}
-
-function clearDate(){
-  calSel = null;
-  var ld = document.getElementById('f-listdate');
-  var ldd = document.getElementById('f-listdate-disp');
-  if(ld) ld.value = '';
-  if(ldd) ldd.value = '';
-  var modal = document.getElementById('cal-modal');
-  if(modal) modal.style.display = 'none';
-}
-
-function calNav(d){
-  calM += d;
-  if(calM > 11){ calM = 0; calY++; }
-  if(calM < 0){ calM = 11; calY--; }
-  calRender();
-}
-
-function calRender(){
-  var T = document.getElementById('cal-title');
-  var G = document.getElementById('cal-grid');
-  if(!T || !G) return;
-  var MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  T.textContent = MN[calM] + ' ' + calY;
-  var fd = new Date(calY, calM, 1).getDay();
-  var dm = new Date(calY, calM+1, 0).getDate();
-  var tn = new Date();
-  var ty = tn.getFullYear(), tm = tn.getMonth(), td = tn.getDate();
-  var ts = ty+'-'+pad2(tm+1)+'-'+pad2(td);
-  var h = '';
-  for(var i = 0; i < fd; i++){
-    h += '<div style="background:#fff;"></div>';
-  }
-  for(var d = 1; d <= dm; d++){
-    var ds = calY+'-'+pad2(calM+1)+'-'+pad2(d);
-    var dow = new Date(calY, calM, d).getDay();
-    var isSel = ds === calSel;
-    var isToday = ds === ts;
-    var isWE = dow === 0 || dow === 6;
-    var isPast = new Date(calY, calM, d) < new Date(ty, tm, td);
-    var bg = isSel ? '#B32025' : (isToday ? '#f0f0ee' : '#fff');
-    var col = isSel ? '#fff' : (isPast ? '#ccc' : (isWE ? '#B32025' : '#111'));
-    var fw = isSel ? '700' : (isWE ? '600' : '400');
-    var border = (!isSel && isToday) ? 'outline:1.5px solid #000;outline-offset:-1px;' : '';
-    var clickable = !isPast;
-    h += '<div'+(clickable?' data-ds="'+ds+'" onclick="calPick(this)"':'')+' style="background:'+bg+';'+border+'padding:14px 0;text-align:center;font-size:14px;font-weight:'+fw+';color:'+col+';cursor:'+(clickable?'pointer':'default')+';user-select:none;min-height:44px;display:flex;align-items:center;justify-content:center;">'+d+'</div>';
-  }
-  G.innerHTML = h;
-}
-
-function calPick(el){
-  var ds = el.getAttribute('data-ds');
-  if(!ds) return;
-  calSel = ds;
-  var ld = document.getElementById('f-listdate');
-  var ldd = document.getElementById('f-listdate-disp');
-  if(ld) ld.value = ds;
-  var pts = ds.split('-');
-  var d2 = new Date(parseInt(pts[0]), parseInt(pts[1])-1, parseInt(pts[2]));
-  var DN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  if(ldd) ldd.value = DN[d2.getDay()]+', '+MN[d2.getMonth()]+' '+d2.getDate()+', '+d2.getFullYear();
-  calRender();
-  // Auto-close after pick
-  setTimeout(function(){
-    var modal = document.getElementById('cal-modal');
-    if(modal) modal.style.display = 'none';
-  }, 300);
-}
-
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
-document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-calInit();
-setTimeout(function(){ initSig(); buildPhotoZones(); renderRoomList(); },300);
-
-// Fix 300ms tap delay on iOS for all buttons
-document.addEventListener('touchstart', function(){}, {passive:true});
-initMic();
+document.addEventListener('DOMContentLoaded',function(){
+  initMic();
+  initHWToggles();
+  bldThermGrid();
+  document.addEventListener('touchstart',function(){},{passive:true});
+});
 </script>
-
-<!-- CALENDAR MODAL -->
-<div class="cal-modal" id="cal-modal" style="display:none;" onclick="calModalBgClick(event)">
-  <div class="cal-sheet">
-    <div class="cal-hdr">
-      <button class="cal-nav" onclick="calNav(-1)">&#8249;</button>
-      <div class="cal-title" id="cal-title"></div>
-      <button class="cal-nav" onclick="calNav(1)">&#8250;</button>
-    </div>
-    <div class="cal-dow">
-      <div style="color:#B32025">SUN</div>
-      <div style="color:#888">MON</div>
-      <div style="color:#888">TUE</div>
-      <div style="color:#888">WED</div>
-      <div style="color:#888">THU</div>
-      <div style="color:#888">FRI</div>
-      <div style="color:#B32025">SAT</div>
-    </div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-foot">
-      <button class="cal-clear-btn" onclick="clearDate()">Clear</button>
-      <button class="cal-done" onclick="toggleCal()">Done</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
