@@ -377,6 +377,7 @@ textarea{resize:none;min-height:56px;}
   </div>
 </div>
 
+<button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
 <div class="bnav">
   <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
   <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
@@ -1073,94 +1074,90 @@ function initSig(){
 function clrSig(){if(sigX)sigX.clearRect(0,0,sigC.width,sigC.height);S.signed=false;}
 
 // ═══════════ MIC ═══════════
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition,micR=null,micOn=false,micTgt=null,micTimer=null;
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var micOn=false,micRec=null,micTgt=null,micTimer=null;
+
 function initMic(){
-  if(!SR)return;
-  var b=document.getElementById('gmic');if(b)b.style.display='flex';
-  document.addEventListener('focusin',function(e){
-    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')micTgt=e.target;
-  });
+  var btn=document.getElementById('gmic');
+  if(!btn)return;
+  if(SR){btn.style.display='flex';}
 }
+
 function togMic(){
-  if(!SR){alert('Speech recognition requires Safari on iOS 14.5+');return;}
-  if(micOn){stopMic();}else{startMic();}
+  if(!SR){alert('Speech not supported. Use the keyboard mic key.');return;}
+  if(micOn){stopMic();return;}
+  // Capture target before starting
+  var tgt=document.activeElement;
+  if(!tgt||(tgt.tagName!=='INPUT'&&tgt.tagName!=='TEXTAREA')){
+    tgt=micTgt;
+  }
+  if(!tgt||(tgt.tagName!=='INPUT'&&tgt.tagName!=='TEXTAREA')){
+    alert('Tap a text field first, then tap mic.');return;
+  }
+  micTgt=tgt;
+  startMic();
 }
+
 function startMic(){
-  // If no field focused, use last known or skip
-  if(!micTgt||!document.body.contains(micTgt)){
-    micTgt=document.activeElement;
-    if(!micTgt||(micTgt.tagName!=='INPUT'&&micTgt.tagName!=='TEXTAREA')){
-      alert('Tap a text field first, then tap the mic.');return;
+  if(micRec){try{micRec.abort();}catch(e){}micRec=null;}
+  var btn=document.getElementById('gmic');
+  micRec=new SR();
+  micRec.lang='en-US';
+  micRec.continuous=false;
+  micRec.interimResults=true; // MUST be true for iOS Safari
+  micRec.maxAlternatives=1;
+  micRec.onstart=function(){
+    micOn=true;
+    if(btn){btn.innerHTML='⏹';btn.style.background='#1a6a1a';}
+    // iOS needs 2s delay — show countdown
+    micTimer=setTimeout(function(){
+      if(btn)btn.innerHTML='🎤';
+      stopMic();
+    },12000); // 12s max
+  };
+  micRec.onresult=function(e){
+    var txt='';
+    for(var i=0;i<e.results.length;i++){
+      txt+=e.results[i][0].transcript;
     }
-  }
-  // Safety: destroy any existing instance
-  if(micR){try{micR.abort();}catch(e){}micR=null;}
-
-  try{
-    micR=new SR();
-    micR.continuous=false;
-    micR.interimResults=false;
-    micR.lang='en-US';
-    micR.maxAlternatives=1;
-
-    micR.onstart=function(){
-      micOn=true;
-      var b=document.getElementById('gmic');if(b)b.classList.add('on');
-      // Auto-stop after 8 seconds as safety
-      micTimer=setTimeout(function(){stopMic();},8000);
-    };
-
-    micR.onresult=function(e){
-      clearTimeout(micTimer);
-      var t='';
-      for(var i=0;i<e.results.length;i++){
-        if(e.results[i].isFinal)t+=e.results[i][0].transcript+' ';
-      }
-      t=t.trim();
-      if(t&&micTgt&&document.body.contains(micTgt)){
-        micTgt.value=(micTgt.value?micTgt.value+' ':'')+t;
-        micTgt.dispatchEvent(new Event('input',{bubbles:true}));
-        micTgt.dispatchEvent(new Event('change',{bubbles:true}));
-      }
-      stopMic();
-    };
-
-    micR.onerror=function(e){
-      clearTimeout(micTimer);
-      if(e.error==='not-allowed'){
-        alert('Microphone access denied. Go to Settings > Safari > Microphone and allow access.');
-      } else if(e.error==='no-speech'){
-        // Silent fail — just stop
-      } else {
-        console.warn('Mic error:',e.error);
-      }
-      stopMic();
-    };
-
-    micR.onend=function(){
-      clearTimeout(micTimer);
-      stopMic();
-    };
-
-    micR.start();
-
-  }catch(e){
-    console.error('Mic start failed:',e);
+    txt=txt.trim();
+    if(txt&&micTgt&&document.contains(micTgt)){
+      micTgt.value=(micTgt.value?micTgt.value+' ':'')+txt;
+      micTgt.dispatchEvent(new Event('input',{bubbles:true}));
+      micTgt.dispatchEvent(new Event('change',{bubbles:true}));
+    }
     stopMic();
-  }
+  };
+  micRec.onspeechend=function(){
+    if(micRec)try{micRec.stop();}catch(e){}
+  };
+  micRec.onerror=function(e){
+    console.warn('mic error:',e.error);
+    if(e.error==='not-allowed'){
+      alert('Mic blocked. Go to Settings > Apps > Safari > Microphone > Allow');
+    }
+    stopMic();
+  };
+  micRec.onend=function(){stopMic();};
+  try{micRec.start();}catch(e){console.error('mic start:',e);stopMic();}
 }
 
 function stopMic(){
   micOn=false;
   clearTimeout(micTimer);
-  var b=document.getElementById('gmic');
-  if(b)b.classList.remove('on');
-  if(micR){
-    try{micR.abort();}catch(e){}
-    try{micR.stop();}catch(e){}
-    micR=null;
+  var btn=document.getElementById('gmic');
+  if(btn){btn.innerHTML='🎤';btn.style.background='var(--red)';}
+  if(micRec){
+    try{micRec.abort();}catch(e){}
+    try{micRec.stop();}catch(e){}
+    micRec=null;
   }
 }
+
+// Track focused field at all times
+document.addEventListener('focusin',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')micTgt=e.target;
+},true);
 
 // ═══════════ HOUSE-WIDE TOGGLES ═══════════
 function initHWToggles(){
@@ -1266,7 +1263,7 @@ async function pushToJT(){
       }catch(e){jl('RENDR link: '+e.message,'err');}
     }
 
-    // 4c. Upload room photos to JobTread
+    // 4c. Post room photos as comments with imgbb URLs
     var totalPhotos=0;
     for(var pi=0;pi<S.rooms.length;pi++){
       var pr=S.rooms[pi];
@@ -1274,28 +1271,17 @@ async function pushToJT(){
       for(var pj=0;pj<pr.photos.length;pj++){
         var photo=pr.photos[pj];
         try{
-          await jtQ({createFile:{'$':{
+          await jtQ({createComment:{'$':{
             targetType:'job',
             targetId:jobId,
-            url:photo.url,
-            name:pr.name+' - Photo '+(pj+1)+'.jpg',
-            folder:'Site Survey Photos'
-          },createdFile:{id:{}}}});
+            message:'📷 '+pr.name+' — Photo '+(pj+1)+': '+photo.url,
+            isVisibleToInternalRoles:true
+          },createdComment:{id:{}}}});
           totalPhotos++;
-        }catch(e){
-          // Try alternate file upload approach
-          try{
-            await jtQ({createComment:{'$':{
-              targetType:'job',targetId:jobId,
-              message:'Photo — '+pr.name+': '+photo.url,
-              isVisibleToInternalRoles:true
-            },createdComment:{id:{}}}});
-            totalPhotos++;
-          }catch(e2){jl('Photo upload: '+e2.message,'err');}
-        }
+        }catch(e){jl('Photo '+pr.name+': '+e.message,'err');}
       }
     }
-    if(totalPhotos>0)jl(totalPhotos+' room photos uploaded','ok');
+    if(totalPhotos>0)jl(totalPhotos+' room photos linked in JobTread comments','ok');
 
     // 5. LOCATION FIELDS
     if(locId&&access){
@@ -1412,7 +1398,7 @@ async function pushToJT(){
     for(var i=0;i<allItems.length;i++){
       var item=allItems[i];
       try{
-        await jtQ({createCostItem:{'$':{jobId:jobId,name:item.name||'Item',organizationCostItemId:item.id,quantity:item.qty||1,description:'Finish: '+finName+(item.room?' | Room: '+item.room:''),showDescription:true,showQuantity:true},createdCostItem:{id:{}}}});
+        await jtQ({createCostItem:{'$':{jobId:jobId,name:item.name||'Item',organizationCostItemId:item.id,quantity:item.qty||1,costCodeId:'22PCgcVGSyrG',costTypeId:'22PCgcVGSyrr',unitId:'22PCgcVGSyr7',description:'Finish: '+finName+(item.room?' | Room: '+item.room:''),showDescription:true,showQuantity:true},createdCostItem:{id:{}}}});
         jl('\u2713 '+item.name,'ok');
       }catch(e){jl('\u26a0 '+item.name+': '+e.message,'err');}
     }
