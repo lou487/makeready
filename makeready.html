@@ -1082,23 +1082,94 @@ function initSig(){
 function clrSig(){if(sigX)sigX.clearRect(0,0,sigC.width,sigC.height);S.signed=false;}
 
 // ═══════════ MIC ═══════════
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition,micR=null,micOn=false,micTgt=null;
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition,micR=null,micOn=false,micTgt=null,micTimer=null;
 function initMic(){
   if(!SR)return;
   var b=document.getElementById('gmic');if(b)b.style.display='flex';
-  document.addEventListener('focusin',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')micTgt=e.target;});
+  document.addEventListener('focusin',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')micTgt=e.target;
+  });
 }
-function togMic(){if(!SR){alert('Use Safari on iOS 14.5+');return;}micOn?stopMic():startMic();}
+function togMic(){
+  if(!SR){alert('Speech recognition requires Safari on iOS 14.5+');return;}
+  if(micOn){stopMic();}else{startMic();}
+}
 function startMic(){
-  if(!micTgt){micTgt=document.activeElement;if(!micTgt||(micTgt.tagName!=='INPUT'&&micTgt.tagName!=='TEXTAREA')){alert('Tap a field first');return;}}
-  micR=new SR();micR.continuous=false;micR.interimResults=false;micR.lang='en-US';
-  micR.onstart=function(){micOn=true;var b=document.getElementById('gmic');if(b)b.classList.add('on');};
-  micR.onresult=function(e){var t=e.results[0][0].transcript;if(micTgt){micTgt.value=(micTgt.value?micTgt.value+' ':'')+t;micTgt.dispatchEvent(new Event('input',{bubbles:true}));}};
-  micR.onerror=function(e){if(e.error==='not-allowed')alert('Mic denied. Check Safari settings.');stopMic();};
-  micR.onend=function(){stopMic();};
-  try{micR.start();}catch(e){stopMic();}
+  // If no field focused, use last known or skip
+  if(!micTgt||!document.body.contains(micTgt)){
+    micTgt=document.activeElement;
+    if(!micTgt||(micTgt.tagName!=='INPUT'&&micTgt.tagName!=='TEXTAREA')){
+      alert('Tap a text field first, then tap the mic.');return;
+    }
+  }
+  // Safety: destroy any existing instance
+  if(micR){try{micR.abort();}catch(e){}micR=null;}
+
+  try{
+    micR=new SR();
+    micR.continuous=false;
+    micR.interimResults=false;
+    micR.lang='en-US';
+    micR.maxAlternatives=1;
+
+    micR.onstart=function(){
+      micOn=true;
+      var b=document.getElementById('gmic');if(b)b.classList.add('on');
+      // Auto-stop after 8 seconds as safety
+      micTimer=setTimeout(function(){stopMic();},8000);
+    };
+
+    micR.onresult=function(e){
+      clearTimeout(micTimer);
+      var t='';
+      for(var i=0;i<e.results.length;i++){
+        if(e.results[i].isFinal)t+=e.results[i][0].transcript+' ';
+      }
+      t=t.trim();
+      if(t&&micTgt&&document.body.contains(micTgt)){
+        micTgt.value=(micTgt.value?micTgt.value+' ':'')+t;
+        micTgt.dispatchEvent(new Event('input',{bubbles:true}));
+        micTgt.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      stopMic();
+    };
+
+    micR.onerror=function(e){
+      clearTimeout(micTimer);
+      if(e.error==='not-allowed'){
+        alert('Microphone access denied. Go to Settings > Safari > Microphone and allow access.');
+      } else if(e.error==='no-speech'){
+        // Silent fail — just stop
+      } else {
+        console.warn('Mic error:',e.error);
+      }
+      stopMic();
+    };
+
+    micR.onend=function(){
+      clearTimeout(micTimer);
+      stopMic();
+    };
+
+    micR.start();
+
+  }catch(e){
+    console.error('Mic start failed:',e);
+    stopMic();
+  }
 }
-function stopMic(){micOn=false;var b=document.getElementById('gmic');if(b)b.classList.remove('on');if(micR){try{micR.stop();}catch(e){}micR=null;}}
+
+function stopMic(){
+  micOn=false;
+  clearTimeout(micTimer);
+  var b=document.getElementById('gmic');
+  if(b)b.classList.remove('on');
+  if(micR){
+    try{micR.abort();}catch(e){}
+    try{micR.stop();}catch(e){}
+    micR=null;
+  }
+}
 
 // ═══════════ HOUSE-WIDE TOGGLES ═══════════
 function initHWToggles(){
