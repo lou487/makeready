@@ -1247,35 +1247,25 @@ async function pushToJT(){
       }catch(e){jl('RENDR link: '+e.message,'err');}
     }
 
-    // 4c. Save room photos as job comments
-    var totalPhotos=0;
-    for(var pi=0;pi<S.rooms.length;pi++){
-      var pr=S.rooms[pi];
-      if(!pr.photos||!pr.photos.length) continue;
-      for(var pj=0;pj<pr.photos.length;pj++){
-        var photo=pr.photos[pj];
-        if(!photo||!photo.url) continue;
+    // Post walk photos immediately (while grant key has fresh job access)
+    var _totalPics=0;
+    for(var _pi=0;_pi<S.rooms.length;_pi++){
+      var _pr=S.rooms[_pi];
+      if(!_pr.photos||!_pr.photos.length) continue;
+      for(var _pj=0;_pj<_pr.photos.length;_pj++){
+        var _ph=_pr.photos[_pj];
+        if(!_ph||!_ph.url) continue;
         try{
-          var msg='\u{1F4F7} '+pr.name+' - Photo '+(pj+1)+': '+photo.url;
-          var cr=await fetch('https://api.jobtread.com/pave',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({query:{
-              '$':{grantKey:GK},
-              createComment:{
-                '$':{targetType:'job',targetId:jobId,message:msg,isVisibleToInternalRoles:true},
-                createdComment:{id:{}}
-              }
-            }})
-          });
-          var cd=await cr.json();
-          if(cd.errors){jl('Photo err: '+JSON.stringify(cd.errors),'err');}
-          else{totalPhotos++;}
-        }catch(e){jl('Photo '+pr.name+' #'+(pj+1)+': '+e.message,'err');}
+          var _msg='[Walk Photo] '+_pr.name+' #'+(_pj+1)+': '+_ph.url;
+          await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:_msg,isPinned:false,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+          _totalPics++;
+        }catch(_e){jl('Photo '+_pr.name+' #'+(_pj+1)+': '+_e.message,'err');}
       }
     }
-    if(totalPhotos>0) jl('\u2713 '+totalPhotos+' photo'+(totalPhotos!==1?'s':'')+' saved to job','ok');
+    if(_totalPics>0) jl('\u2713 '+_totalPics+' walk photo'+(_totalPics!==1?'s':'')+' saved to job','ok');
 
+
+    // 4c. Photos posted right after job creation
     
     // 5. LOCATION FIELDS
     if(locId&&access){
@@ -1420,7 +1410,8 @@ async function pushToJT(){
         name:'Proposal — Pre-Listing Market Prep',
         accountId:custId,
         fromName:'LMC Contracting',
-        toName:seller
+        toName:seller,
+        taxRate:0.0
       },createdDocument:{id:{}}}});
       jl('Proposal created','ok');
     }catch(e){jl('Proposal: '+e.message,'err');}
@@ -1432,7 +1423,8 @@ async function pushToJT(){
         name:'PO — '+(addr.split(',')[0]||addr),
         accountId:'22PEnZwGDc7H',
         fromName:'LMC Contracting',
-        toName:'Home Depot'
+        toName:'Home Depot',
+        taxRate:0.0
       },createdDocument:{id:{}}}});
       jl('Purchase Order created','ok');
     }catch(e){jl('PO: '+e.message,'err');}
@@ -1464,34 +1456,43 @@ async function handlePhoto(rid,input){
   if(!room)return;
   if(!room.photos)room.photos=[];
   var stat=document.getElementById('pstat-'+rid);
-  if(stat)stat.textContent='Uploading...';
+  if(stat){stat.textContent='Uploading...';stat.style.color='#888';}
   try{
+    // Convert to base64
     var b64=await new Promise(function(res,rej){
       var reader=new FileReader();
-      reader.onload=function(e){res(e.target.result.split(',')[1]);};
-      reader.onerror=rej;
+      reader.onload=function(e){
+        var result=e.target.result;
+        res(result.split(',')[1]);
+      };
+      reader.onerror=function(e){rej(new Error('FileReader failed'));};
       reader.readAsDataURL(file);
     });
+    console.log('Photo b64 length:',b64.length,'for room:',room.name);
+    // Upload to imgbb
     var fd=new FormData();
     fd.append('key',IMGBB_KEY);
     fd.append('image',b64);
-    fd.append('name',rid+'-'+Date.now());
+    fd.append('name','walk-'+rid+'-'+Date.now());
     var resp=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
+    if(!resp.ok){throw new Error('imgbb HTTP '+resp.status);}
     var result=await resp.json();
-    if(result.success){
+    console.log('imgbb result:',result.success,result.data?result.data.url:'no url');
+    if(result.success&&result.data&&result.data.url){
       var url=result.data.url;
       var thumb=result.data.thumb?result.data.thumb.url:url;
-      room.photos.push({url:url,thumb:thumb,room:room.name});
+      room.photos.push({url:url,thumb:thumb,room:room.name,file:file.name});
       renderPhotos(rid);
       var n=room.photos.length;
-      if(stat)stat.textContent=n+' photo'+(n!==1?'s':'')+' ready to push';
+      if(stat){stat.textContent=n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';}
     } else {
-      if(stat)stat.textContent='Upload failed — try again';
-      console.error('imgbb error:',JSON.stringify(result));
+      var errMsg=result.error?JSON.stringify(result.error):'unknown error';
+      console.error('imgbb error:',errMsg);
+      if(stat){stat.textContent='Upload failed: '+errMsg;stat.style.color='red';}
     }
   }catch(e){
-    if(stat)stat.textContent='Error: '+e.message;
-    console.error('Photo upload error:',e);
+    console.error('Photo upload error:',e.message,e);
+    if(stat){stat.textContent='Error: '+e.message;stat.style.color='red';}
   }
 }
 
