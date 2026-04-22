@@ -168,7 +168,7 @@ textarea{resize:none;min-height:56px;}
 .photo-add{aspect-ratio:1;border-radius:7px;border:2px dashed var(--border);background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);gap:4px;}
 .photo-add-icon{font-size:24px;}
 .photo-uploading{opacity:.5;}
-.photo-status{font-size:10px;color:var(--muted);margin-bottom:6px;}
+.photo-status{font-size:13px;color:#666;margin:4px 0 6px 0;min-height:18px;transition:color 0.3s;}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
 
 /* BOT NAV */
@@ -1456,45 +1456,46 @@ async function handlePhoto(rid,input){
   if(!room)return;
   if(!room.photos)room.photos=[];
   var stat=document.getElementById('pstat-'+rid);
-  if(stat){stat.textContent='Uploading...';stat.style.color='#888';}
+  var btn=document.querySelector('#room-'+rid+' .photo-add');
+  if(stat){stat.textContent='Uploading...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
+  if(btn)btn.disabled=true;
   try{
-    // Convert to base64
     var b64=await new Promise(function(res,rej){
       var reader=new FileReader();
-      reader.onload=function(e){
-        var result=e.target.result;
-        res(result.split(',')[1]);
-      };
-      reader.onerror=function(e){rej(new Error('FileReader failed'));};
+      reader.onload=function(e){res(e.target.result.split(',')[1]);};
+      reader.onerror=function(){rej(new Error('Could not read photo file'));};
       reader.readAsDataURL(file);
     });
-    console.log('Photo b64 length:',b64.length,'for room:',room.name);
-    // Upload to imgbb
-    var fd=new FormData();
-    fd.append('key',IMGBB_KEY);
-    fd.append('image',b64);
-    fd.append('name','walk-'+rid+'-'+Date.now());
-    var resp=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
-    if(!resp.ok){throw new Error('imgbb HTTP '+resp.status);}
+    // Use URLSearchParams instead of FormData for better iOS Safari compat
+    var params=new URLSearchParams();
+    params.append('key',IMGBB_KEY);
+    params.append('image',b64);
+    params.append('name','lmc-'+rid.slice(-4)+'-'+Date.now());
+    var resp=await fetch('https://api.imgbb.com/1/upload',{
+      method:'POST',
+      body:params
+    });
+    if(!resp.ok)throw new Error('Upload failed (HTTP '+resp.status+')');
     var result=await resp.json();
-    console.log('imgbb result:',result.success,result.data?result.data.url:'no url');
     if(result.success&&result.data&&result.data.url){
       var url=result.data.url;
       var thumb=result.data.thumb?result.data.thumb.url:url;
-      room.photos.push({url:url,thumb:thumb,room:room.name,file:file.name});
+      room.photos.push({url:url,thumb:thumb,room:room.name});
       renderPhotos(rid);
       var n=room.photos.length;
-      if(stat){stat.textContent=n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';}
+      if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' ready to push';stat.style.color='green';stat.style.fontWeight='bold';}
     } else {
-      var errMsg=result.error?JSON.stringify(result.error):'unknown error';
-      console.error('imgbb error:',errMsg);
-      if(stat){stat.textContent='Upload failed: '+errMsg;stat.style.color='red';}
+      var err=result.error?result.error.message:'Upload rejected';
+      throw new Error(err);
     }
   }catch(e){
-    console.error('Photo upload error:',e.message,e);
-    if(stat){stat.textContent='Error: '+e.message;stat.style.color='red';}
+    if(stat){stat.textContent='\u274c Error: '+e.message;stat.style.color='red';stat.style.fontWeight='bold';}
+    console.error('Photo error:',e.message);
+  } finally {
+    if(btn)btn.disabled=false;
   }
 }
+
 
 function renderPhotos(rid){
   var room=S.rooms.find(function(r){return r.id===rid;});
