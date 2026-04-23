@@ -88,15 +88,16 @@ textarea{resize:none;min-height:56px;}
 /* PRODUCT GRID */
 .pg2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px;}
 .pg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;}
-.pcard{border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff;transition:border-color .15s;}
-.pcard.on{border-color:var(--red);}
-.pcard-img{width:100%;aspect-ratio:1;object-fit:contain;background:#f8f7f4;padding:6px;}
-.pcard-ph{width:100%;aspect-ratio:1;background:#f0ede8;display:flex;align-items:center;justify-content:center;font-size:24px;}
-.pcard-info{padding:5px 7px 7px;}
-.pcard-name{font-size:10px;font-weight:600;line-height:1.3;margin-bottom:2px;}
-.pcard-price{font-size:11px;color:var(--red);font-weight:800;}
-.pcard-fin{font-size:9px;color:var(--muted);}
-.pcard-chk{display:none;background:var(--red);color:#fff;text-align:center;font-size:9px;font-weight:800;padding:3px;}
+.pcard{border:2px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;background:#fff;transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.pcard.pcard-on,.pcard.on{border-color:var(--red);background:#fff5f5;}
+.pcard-body{flex:1;min-width:0;}
+.pcard-name{font-weight:600;font-size:13px;color:#1a1a1a;line-height:1.3;}
+.pcard-desc{font-size:11px;color:#666;margin-top:2px;line-height:1.4;}
+.pcard-price{font-size:12px;color:var(--red);font-weight:700;margin-top:4px;}
+.pcard-sel-mark{color:var(--red);font-size:22px;font-weight:700;opacity:0;flex-shrink:0;}
+.pcard.pcard-on .pcard-sel-mark,.pcard.on .pcard-sel-mark{opacity:1;}
+.pcard-grid{display:flex;flex-direction:column;gap:0;}
+.pcard.on .pcard-chk{opacity:1;}
 .pcard.on .pcard-chk{display:block;}
 
 /* QTY */
@@ -161,14 +162,14 @@ textarea{resize:none;min-height:56px;}
 /* MIC */
 
 /* PHOTOS */
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
-.photo-thumb{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;background:#f0ede8;}
+
+
 .photo-thumb img{width:100%;height:100%;object-fit:cover;}
-.photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
-.photo-add{aspect-ratio:1;border-radius:7px;border:2px dashed var(--border);background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);gap:4px;}
-.photo-add-icon{font-size:24px;}
+
+
+
 .photo-uploading{opacity:.5;}
-.photo-status{font-size:13px;color:#666;margin:4px 0 6px 0;min-height:18px;transition:color 0.3s;}
+
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
 
 /* BOT NAV */
@@ -393,83 +394,7 @@ var sigC,sigX,drawing=false,lx=0,ly=0;
 var HW={junkQty:1,'hw-car-qty':1,'hw-junk-qty':1};
 
 // ═══════════ CATALOG ═══════════
-var IMG={
-  '22PVPKTZB6A7':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PVPLmRRLGA':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PVPTFTuMJp':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PPFiRxVCMd':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PPJPLR8AAu':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PPFiRvqpC8':'https://cdn.jobtread.com/ixmAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEpMakxYU3piIiwibiI6ImZpbGUifQM.OPqTSgpgc1SzHhW4D3MILLVhQDV0Lo9JVpMvcdjrEoY',
-  '22PPFjNK2qMn':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PPJQicPsZU':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
-  '22PVPuX7beu7':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPuX7beu8':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPuX7beu9':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPxpDcvV4':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPxpDcvV5':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPuX7beuA':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUFBKcWZLcTZLIiwibiI6IkltYWdlIDEifQM.E2X7V5FKHyAmkVQTWWS1vPgVCFJelYuX6yZCH9w89a4',
-  '22PVPuX7beuB':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUFBKcWZLcTZLIiwibiI6IkltYWdlIDEifQM.E2X7V5FKHyAmkVQTWWS1vPgVCFJelYuX6yZCH9w89a4',
-  '22PVPuX7beuC':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPuX7beuD':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPuX7beuE':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPxpDcvV6':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPxpDcvV7':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPyVmq8kS':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPzxqgdYz':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVQ4skJPBQ':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVQ5KgFvz2':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
-  '22PVPuX7beuF':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PVPuX7beuG':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PVQ4skJPBM':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PVQ4skJPBN':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PVQ4skJPBP':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PVTPwC2tQ2':'https://cdn.jobtread.com/ixqAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZpUnVpb3c5IiwibiI6ImZpbGUifQM.I3H9A0gNRIbzRGXbhcSL5gAYGKGIMHE-i2JqWfBmRVA',
-  '22PVTPwC2tQ3':'https://cdn.jobtread.com/ixqAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZpUnVpb3c5IiwibiI6ImZpbGUifQM.I3H9A0gNRIbzRGXbhcSL5gAYGKGIMHE-i2JqWfBmRVA',
-  '22PVTPwC2tQ4':'https://cdn.jobtread.com/ixqAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZpUnVpb3c5IiwibiI6ImZpbGUifQM.I3H9A0gNRIbzRGXbhcSL5gAYGKGIMHE-i2JqWfBmRVA',
-  '22PVTXhdLTfs':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
-  '22PVTXhdLTft':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
-  '22PVTXwmntYs':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
-  '22PVTYN2tzs9':'https://cdn.jobtread.com/G4UAoMSqfaHqYWU65q2HgdOWCFJ_ZsFGGaVoNPCJA2fxB4YOCsFl4n4TJXYtULWoJmRriJ5hQw_HPqvH0fPyYCDIp6pLH1KfNJp3J8.Q8Xt1oU1OJd9bP0xfHDVzHxPfUg2mHlxJrDVn0FkFkk',
-  '22PVTYf7Rjhf':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
-  '22PVTYwYVTRS':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
-  '22PVTZAEcb6m':'https://cdn.jobtread.com/G5MAoIzVAWxjz0VvV1q2Oi5tV0OMXxoRPKHjhZLxj6aVBWYmFBNFRRPB3G0dBrBdBDp3TnB8TBcOiMGOJxS-VIm_vWm4V9Wm8MzqKo.nM7fRFKDHdVnH2H3dpZGHiSRN2NV7HZ-CUqsWG3eIyk',
-  '22PVTZN7DzYg':'https://cdn.jobtread.com/G5MAoIzVAWxjz0VvV1q2Oi5tV0OMXxoRPKHjhZLxj6aVBWYmFBNFRRPB3G0dBrBdBDp3TnB8TBcOiMGOJxS-VIm_vWm4V9Wm8MzqKo.nM7fRFKDHdVnH2H3dpZGHiSRN2NV7HZ-CUqsWG3eIyk',
-  '22PVWU72XDUt':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
-  '22PVWU72XDUu':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
-  '22PVWU72XDUv':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
-  '22PLictfFuRM':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGljdGNDQ1pRIiwibiI6IkltYWdlIDEifQM.I_UqPkfHHAx-3RCWcEvbiPrcnlLJ1JQLqRuxQn6j7BM',
-  '22PLidsWNdYp':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGljdGNDQ1pRIiwibiI6IkltYWdlIDEifQM.I_UqPkfHHAx-3RCWcEvbiPrcnlLJ1JQLqRuxQn6j7BM',
-  '22PMzkaL2eTH':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
-  '22PLihEi33Hz':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGloRWU2d2RkIiwibiI6IkltYWdlIDEifQM.rB_FBB--O9y9Us4lL4hFte7iP5dp6xKj_hzLB6v9oIA',
-  '22PMzpqhYMcA':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTXpwcWhZTWVnIiwibiI6IkltYWdlIDEifQM.4lRxQ7DJQL-BnjkZLhULd5qTJJPWPF_Z6vOe1oBFIgI',
-  '22PLihfEsfeL':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGloZkdQYjlmIiwibiI6IkltYWdlIDEifQM.RzZ5lQqfJKvDRJqXXmLMXbXcLBTh8l8CQUuUZfnSJe4',
-  '22PVVRMYQsFD':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGloRWU2d2RkIiwibiI6IkltYWdlIDEifQM.rB_FBB--O9y9Us4lL4hFte7iP5dp6xKj_hzLB6v9oIA',
-  '22PVScAuHEv7':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
-  '22PVSdyhK8Te':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSdyhK8Tg':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSdyhKVN2':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSdyhKVN4':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSf6QFNqJ':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
-  '22PVSfMg5CAM':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
-  '22PVSfaDBtaX':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
-  '22PVSf6QFNqL':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSg9vxALY':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSg9vxALa':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
-  '22PVSnfWPtFy':'https://cdn.jobtread.com/G08AgBSh0kp4Ue_C5vw1QAF0d0EyTCHXqfh4Bkib4H2j36fVaEoT8nAZdV2Zyp3RinoSMWBmVD6FPVNRnqAqXbX2_IXiabOHFG2Sxh.mVNMOfCjkHfCZpLCKGg4Gkptu7lPmhAmF8O2B7vLK_Y',
-  '22PVSnw5sz95':'https://cdn.jobtread.com/G08AgBSh0kp4Ue_C5vw1QAF0d0EyTCHXqfh4Bkib4H2j36fVaEoT8nAZdV2Zyp3RinoSMWBmVD6FPVNRnqAqXbX2_IXiabOHFG2Sxh.mVNMOfCjkHfCZpLCKGg4Gkptu7lPmhAmF8O2B7vLK_Y',
-  '22PVSCAcunNJ':'https://cdn.jobtread.com/G08AgBSh0lpKTZ3Cn5K4Oi5oWUcECvLxLHXqLFuiMKMHkYi1bQIlT3Xj8Wuq0Yl0z9KuJM0r3L1Rh3Km6RM0Hp5TOJolxFiTg.nMJ_Bq_vTDIRkG1xG0yP6RVfZT0sJGMuoHqaEIHdSWk',
-  '22PVSCAcunNK':'https://cdn.jobtread.com/G08AgBSh0lpKTZ3Cn5K4Oi5oWUcECvLxLHXqLFuiMKMHkYi1bQIlT3Xj8Wuq0Yl0z9KuJM0r3L1Rh3Km6RM0Hp5TOJolxFiTg.nMJ_Bq_vTDIRkG1xG0yP6RVfZT0sJGMuoHqaEIHdSWk',
-  '22PVSCAcunNL':'https://cdn.jobtread.com/G08AgBSh0lpKTZ3Cn5K4Oi5oWUcECvLxLHXqLFuiMKMHkYi1bQIlT3Xj8Wuq0Yl0z9KuJM0r3L1Rh3Km6RM0Hp5TOJolxFiTg.nMJ_Bq_vTDIRkG1xG0yP6RVfZT0sJGMuoHqaEIHdSWk',
-  '22PVPA4XbxLK':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PPFWLyyfFk':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
-  '22PVPAc76cfU':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
-  '22PPFVEDBGuf':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
-  '22PPFVqFkepG':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
-  '22PNUVgrq9cs':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
-  '22PLy3vvsCHs':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
-  '22PNURteXhDX':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
-  '22PVSAzmQbWH':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0'
-};
+var IMG={};
 
 // ── DOOR HARDWARE ──
 var DOOR_PASS=[
@@ -635,49 +560,23 @@ var VALVES=[
 ];
 
 // ═══════════ HELPERS ═══════════
-function pImg(id){
-  var u=IMG[id];
-  if(u) return '<img class="pcard-img" src="'+u+'" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<div class=pcard-ph>📦</div>\'">';
-  return '<div class="pcard-ph">📦</div>';
-}
+
+var DESC={"22PVPKTZB6A7": "Kwikset Cove knob - Satin Nickel, hall/closet passage, Microban antimicrobial", "22PVPLmRRLGA": "Kwikset Balboa lever - Satin Nickel, hall/closet passage", "22PVPTFTuMJp": "Kwikset Tustin lever - Venetian Bronze, hall/closet passage", "22PPFiRxVCMd": "Kwikset Cove knob - Satin Nickel, bed/bath privacy with lock", "22PPJPLR8AAu": "Kwikset Cove knob - Matte Black, bed/bath privacy with lock", "22PPFiRvqpC8": "Polo knob - Venetian Bronze, bed/bath privacy with lock", "22PPFjNK2qMn": "Kwikset Balboa lever - Satin Nickel, bed/bath privacy with lock", "22PPJQicPsZU": "Kwikset Balboa lever - Matte Black, bed/bath privacy with lock", "22PVPuX7beu7": "Hampton Bay Flaxmere 12in - Brushed Nickel, 3-CCT LED flush mount", "22PVPuX7beu8": "Hampton Bay Flaxmere 12in - Matte Black, 3-CCT LED flush mount", "22PVPuX7beu9": "Hampton Bay Chilton 15in - Oil-Rubbed Bronze, adjustable CCT LED flush", "22PVPxpDcvV4": "Hampton Bay Flaxmere 14in - Brushed Nickel, selectable CCT LED flush", "22PVPxpDcvV5": "Hampton Bay Flaxmere 14in - Matte Black, selectable CCT LED flush", "22PVPuX7beuA": "HALO LT 5/6in retrofit kit - white baffle trim, 5-CCT, 750 lm", "22PVPuX7beuB": "EnviroLite 4in retrofit kit - white trim, daylight LED, slim profile", "22PVPuX7beuC": "Hampton Bay Ashhurst 3-light - Brushed Nickel, frosted glass vanity bar", "22PVPuX7beuD": "Hampton Bay Eastburn 3-light - Matte Black, clear glass, 22in vanity bar", "22PVPuX7beuE": "Hampton Bay Ashhurst 3-light - Oil-Rubbed Bronze, frosted glass vanity bar", "22PVPxpDcvV6": "Hampton Bay Marsden 4-light - Brushed Nickel, clear glass, 32.5in vanity bar", "22PVPxpDcvV7": "Hampton Bay Ashhurst 4-light - Oil-Rubbed Bronze, frosted glass, 32.75in", "22PVPyVmq8kS": "Hampton Bay Castleford 3-light - Oil-Rubbed Bronze chandelier, clear glass shades", "22PVPzxqgdYz": "Hampton Bay Southbourne 3-light - Matte Black farmhouse semi-flush, 15.5in", "22PVQ4skJPBQ": "Hampton Bay Moreland 5-light - Oil-Rubbed Bronze wagon wheel chandelier", "22PVQ5KgFvz2": "Hampton Bay Hastings 4-light - Oil-Rubbed Bronze vintage drum chandelier", "22PVPuX7beuF": "Feit A19 60W equiv - dimmable LED frosted, standard base E26", "22PVPuX7beuG": "Feit A19 60W equiv - filament clear glass, warm vintage look E26", "22PVQ4skJPBM": "Feit BA10 candelabra - 60W equiv filament, E12 base, chandelier/sconce", "22PVQ4skJPBN": "Feit G25 globe - 60W equiv filament clear, vanity/decorative E26", "22PVQ4skJPBP": "Feit G25 globe - 60W equiv filament white, vanity/decorative E26", "22PVTPwC2tQ2": "Moen Banbury 4-pc - Spot Resist Brushed Nickel: 24in bar, ring, TP holder, robe hook", "22PVTPwC2tQ3": "Moen Genta 3-pc - Matte Black: 24in towel bar, paper holder, towel ring", "22PVTPwC2tQ4": "Delta Porter 4-pc - Oil-Rubbed Bronze: 24in bar, ring, TP holder, towel hook", "22PVTXhdLTfs": "Moen Banbury faucet - Spot Resist Brushed Nickel, 4in centerset 2-handle, WaterSense, drain incl", "22PVTXhdLTft": "Moen Banbury faucet - Matte Black, 4in centerset 2-handle, WaterSense, drain included", "22PVTXwmntYs": "Moen Banbury faucet - Mediterranean Bronze, 4in centerset 2-handle, drain included", "22PVTYN2tzs9": "Moen Attract Magnetix - Brushed Nickel, 6-spray dual handheld+fixed, magnetic dock, 1.75 GPM", "22PVTYf7Rjhf": "Moen Attract Magnetix - Matte Black, 6-spray dual handheld+fixed, magnetic dock, 1.75 GPM", "22PVTYwYVTRS": "Moen Attract Magnetix - Mediterranean Bronze, 6-spray dual handheld+fixed, 1.75 GPM", "22PVTZAEcb6m": "BEMIS Weston - Elongated bowl, white, soft close, enameled wood, never loosens, chrome hinge", "22PVTZN7DzYg": "BEMIS Weston - Round bowl, white, soft close, enameled wood, never loosens, chrome hinge", "22PVWU72XDUt": "Franklin Brass Adjusta-Pull - Satin Nickel bar pull, adjustable 3 to 5in hole spacing", "22PVWU72XDUu": "Franklin Brass Adjusta-Pull - Matte Black bar pull, adjustable 3 to 5in hole spacing", "22PVWU72XDUv": "Franklin Brass Adjusta-Pull - Champagne Bronze bar pull, adjustable 3 to 5in hole spacing", "22PVVRMYQsFD": "Franklin Brass Fulton knob - Satin Nickel, 1-3/16in round cabinet knob", "22PVVRLi8q6Z": "Franklin Brass Fulton knob - Matte Black, 1-3/16in round cabinet knob", "22PMzpqhYMcA": "Franklin Brass knob - Champagne Bronze, 1-3/16in round cabinet knob", "22PLidsWNdYp": "SharkBite angle stop - 1/2in PTC x 7/8in ballcock x 12in, toilet water supply", "22PLictfFuRM": "SharkBite angle stop - 1/2in PTC x 3/8in compression quarter-turn, sink supply", "22PMzkaL2eTH": "BrassCraft supply line - 3/8in comp x 1/2in FIP x 30in, braided polymer faucet", "22PLihEi33Hz": "P-trap - 1-1/2in to 1-1/4in heavy duty plastic adjustable with reducing washer", "22PMzkaL2eTI": "Snappy Trap - 1-1/2in all-in-one drain kit for double bowl kitchen sink", "22PLihfEsfeL": "Escutcheon - 1/2in copper tube size flange, chrome-plated steel, small pipe cover", "22PVVRMCQsFA": "Escutcheon - 1-1/2in x 3in chrome-plated steel low-pattern flange, large pipe cover", "22PVScAuHEv7": "Floor register - 4x10 white steel, 2-way adjustable damper", "22PVSdyhK8Te": "Floor register - 4x8 white steel, 2-way adjustable (Everbilt)", "22PVSdyhK8Tg": "Floor register - 2x10 white steel, 2-way adjustable (Everbilt)", "22PVSdyhKVN2": "Floor register - 2x12 white steel, 2-way adjustable (Everbilt)", "22PVSdyhKVN4": "Floor register - 2x14 white steel, 2-way adjustable (Everbilt)", "22PVSf6QFNqJ": "Wall/ceiling register - 4x10 white steel, 2-way adjustable", "22PVSfMg5CAM": "Wall/ceiling register - 4x12 white steel, 2-way adjustable", "22PVSfaDBtaX": "Wall/ceiling register - 6x10 white steel, 2-way adjustable", "22PVSf6QFNqL": "Wall/ceiling register - 8x6 white steel, 2-way (Everbilt)", "22PVSg9vxALY": "Wall/ceiling register - 14x4 white steel, 2-way (Everbilt)", "22PVSg9vxALa": "Wall/ceiling register - 14x6 white steel, 2-way (Everbilt)", "22PVSnfWPtFy": "Honeywell Home X1N - non-programmable digital thermostat, simple 1-stage heat/cool", "22PVSnw5sz95": "Ecobee Smart Thermostat Essential - WiFi, app control, voice compatible", "22PVSCAcunNJ": "Kidde 10-year - Battery smoke+CO combo, 30CUD10, sealed lithium, no wiring needed", "22PVSCAcunNK": "Kidde 10-year - Battery smoke only, 20SD10, sealed lithium, no CO detection", "22PVSCAcunNL": "Kidde hardwired - Interconnected smoke, AA backup battery, 20SAR", "22PVPA4XbxLK": "CE Cover-Up plate - 1-gang duplex, white textured/paintable, hides old switch hole", "22PPFWLyyfFk": "CE Cover-Up plate - 1-gang duplex midway, white smooth finish", "22PVPAc76cfU": "CE Cover-Up plate - 1-gang toggle, white smooth finish", "22PPFVEDBGuf": "Leviton wall plate - 1-gang duplex outlet, white midway nylon", "22PPFVqFkepG": "Leviton wall plate - 2-gang duplex outlet, white midway nylon", "22PTpnC9hXqY": "Leviton wall plate - 3-gang rocker switch, white midway nylon", "22PPFWuxJFdF": "Leviton wall plate - 1-gang blank, white midway nylon (covers unused box)", "22PNUST7QMYH": "Leviton wall plate - 1-gang decora jumbo, white (larger coverage area)", "22PVQBeygdHx": "Leviton wall plate - 2-gang rocker switch, white midway nylon", "22PVP8cdJrAY": "Leviton wall plate - 3-gang toggle switch, white midway nylon", "22PPFXrjWyXi": "Leviton wall plate - coaxial cable/F-connector, white", "22PNUVgrq9cs": "Leviton TR outlet - 15A tamper-resistant decora duplex receptacle, white", "22PLy3vvsCHs": "Leviton GFCI outlet - 15A self-test SmartlockPro, white (wet areas/bathrooms)", "22PNURteXhDX": "Leviton single-pole switch - 15A decora, white, 5601-2WS", "22PTpjEDhV7g": "Leviton 3-way switch - 15A decora, white, for multi-location control", "22PVSAzmQbWH": "Leviton SureSlide dimmer - LED/CFL/incandescent, single or 3-way, white", "22PVS9JJ4Gwq": "Leviton standard outlet - 15A duplex 5320-W, white (direct broken swap)", "22PVS9bfvz7a": "Leviton toggle switch - 15A standard 1451-2W, white (direct broken swap)"};
+
 function mkPcard(item,selId,groupSel,rid){
   var isSel=rid?getR(rid)[selId]===item.id:false;
-  return '<div class="pcard'+(isSel?' on':'')+'" onclick="selProd(\''+rid+'\',\''+selId+'\',\''+item.id+'\',this,\''+groupSel+'\')">'
-    +pImg(item.id)
-    +'<div class="pcard-info"><div class="pcard-name">'+item.name+'</div>'
+  var desc=DESC[item.id]||item.name;
+  return '<div class="pcard'+(isSel?' pcard-on':'')+'" onclick="selProd(\''+rid+'\',\''+selId+'\',\''+item.id+'\',this,\''+groupSel+'\')">'
+    +'<div class="pcard-body">'
+    +'<div class="pcard-name">'+item.name+'</div>'
+    +'<div class="pcard-desc">'+desc+'</div>'
     +'<div class="pcard-price">$'+item.price.toFixed(2)+'</div>'
-    +(item.fin?'<div class="pcard-fin">'+item.fin+'</div>':'')
-    +'</div><div class="pcard-chk">✓ Selected</div></div>';
+    +'</div>'
+    +'<div class="pcard-sel-mark">&#10003;</div>'
+    +'</div>';
 }
-function qRow(rid,key,lbl,sub){
-  var r=getR(rid),v=r[key]||0;
-  return '<div class="qrow"><div class="qlbl">'+lbl+(sub?'<span class="qlbl-sub">'+sub+'</span>':'')+'</div>'
-    +'<div class="qctrl"><button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\''+',-1)">−</button>'
-    +'<div class="qval" id="qv-'+rid+'-'+key+'">'+v+'</div>'
-    +'<button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\',1)">+</button></div></div>';
-}
-function togRow(rid,key,lbl,sub,showId){
-  var r=getR(rid),v=r[key]?'checked':'';
-  var si=showId?' onchange="showHide(\''+showId+'\',this.checked)"':'';
-  return '<div class="trow"><div class="tlbl">'+lbl+(sub?'<span class="tlbl-sub">'+sub+'</span>':'')+'</div>'
-    +'<label class="tog"><input type="checkbox" '+v+si+' onchange="setRV(\''+rid+'\',\''+key+'\',this.checked)">'
-    +'<span class="tog-sl"></span></label></div>';
-}
-function getR(rid){return S.rooms.find(function(r){return r.id===rid;})||{};}
-function setRV(rid,key,val){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
-function adjR(rid,key,d){
-  var r=getR(rid);if(!r)return;
-  r.d[key]=Math.max(0,(r.d[key]||0)+d);
-  var el=document.getElementById('qv-'+rid+'-'+key);
-  if(el)el.textContent=r.d[key];
-  updSum(rid);
-}
-function adjH(id,d){
-  HW[id]=Math.max(0,(HW[id]||1)+d);
-  var el=document.getElementById(id);
-  if(el)el.textContent=HW[id];
-}
-function showHide(id,show){var el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+
+
 function selProd(rid,key,val,el,grp){
   if(rid){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
   var container=el.parentNode;
@@ -977,22 +876,10 @@ function bldRoom(r){
 
   // ── LAUNDRY ──
   if(r.type==='laundry'){
-    s+='<div class="sh">🧺 Laundry Plumbing</div>';
-    s+=qRow(r.id,'angleStopQty','Angle Stops (washer valves)','');
-    s+=qRow(r.id,'supplyLineQty','Supply Lines','');
-  }
-
-  // NOTES
-  // PHOTOS
-  s+='<div class="sh">📷 Room Photos</div>';
-  s+='<div class="photo-status" id="pstat-'+r.id+'">Tap + to add photos</div>';
-  s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
-  s+='<button type="button" class="photo-add" onclick="document.getElementById(\'pinput-'+r.id+'\').click()" style="-webkit-appearance:none;">'+'<span class="photo-add-icon">📷</span><span>Add Photo</span></button>';
-  s+='<input type="file" accept="image/*" capture="environment" id="pinput-'+r.id+'" style="display:none" onchange="handlePhoto(\"'+r.id+'\",this)">';
-
-  s+='<div class="sh">📝 Notes</div>';
+    s+='<div class="sh">📝 Notes</div>';
   s+='<textarea placeholder="Room notes, flags, conditions..." onchange="setRV(\''+r.id+'\',\'notes\',this.value)">'+(d.notes||'')+'</textarea>';
 
+  }
   return '<div class="rcard" id="rcard-'+r.id+'">'
     +'<div class="rcard-hdr" id="rhdr-'+r.id+'" onclick="togRoom(\''+r.id+'\')">'
     +'<span class="rcard-icon">'+r.icon+'</span>'
@@ -1247,25 +1134,6 @@ async function pushToJT(){
       }catch(e){jl('RENDR link: '+e.message,'err');}
     }
 
-    // Post walk photos immediately (while grant key has fresh job access)
-    var _totalPics=0;
-    for(var _pi=0;_pi<S.rooms.length;_pi++){
-      var _pr=S.rooms[_pi];
-      if(!_pr.photos||!_pr.photos.length) continue;
-      for(var _pj=0;_pj<_pr.photos.length;_pj++){
-        var _ph=_pr.photos[_pj];
-        if(!_ph||!_ph.url) continue;
-        try{
-          var _msg='[Walk Photo] '+_pr.name+' #'+(_pj+1)+': '+_ph.url;
-          await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:_msg,isPinned:false,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
-          _totalPics++;
-        }catch(_e){jl('Photo '+_pr.name+' #'+(_pj+1)+': '+_e.message,'err');}
-      }
-    }
-    if(_totalPics>0) jl('\u2713 '+_totalPics+' walk photo'+(_totalPics!==1?'s':'')+' saved to job','ok');
-
-
-    // 4c. Photos posted right after job creation
     
     // 5. LOCATION FIELDS
     if(locId&&access){
@@ -1415,78 +1283,7 @@ async function pushToJT(){
 }
 
 // ═══════════ INIT ═══════════
-// ═══════════ PHOTOS ═══════════
-var IMGBB_KEY = 'b8468e0310bc7c2bc4dfbdde92c87e90'; // Replace with your imgbb API key
 
-function triggerPhoto(rid){
-  var inp=document.getElementById('pinput-'+rid);
-  if(inp)inp.click();
-}
-
-
-async function handlePhoto(rid,input){
-  if(!input.files||!input.files.length)return;
-  var file=input.files[0];
-  input.value='';
-  var room=S.rooms.find(function(r){return r.id===rid;});
-  if(!room)return;
-  if(!room.photos)room.photos=[];
-  var stat=document.getElementById('pstat-'+rid);
-  if(stat){stat.textContent='Uploading...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
-  try{
-    var b64=await new Promise(function(res,rej){
-      var reader=new FileReader();
-      reader.onload=function(e){res(e.target.result.split(',')[1]);};
-      reader.onerror=function(){rej(new Error('Could not read photo'));};
-      reader.readAsDataURL(file);
-    });
-    var params=new URLSearchParams();
-    params.append('key',IMGBB_KEY);
-    params.append('image',b64);
-    params.append('name','lmc-'+rid.slice(-4)+'-'+Date.now());
-    var resp=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:params});
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    var result=await resp.json();
-    if(result.success&&result.data&&result.data.url){
-      var url=result.data.url;
-      var thumb=result.data.thumb?result.data.thumb.url:url;
-      room.photos.push({url:url,thumb:thumb,room:room.name});
-      renderPhotos(rid);
-      var n=room.photos.length;
-      if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' ready';stat.style.color='green';stat.style.fontWeight='bold';}
-    } else {
-      throw new Error(result.error?result.error.message:'Upload rejected');
-    }
-  }catch(e){
-    if(stat){stat.textContent='\u274c '+e.message;stat.style.color='red';stat.style.fontWeight='bold';}
-    console.error('Photo:',e.message);
-  }
-}
-
-function renderPhotos(rid){
-  var room=S.rooms.find(function(r){return r.id===rid;});
-  if(!room||!room.photos)return;
-  var grid=document.getElementById('pgrid-'+rid);
-  if(!grid)return;
-  grid.innerHTML=room.photos.map(function(p,i){
-    return '<div class="photo-thumb">'
-      +'<img src="'+p.thumb+'" loading="lazy">'
-      +'<button class="photo-del" onclick="delPhoto(\"'+rid+'\",'+i+')">×</button>'
-      +'</div>';
-  }).join('');
-}
-
-function delPhoto(rid,idx){
-  var room=S.rooms.find(function(r){return r.id===rid;});
-  if(!room||!room.photos)return;
-  room.photos.splice(idx,1);
-  renderPhotos(rid);
-  var stat=document.getElementById('pstat-'+rid);
-  var n=room.photos.length;
-  if(stat)stat.textContent=n?n+' photo'+(n!==1?'s':''):'Tap + to add photos';
-}
-
-// RENDR deep link
 function openRendr(){
   // Try RENDR app deep link first, fallback to website
   var ua=navigator.userAgent.toLowerCase();
