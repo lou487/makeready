@@ -535,7 +535,7 @@ var ELEC={
     {id:'22PNUST7QMYH',name:'1-Gang Decora Jumbo Plate',price:2.51},
     {id:'22PVQBeygdHx',name:'2-Gang Rocker Switch Plate',price:3.07},
     {id:'22PVP8cdJrAY',name:'3-Gang Rocker/Toggle Plate',price:5.90},
-    {id:'22PPFWuxJFdF',name:'Phone Jack Plate',price:6.17},
+    {id:'22PPhoneJackID',name:'Phone Jack Plate',price:6.17},
     {id:'22PPFXrjWyXi',name:'Coaxial Cable Plate',price:6.04}
   ],
   decora:[
@@ -704,14 +704,16 @@ function updSum(rid){
   var r=getR(rid);if(!r)return;
   var d=r.d,p=[];
   if(d.paintTier)p.push('T'+d.paintTier+' Paint');
-  if(d.doorQty)p.push(d.doorQty+' Door HW');
-  if(d.flushId)p.push('Fixture');
-  if(d.can6Qty||d.can4Qty)p.push('Cans');
+  var dqty=(d.passageQty||0)+(d.privacyQty||0)+(d.entryQty||0);
+  if(dqty>0)p.push(dqty+' Door HW');
+  if((d.flushQty||0)>0)p.push(d.flushQty+' Fixture');
+  if((d.can6Qty||0)>0||(d.can4Qty||0)>0)p.push('Cans');
   if(d.faucet)p.push('Faucet');
   if(d.bathHW)p.push('Bath HW');
   if(d.toiletSeat)p.push('Toilet Seat');
   if(d.showerHead)p.push('Shower');
-  if(d.cabPullId)p.push('Cabinet HW');
+  var cqty=(d.drawerPullQty||0)+(d.doorPullQty||0);
+  if(cqty>0)p.push(cqty+' Cab HW');
   var el=document.getElementById('rsum-'+rid);
   if(el)el.textContent=p.length?p.join(' · '):'Tap to expand';
 }
@@ -1010,21 +1012,25 @@ function bldReview(){
     var d=r.d;
     h+='<div class="card"><div class="ctitle">'+r.icon+' '+r.name+'</div><div style="font-size:11px;line-height:1.9;color:#444;">';
     if(d.paintTier)h+='Paint: Tier '+d.paintTier+'<br>';
-    if(d.doorType&&d.doorQty)h+='Door HW: '+d.doorQty+' '+d.doorType+'<br>';
-    if(d.flushId)h+='Ceiling Fixture: Yes (qty '+d.flushQty+')<br>';
-    if(d.can6Qty)h+='6" Can Retrofit: '+d.can6Qty+'<br>';
-    if(d.can4Qty)h+='4" Can Retrofit: '+d.can4Qty+'<br>';
-    if(d.bulbQty)h+='Bulb Packs: '+d.bulbQty+'<br>';
+    var dqty=(d.passageQty||0)+(d.privacyQty||0)+(d.entryQty||0);
+    if(dqty>0)h+='Door HW: '+dqty+' Total<br>';
+    if(d.flushQty>0)h+='Ceiling Fixture: '+d.flushQty+'<br>';
+    if(d.can6Qty>0)h+='6" Can Retrofit: '+d.can6Qty+'<br>';
+    if(d.can4Qty>0)h+='4" Can Retrofit: '+d.can4Qty+'<br>';
+    if(d.decoId)h+='Decorative Fixture: Yes<br>';
+    if(d.bulbQty>0)h+='Bulb Packs: '+d.bulbQty+'<br>';
     if(d.smokeId)h+='Smoke/CO Detector: Yes<br>';
-    if(d.regId&&d.regQty)h+='Register: '+d.regQty+'<br>';
-    if(d.carPaint||d.carReplace)h+='Cold Air Return: '+(d.carPaint?'Paint ':'')+(d.carReplace?'Replace ':'')+' ('+d.carQty+')<br>';
+    if(d.regQty>0)h+='Register: '+d.regQty+'<br>';
+    if(d.carPaint||d.carReplace)h+='Cold Air Return: '+(d.carPaint?'Paint ':'')+(d.carReplace?'Replace ':'')+' ('+(d.carQty||1)+')<br>';
+    if(d.hasVanityLight)h+='Vanity Light: Yes<br>';
     if(d.faucet)h+='Faucet: Yes<br>';
     if(d.bathHW)h+='Bath HW: Yes<br>';
     if(d.toiletSeat)h+='Toilet Seat: Yes<br>';
     if(d.valve)h+='Valve: '+d.valve+'<br>';
     if(d.showerHead)h+='Shower Head: Yes<br>';
-    if(d.cabPullId)h+='Cabinet Pulls ('+d.holeSpacing+'): Drawer='+d.drawerPullQty+' Door='+d.doorPullQty+'<br>';
-    if(d.angleStopQty)h+='Angle Stops: '+d.angleStopQty+'<br>';
+    var cqty=(d.drawerPullQty||0)+(d.doorPullQty||0);
+    if(cqty>0)h+='Cabinet Pulls: '+cqty+'<br>';
+    if(d.angleStopQty>0)h+='Angle Stops: '+d.angleStopQty+'<br>';
     if(d.notes)h+='Notes: '+d.notes+'<br>';
     h+='</div></div>';
   });
@@ -1169,7 +1175,7 @@ async function pushToJT(){
     if(j.errors)throw new Error(JSON.stringify(j.errors));
     return j;
   }
-  function gc(r,k){var d=r.data||r,n=d[k]||{};return n.createdAccount||n.createdLocation||n.createdJob||n.createdContact||n.createdCostGroup||n.createdCostItem||n.createdDocument||n.createdComment||n.createdDailyLog||n;}
+  function gc(r,k){var d=r.data||r,n=d[k]||{};return n.createdAccount||n.createdLocation||n.createdJob||n.createdContact||n.createdCostGroup||n.createdCostItem||n.createdDocument||n.createdComment||n;}
 
   var addr=(document.getElementById('f-addr').value||'').trim()||'[Address]';
   var seller=(document.getElementById('f-seller').value||'').trim()||'Client';
@@ -1208,7 +1214,20 @@ async function pushToJT(){
     if(!locId)throw new Error('Cannot create job — location failed. Enter a valid address.');
     jl('Creating job...','info');
     var roomDesc=S.rooms.map(function(r){return r.name+(r.d.paintTier?' T'+r.d.paintTier:'');}).join(', ');
-    var desc='PRE-LISTING MARKET PREP\nFinish: '+finName+'\nRooms: '+roomDesc+(walknotes?'\nNotes: '+walknotes:'');
+    
+    // PHOTOS COMPILED DIRECTLY INTO JOB DESCRIPTION
+    var photoLines = [];
+    S.rooms.forEach(function(r) {
+      if (r.photos) {
+        r.photos.forEach(function(p, idx) {
+          photoLines.push(r.name + ' Photo ' + (idx+1) + ': ' + p.url);
+        });
+      }
+    });
+    var photoText = photoLines.length > 0 ? '\n\n--- WALK PHOTOS ---\n' + photoLines.join('\n') : '';
+
+    var desc='PRE-LISTING MARKET PREP\nFinish: '+finName+'\nRooms: '+roomDesc+(walknotes?'\nNotes: '+walknotes:'') + photoText;
+    
     var jobName=(addr.split(',')[0]||addr).substring(0,26)+' MP';
     var jcf={'Sales Rep':'Lou','Status':'New Lead'};
     if(listd)jcf['Target List Date']=listd;
@@ -1220,6 +1239,7 @@ async function pushToJT(){
     var jobId=gc(r3,'createJob').id;
     if(!jobId)throw new Error('No job ID');
     jl('Job created: '+jobName,'ok');
+    if (photoLines.length > 0) jl('\u2713 ' + photoLines.length + ' walk photo(s) injected into Job Description', 'ok');
 
     // 4. CONTACTS
     if(phone||email){
@@ -1238,25 +1258,6 @@ async function pushToJT(){
       }catch(e){jl('RENDR link: '+e.message,'err');}
     }
 
-    // 4c. Post walk photos as a Daily Log 
-    var photoLines = [];
-    for(var _pi=0;_pi<S.rooms.length;_pi++){
-      var _pr=S.rooms[_pi];
-      if(!_pr.photos||!_pr.photos.length) continue;
-      for(var _pj=0;_pj<_pr.photos.length;_pj++){
-        var _ph=_pr.photos[_pj];
-        if(_ph&&_ph.url) photoLines.push(_pr.name+' #'+(_pj+1)+': '+_ph.url);
-      }
-    }
-    if(photoLines.length>0){
-      try{
-        var dlNotes = 'Walk Photos:\n' + photoLines.join('\n');
-        var todayISO = new Date().toISOString().split('T')[0];
-        await jtQ({createDailyLog:{'$':{jobId:jobId,date:todayISO,notes:dlNotes},createdDailyLog:{id:{}}}});
-        jl('\u2713 '+photoLines.length+' walk photo(s) saved to daily log','ok');
-      }catch(_e){jl('\u26a0 Photo log error: '+_e.message,'err');}
-    }
-    
     // 5. LOCATION FIELDS
     if(locId&&access){
       try{
@@ -1320,24 +1321,42 @@ async function pushToJT(){
       var rn=r.name;
       function addRI(id,qty,grp,name){if(id&&qty>0)roomItems.push({id:id,qty:qty,grp:grp,name:rn+' \u2014 '+name,room:rn});}
 
-      // Door hardware — all three types
-      if(d.passageId&&d.passageQty>0)addRI(d.passageId,d.passageQty,G.door,'Passage Hardware');
-      if(d.privacyId&&d.privacyQty>0)addRI(d.privacyId,d.privacyQty,G.door,'Privacy Hardware');
-      if(d.entryId&&d.entryQty>0)addRI(d.entryId,d.entryQty,G.door,'Entry Hardware');
-      // Flush mount
-      if(d.flushId&&d.flushQty>0)addRI(d.flushId,d.flushQty,G.light,'Ceiling Fixture');
-      // Cans
-      if(d.can6Qty>0)addRI(CAN6.id,d.can6Qty,G.light,'6" Can Retrofit');
-      if(d.can4Qty>0)addRI(CAN4.id,d.can4Qty,G.light,'4" Can Retrofit');
+      // Default Finish Logic
+      var fIdx = S.finish;
+      var dfPass = DOOR_PASS[fIdx].id;
+      var dfPriv = DOOR_PRIV[fIdx].id;
+      var dfEnt = DOOR_ENTRY[fIdx].id;
+      var dfFlush = (FLUSH[fIdx]||FLUSH[0])[0].id;
+      var dfVan = (VANITY[fIdx]||VANITY[0])[0].id;
+      var dfFau = BATH_FAU[fIdx].id;
+      var dfBhw = BATH_HW[fIdx].id;
+      var dfSh = SHOWER_H[fIdx].id;
+      var dfCab = CAB_PULL[fIdx].id;
+
+      // Door hardware
+      if(d.passageQty>0)addRI(d.passageId||dfPass, d.passageQty, G.door, 'Passage Hardware');
+      if(d.privacyQty>0)addRI(d.privacyId||dfPriv, d.privacyQty, G.door, 'Privacy Hardware');
+      if(d.entryQty>0)addRI(d.entryId||dfEnt, d.entryQty, G.door, 'Entry Hardware');
+      
+      // Flush mount & Cans
+      if(d.flushQty>0)addRI(d.flushId||dfFlush, d.flushQty, G.light, 'Ceiling Fixture');
+      if(d.can6Qty>0)addRI(CAN6.id, d.can6Qty, G.light, '6" Can Retrofit');
+      if(d.can4Qty>0)addRI(CAN4.id, d.can4Qty, G.light, '4" Can Retrofit');
+      
       // Decorative
-      if(d.decoId)addRI(d.decoId,1,G.light,'Decorative Fixture');
+      if(d.decoId)addRI(d.decoId, 1, G.light, 'Decorative Fixture');
+      
       // Bulbs
-      if(d.bulbId&&d.bulbQty>0)addRI(d.bulbId,d.bulbQty,G.bulbs,'Bulbs');
+      if(d.bulbQty>0)addRI(d.bulbId||BULBS[0].id, d.bulbQty, G.bulbs, 'Bulbs');
+      
       // Smoke/CO
-      if(d.smokeId)addRI(d.smokeId,1,G.smoke,'Smoke/CO Detector');
+      if(d.smokeId)addRI(d.smokeId, 1, G.smoke, 'Smoke/CO Detector');
+      
       // Register
-      if(d.regId&&d.regQty>0)addRI(d.regId,d.regQty,G.consumables,'Register');
-      // Cold air return handled house-wide
+      if(d.regQty>0){
+        var dfReg = (d.regType==='floor' ? REG_FL[0].id : REG_WL[0].id);
+        addRI(d.regId||dfReg, d.regQty, G.consumables, 'Register');
+      }
 
       // Electrical devices
       ELEC.coverUp.forEach(function(item){if(d['cup_'+item.id]>0)addRI(item.id,d['cup_'+item.id],G.device,'Cover-Up: '+item.name);});
@@ -1346,12 +1365,13 @@ async function pushToJT(){
       ELEC.standard.forEach(function(item){if(d['std_'+item.id]>0)addRI(item.id,d['std_'+item.id],G.device,'Std: '+item.name);});
 
       // Bath
-      if(d.vanityId&&d.hasVanityLight)addRI(d.vanityId,1,G.light,'Vanity Light Bar');
-      if(d.faucetId)addRI(d.faucetId,1,G.plumbing,'Faucet');
-      if(d.bathHWId)addRI(d.bathHWId,1,G.plumbing,'Bath Hardware Set');
-      if(d.toiletSeatId)addRI(d.toiletSeatId,1,G.plumbing,'Toilet Seat');
-      if(d.showerHeadId)addRI(d.showerHeadId,1,G.plumbing,'Shower Head');
-      if(d.tubSpout)addRI('22PVVRcJQ6pd',1,G.plumbing,'Tub Spout — Verify');
+      if(d.hasVanityLight)addRI(d.vanityId||dfVan, 1, G.light, 'Vanity Light Bar');
+      if(d.faucet)addRI(d.faucetId||dfFau, 1, G.plumbing, 'Faucet');
+      if(d.bathHW)addRI(d.bathHWId||dfBhw, 1, G.plumbing, 'Bath Hardware Set');
+      if(d.toiletSeat)addRI(d.toiletSeatId||TOILET_S[0].id, 1, G.plumbing, 'Toilet Seat');
+      if(d.showerHead)addRI(d.showerHeadId||dfSh, 1, G.plumbing, 'Shower Head');
+      if(d.tubSpout)addRI('22PVVRcJQ6pd', 1, G.plumbing, 'Tub Spout — Verify');
+      
       // Plumbing trim
       if(d.angleStopQty>0)addRI(PLB.angleStop.id,d.angleStopQty,G.plumbing,'Angle Stops');
       if(d.toiletAngleQty>0)addRI(PLB.toiletAngle.id,d.toiletAngleQty,G.plumbing,'Toilet Angle Stops');
@@ -1359,8 +1379,11 @@ async function pushToJT(){
       if(d.ptrap)addRI(PLB.ptrap.id,1,G.plumbing,'P-Trap');
       if(d.escutcheonQty>0)addRI(PLB.escutcheon.id,d.escutcheonQty,G.plumbing,'Escutcheons');
       if(d.popUpDrain)addRI(PLB.popUpDrain.id,1,G.plumbing,'Pop-Up Drain');
+      
       // Kitchen
-      if(d.cabPullId){var pqty=(d.drawerPullQty||0)+(d.doorPullQty||0);if(pqty>0)addRI(d.cabPullId,pqty,G.cabinet,'Cabinet Pulls ('+d.holeSpacing+')');}
+      var cqty=(d.drawerPullQty||0)+(d.doorPullQty||0);
+      if(cqty>0)addRI(d.cabPullId||dfCab, cqty, G.cabinet, 'Cabinet Pulls ('+(d.holeSpacing||'Not measured')+')');
+      
       if(d.sinkStrainer)addRI(PLB.sinkStrainer.id,1,G.plumbing,'Sink Strainer');
       if(d.dishwasher)addRI(PLB.dishwasher.id,1,G.plumbing,'Dishwasher Line');
       if(d.snappyTrap)addRI(PLB.snappyTrap.id,1,G.plumbing,'Snappy Trap Kit');
@@ -1412,7 +1435,6 @@ function triggerPhoto(rid){
   var inp=document.getElementById('pinput-'+rid);
   if(inp)inp.click();
 }
-
 
 async function handlePhoto(rid,input){
   if(!input.files||!input.files.length)return;
@@ -1484,22 +1506,3 @@ function openRendr(){
   var isIOS=/iphone|ipad|ipod/.test(ua);
   if(isIOS){
     // Try to open RENDR app, fallback to App Store
-    window.location='rendr://';
-    setTimeout(function(){
-      window.location='https://apps.apple.com/us/app/rendr/id1439499554';
-    },1500);
-  } else if(isAndroid){
-    window.location='https://play.google.com/store/apps/details?id=com.rendr.app';
-  } else {
-    window.open('https://cloud.rendr.com','_blank');
-  }
-}
-
-document.addEventListener('DOMContentLoaded',function(){
-  initHWToggles();
-  bldThermGrid();
-  document.addEventListener('touchstart',function(){},{passive:true});
-});
-</script>
-</body>
-</html>
