@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>LMC Make Ready</title>
+<style>
+:root{
+  --red:#B32025;--red2:#8a1a1d;--bg:#f2f0ec;--card:#fff;
+  --border:#e0ddd8;--muted:#888;--text:#1a1a1a;
+  --green:#2d6a2d;--orange:#c96a00;--blue:#1a4a8a;
+  --r:10px;--sh:0 2px 10px rgba(0,0,0,.07);
+  --sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;padding-bottom:90px;}
+
+/* HEADER */
+.hdr{background:var(--red);color:#fff;padding:12px 16px;display:flex;align-items:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.hdr-logo{font-size:17px;font-weight:800;letter-spacing:.3px;}
+.hdr-sub{font-size:10px;opacity:.7;margin-top:1px;}
+.hdr-step{margin-left:auto;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;}
+
+/* TABS */
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:50px;z-index:199;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{flex:1;min-width:56px;padding:8px 2px 6px;text-align:center;font-size:9px;font-weight:700;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;}
+.tab.on{color:var(--red);border-bottom-color:var(--red);}
+.tab span{display:block;font-size:17px;margin-bottom:2px;}
+
+/* PAGES */
+.pg{display:none;padding:10px 10px 16px;}
+.pg.on{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:12px;margin-bottom:8px;box-shadow:var(--sh);}
+.ctitle{font-weight:800;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ctitle-icon{font-size:15px;}
+
+/* FORM */
+.fg{margin-bottom:9px;}
+.lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:block;}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;font-family:var(--sans);background:#fff;color:var(--text);-webkit-appearance:none;appearance:none;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);}
+textarea{resize:none;min-height:56px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+
+/* FINISH */
+.fin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.fin-opt{border:2px solid var(--border);border-radius:8px;padding:10px 4px;text-align:center;cursor:pointer;}
+.fin-opt.on{border-color:var(--red);background:#fff5f5;}
+.swatch{width:30px;height:30px;border-radius:50%;margin:0 auto 5px;border:2px solid rgba(0,0,0,.1);}
+.sw-sn{background:radial-gradient(circle at 35% 35%,#e8e4d8,#a8a49c,#8a8680);}
+.sw-mb{background:radial-gradient(circle at 35% 35%,#444,#222,#111);}
+.sw-vb{background:radial-gradient(circle at 35% 35%,#8b6914,#5c4409,#3d2c06);}
+.fin-name{font-size:11px;font-weight:700;}
+.fin-sub{font-size:9px;color:var(--muted);}
+
+/* ROOM CHIPS */
+.rtype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+.rchip{border:1.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;background:#fff;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.rchip span{display:block;font-size:20px;margin-bottom:3px;}
+.rchip:active{background:#f5f5f5;}
+
+/* ROOM CARDS */
+.rcard{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;box-shadow:var(--sh);}
+.rcard-hdr{display:flex;align-items:center;padding:10px 12px;gap:8px;cursor:pointer;}
+.rcard-icon{font-size:22px;}
+.rcard-name{font-weight:800;font-size:14px;flex:1;}
+.rcard-sum{font-size:10px;color:var(--muted);margin-top:1px;}
+.rcard-body{padding:12px;border-top:1px solid var(--border);display:none;}
+.rcard-body.on{display:block;}
+.rcard-arrow{color:var(--muted);font-size:18px;transition:.2s;}
+.rcard-hdr.open .rcard-arrow{transform:rotate(90deg);}
+
+/* SECTION HEADERS */
+.sh{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;}
+
+/* PAINT TIERS */
+.pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px;}
+.pt{border:2px solid var(--border);border-radius:7px;padding:7px 4px;text-align:center;cursor:pointer;background:#fff;}
+.pt.on{border-color:var(--red);background:#fff5f5;}
+.pt-lbl{font-size:12px;font-weight:800;color:var(--red);}
+.pt-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* PRODUCT GRID */
+.pg2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px;}
+.pg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;}
+.pcard{border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff;transition:border-color .15s;}
+.pcard.on{border-color:var(--red);}
+.pcard-img{width:100%;aspect-ratio:1;object-fit:contain;background:#f8f7f4;padding:6px;}
+.pcard-ph{width:100%;aspect-ratio:1;background:#f0ede8;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.pcard-info{padding:5px 7px 7px;}
+.pcard-name{font-size:10px;font-weight:600;line-height:1.3;margin-bottom:2px;}
+.pcard-price{font-size:11px;color:var(--red);font-weight:800;}
+.pcard-fin{font-size:9px;color:var(--muted);}
+.pcard-chk{display:none;background:var(--red);color:#fff;text-align:center;font-size:9px;font-weight:800;padding:3px;}
+.pcard.on .pcard-chk{display:block;}
+
+/* QTY */
+.qrow{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.qlbl{flex:1;font-size:12px;font-weight:600;}
+.qlbl-sub{font-size:10px;color:var(--muted);font-weight:400;display:block;}
+.qctrl{display:flex;align-items:center;}
+.qbtn{width:30px;height:30px;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.qbtn:first-child{border-radius:7px 0 0 7px;}
+.qbtn:last-child{border-radius:0 7px 7px 0;}
+.qval{width:34px;height:30px;border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);border-left:none;border-right:none;text-align:center;font-size:13px;font-weight:800;background:#fff;display:flex;align-items:center;justify-content:center;}
+
+/* TOGGLE */
+.trow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #f0ede8;gap:8px;}
+.trow:last-child{border-bottom:none;}
+.tlbl{flex:1;font-size:12px;font-weight:600;}
+.tlbl-sub{font-size:10px;color:var(--muted);display:block;font-weight:400;}
+.tog{position:relative;width:42px;height:24px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.tog-sl{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:.2s;}
+.tog-sl:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+.tog input:checked+.tog-sl{background:var(--red);}
+.tog input:checked+.tog-sl:before{transform:translateX(18px);}
+
+/* VALVE */
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.vopt{border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;cursor:pointer;background:#fff;}
+.vopt.on{border-color:var(--red);background:#fff5f5;}
+.vopt.danger.on{border-color:var(--orange);background:#fff8f0;}
+.vname{font-size:11px;font-weight:700;margin-bottom:2px;}
+.vsub{font-size:9px;color:var(--muted);}
+.vbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;display:inline-block;margin-top:3px;}
+.vb-ok{background:#e8f5e8;color:var(--green);}
+.vb-chk{background:#fff3e0;color:var(--orange);}
+.vb-no{background:#fce8e8;color:var(--red);}
+
+/* ELEC SUB-SECTIONS */
+.esub{background:#f8f7f4;border-radius:8px;padding:8px 10px;margin-bottom:6px;}
+.esub-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+
+/* ALERTS */
+.a-info{background:#e8f0fb;color:var(--blue);border:1px solid #b8d0f0;padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;line-height:1.5;}
+.a-warn{background:#fff8e8;color:var(--orange);border:1px solid #f0d890;padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;line-height:1.5;}
+.a-ok{background:#e8f5e8;color:var(--green);border:1px solid #a8d8a8;padding:9px 11px;border-radius:8px;font-size:11px;margin-bottom:8px;}
+
+/* LOG */
+#jt-log{display:none;margin-top:10px;background:#111;border-radius:8px;padding:10px;max-height:260px;overflow-y:auto;}
+#jt-log .ok{color:#4caf50;font-size:11px;padding:1px 0;}
+#jt-log .err{color:#f44336;font-size:11px;padding:1px 0;}
+#jt-log .info{color:#90caf9;font-size:11px;padding:1px 0;}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px;border:none;border-radius:9px;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--sans);}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:disabled{background:#ccc;}
+.btn-out{background:transparent;border:2px solid var(--red);color:var(--red);}
+.btn-sm{padding:7px 12px;font-size:11px;width:auto;border-radius:7px;}
+
+/* SIG */
+#sig-c{display:block;width:100%;height:110px;border:2px dashed var(--border);border-radius:8px;background:#fafaf8;touch-action:none;}
+
+/* MIC */
+
+/* PHOTOS */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;background:#f0ede8;}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.photo-add{aspect-ratio:1;border-radius:7px;border:2px dashed var(--border);background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);gap:4px;}
+.photo-add-icon{font-size:24px;}
+.photo-uploading{opacity:.5;}
+.photo-status{font-size:13px;color:#666;margin:4px 0 6px 0;min-height:18px;transition:color 0.3s;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+
+/* BOT NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;padding:8px 10px;gap:8px;z-index:198;}
+.bbtn{flex:1;padding:10px;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:var(--sans);}
+.bb-back{background:#ede9e4;color:var(--text);}
+.bb-next{background:var(--red);color:#fff;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div><div class="hdr-logo">LMC Contracting</div><div class="hdr-sub">Make Ready — Site Survey</div></div>
+  <div class="hdr-step" id="hdr-step">1 / 5</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab on" onclick="goTo(0)"><span>📋</span>Client</button>
+  <button class="tab" onclick="goTo(1)"><span>🏠</span>Rooms</button>
+  <button class="tab" onclick="goTo(2)"><span>🚶</span>Walk</button>
+  <button class="tab" onclick="goTo(3)"><span>👁</span>Review</button>
+  <button class="tab" onclick="goTo(4)"><span>✍️</span>Push</button>
+</div>
+
+<div class="pg on" id="pg0">
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏡</span>Property</div>
+    <div class="fg"><label class="lbl">Property Address</label><input type="text" id="f-addr" placeholder="123 Main St, Santa Rosa CA 95401"></div>
+    <div class="fg"><label class="lbl">Property Status</label>
+      <select id="f-occ"><option value="Vacant">Vacant</option><option value="Occupied">Owner Occupied</option><option value="Tenant occupied">Tenant Occupied</option></select>
+    </div>
+    <div class="fg"><label class="lbl">Entry / Access Code</label><input type="text" id="f-access" placeholder="Lockbox 1234 / Key under mat"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">👤</span>Seller / Owner</div>
+    <div class="fg"><label class="lbl">Seller Name</label><input type="text" id="f-seller" placeholder="Full name"></div>
+    <div class="row2">
+      <div class="fg"><label class="lbl">Phone</label><input type="tel" id="f-phone" placeholder="(707) 000-0000"></div>
+      <div class="fg"><label class="lbl">Email</label><input type="email" id="f-email" placeholder="seller@email.com"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏷</span>Referring Agent</div>
+    <div class="fg"><label class="lbl">Agent Name</label><input type="text" id="f-agent" placeholder="Agent full name"></div>
+    <div class="fg"><label class="lbl">Brokerage</label><input type="text" id="f-brokerage" placeholder="Brokerage name"></div>
+    <div class="row2">
+      <div class="fg"><label class="lbl">Agent Phone</label><input type="tel" id="f-agent-phone" placeholder="(707) 000-0000"></div>
+      <div class="fg"><label class="lbl">Agent Email</label><input type="email" id="f-agent-email" placeholder="agent@brokerage.com"></div>
+    </div>
+    <div class="fg"><label class="lbl">Target List Date</label><input type="date" id="f-listdate"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🎨</span>Hardware Finish — Entire Home</div>
+    <div class="fin-grid">
+      <div class="fin-opt on" onclick="setFin(0,this)"><div class="swatch sw-sn"></div><div class="fin-name">Satin Nickel</div><div class="fin-sub">Most popular</div></div>
+      <div class="fin-opt" onclick="setFin(1,this)"><div class="swatch sw-mb"></div><div class="fin-name">Matte Black</div><div class="fin-sub">Modern</div></div>
+      <div class="fin-opt" onclick="setFin(2,this)"><div class="swatch sw-vb"></div><div class="fin-name">Venetian Bronze</div><div class="fin-sub">Wine country</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">📐</span>3D Scan — RENDR</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">Scan the property with RENDR first to capture floor plan and measurements. Sync the scan to JobTread, then return here to complete the walk.</p>
+    <button class="btn btn-out" style="margin-bottom:10px;" onclick="openRendr()">📐 Open RENDR to Scan</button>
+    <div class="fg"><label class="lbl">RENDR Scan Link (paste after scanning)</label><input type="text" id="f-rendr-link" placeholder="https://cloud.rendr.com/spaces/..."></div>
+    <div class="fg"><label class="lbl">RENDR Notes</label><input type="text" id="f-rendr-notes" placeholder="Scan complete, linked to job, approx sq ft..."></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏠</span>House-Wide Scope</div>
+
+    <div class="trow">
+      <div class="tlbl">💧 Water Heater Strapping<span class="tlbl-sub">CA seismic compliance — required for transfer</span></div>
+      <label class="tog"><input type="checkbox" id="hw-whs"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-whs-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" placeholder="Location / access notes (e.g. garage, closet)">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🚿 Pressure Washing<span class="tlbl-sub">Driveway, walkways, entry, hardscape</span></div>
+      <label class="tog"><input type="checkbox" id="hw-pw"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-pw-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-pw-txt" placeholder="Scope — driveway, patio, deck, walkways...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🗑 Debris & Junk Removal<span class="tlbl-sub">Include estimated load count</span></div>
+      <label class="tog"><input type="checkbox" id="hw-junk"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-junk-ctrl" style="display:none;padding:4px 0 8px;">
+      <div class="qrow"><div class="qlbl">Estimated Load Count</div><div class="qctrl"><button class="qbtn" onclick="adjH('hw-junk-qty',-1)">−</button><div class="qval" id="hw-junk-qty">1</div><button class="qbtn" onclick="adjH('hw-junk-qty',1)">+</button></div></div>
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🧹 Deep Clean<span class="tlbl-sub">Full interior by licensed cleaning sub</span></div>
+      <label class="tog"><input type="checkbox" id="hw-clean"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-clean-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-clean-txt" placeholder="Condition notes, special areas...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🌿 Light Landscaping<span class="tlbl-sub">Debris removal, edging, bed weeding</span></div>
+      <label class="tog"><input type="checkbox" id="hw-land"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-land-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-land-txt" placeholder="Scope notes...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🪟 Caulking & Sealing<span class="tlbl-sub">Windows, doors, trim, bath/kitchen fixtures</span></div>
+      <label class="tog"><input type="checkbox" id="hw-caulk"><span class="tog-sl"></span></label>
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">🪣 Minor Drywall Repair<span class="tlbl-sub">Nail holes, dings, small patches</span></div>
+      <label class="tog"><input type="checkbox" id="hw-drywall"><span class="tog-sl"></span></label>
+    </div>
+    <div id="hw-dw-note" style="display:none;padding:4px 0 8px;">
+      <input type="text" id="hw-dw-txt" placeholder="Location and scope notes...">
+    </div>
+
+    <div class="trow">
+      <div class="tlbl">❄️ Cold Air Return<span class="tlbl-sub">Common areas, hallways, living rooms, kitchen</span></div>
+      <label class="tog"><input type="checkbox" id="hw-car" onchange="showHide('car-body',this.checked)"><span class="tog-sl"></span></label>
+    </div>
+    <div id="car-body" style="display:none;padding:6px 0 10px;">
+      <div class="fg"><label class="lbl">Location Description</label><input type="text" id="hw-car-loc" placeholder="e.g. Hallway near master, Living room east wall"></div>
+      <div class="fg"><label class="lbl">Action</label>
+        <select id="hw-car-action">
+          <option value="paint">Paint Existing Grille — Rust-Oleum Epoxy ($63)</option>
+          <option value="replace">Replace Grille — Allowance ($75)</option>
+          <option value="both">Paint some, Replace others</option>
+        </select>
+      </div>
+      <div class="qrow"><div class="qlbl">Quantity</div><div class="qctrl"><button class="qbtn" onclick="adjH('hw-car-qty',-1)">−</button><div class="qval" id="hw-car-qty">1</div><button class="qbtn" onclick="adjH('hw-car-qty',1)">+</button></div></div>
+    </div>
+
+    <div class="trow" style="border-bottom:none;">
+      <div class="tlbl">🌡 Thermostat Replacement<span class="tlbl-sub">Select model below</span></div>
+      <label class="tog"><input type="checkbox" id="hw-therm" onchange="showHide('therm-body',this.checked)"><span class="tog-sl"></span></label>
+    </div>
+    <div id="therm-body" style="display:none;padding-top:8px;">
+      <div class="pg2" id="therm-grid"></div>
+    </div>
+
+    <div class="fg" style="margin-top:10px;"><label class="lbl">HVAC Filter</label>
+      <select id="hw-filter-sel">
+        <option value="">No filter replacement</option>
+        <option value="standard">Standard Filter Replacement</option>
+        <option value="allergen">Allergen Defense Upgrade</option>
+      </select>
+    </div>
+    <div class="fg"><label class="lbl">Filter Size (confirm on site)</label><input type="text" id="hw-filter-size" placeholder="e.g. 16x25x1 or 20x25x4"></div>
+
+    <div class="fg"><label class="lbl">General Walk Notes</label><textarea id="f-walknotes" placeholder="Access issues, scope questions, overall condition, concerns..."></textarea></div>
+  </div>
+</div>
+
+<div class="pg" id="pg1">
+  <div class="a-info">Tap a room type to add it. Rename each room after adding.</div>
+  <div class="rtype-grid">
+    <button class="rchip" onclick="addRoom('bedroom','🛏','Bedroom')"><span>🛏</span>Bedroom</button>
+    <button class="rchip" onclick="addRoom('bathroom','🚿','Bathroom')"><span>🚿</span>Bathroom</button>
+    <button class="rchip" onclick="addRoom('kitchen','🍳','Kitchen')"><span>🍳</span>Kitchen</button>
+    <button class="rchip" onclick="addRoom('living','🛋','Living Room')"><span>🛋</span>Living</button>
+    <button class="rchip" onclick="addRoom('dining','🪑','Dining Room')"><span>🪑</span>Dining</button>
+    <button class="rchip" onclick="addRoom('hall','🚪','Hallway')"><span>🚪</span>Hall</button>
+    <button class="rchip" onclick="addRoom('laundry','🧺','Laundry')"><span>🧺</span>Laundry</button>
+    <button class="rchip" onclick="addRoom('office','💼','Office')"><span>💼</span>Office</button>
+    <button class="rchip" onclick="addRoom('garage','🚗','Garage')"><span>🚗</span>Garage</button>
+  </div>
+  <div id="room-list"></div>
+</div>
+
+<div class="pg" id="pg2">
+  <div class="a-info">Expand each room to fill in selections. Finish from Page 1 pre-filters items.</div>
+  <div id="walk-list"></div>
+</div>
+
+<div class="pg" id="pg3"><div id="rev-content"></div></div>
+
+<div class="pg" id="pg4">
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">✍️</span>Signature</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Sign to confirm survey is complete and accurate.</p>
+    <canvas id="sig-c"></canvas>
+    <button class="btn btn-out btn-sm" style="margin-top:8px;" onclick="clrSig()">Clear</button>
+  </div>
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">📤</span>Push to JobTread</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">Creates customer account, location, job, applies Pre-Listing Market Prep template, and adds all room selections to the budget.</p>
+    <button class="btn btn-red" id="jt-btn" onclick="pushToJT()">Push to JobTread</button>
+    <div id="jt-log"></div>
+  </div>
+</div>
+
+<button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
+<div class="bnav">
+  <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
+  <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
+</div>
+
+<script>
+// ═══════════ STATE ═══════════
+var CP=0;
+var S={finish:0,rooms:[],signed:false,thermostatId:null};
+var sigC,sigX,drawing=false,lx=0,ly=0;
+
+// House-wide qty tracking
+var HW={junkQty:1,'hw-car-qty':1,'hw-junk-qty':1};
+
+// ═══════════ CATALOG ═══════════
+var IMG={
+  '22PVPKTZB6A7':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PVPLmRRLGA':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PVPTFTuMJp':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PPFiRxVCMd':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PPJPLR8AAu':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PPFiRvqpC8':'https://cdn.jobtread.com/ixmAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEpMakxYU3piIiwibiI6ImZpbGUifQM.OPqTSgpgc1SzHhW4D3MILLVhQDV0Lo9JVpMvcdjrEoY',
+  '22PPFjNK2qMn':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PPJQicPsZU':'https://cdn.jobtread.com/G4sAgORqXao3m1-u38QOUSfHB9V_3lZr3mKJtACD3BH7_EaKHpm444UEFGjGZKtagEErzbaTDONEjtZIfH4YBoaHftbtmm9IHY8c-fFWD6TozDuGMqOn1ocxWWCmQjEurGHb7it9sY0kHlDXDj8.TCAPtfS0Q_h_h9d7DHL-BPMi79uGwIQc4nhmNSYaQMw',
+  '22PVPuX7beu7':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPuX7beu8':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPuX7beu9':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPxpDcvV4':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPxpDcvV5':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPuX7beuA':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUFBKcWZLcTZLIiwibiI6IkltYWdlIDEifQM.E2X7V5FKHyAmkVQTWWS1vPgVCFJelYuX6yZCH9w89a4',
+  '22PVPuX7beuB':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUFBKcWZLcTZLIiwibiI6IkltYWdlIDEifQM.E2X7V5FKHyAmkVQTWWS1vPgVCFJelYuX6yZCH9w89a4',
+  '22PVPuX7beuC':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPuX7beuD':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPuX7beuE':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPxpDcvV6':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPxpDcvV7':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPyVmq8kS':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPzxqgdYz':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVQ4skJPBQ':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVQ5KgFvz2':'https://cdn.jobtread.com/G5oAGIzTBffoY5e6WFeqO5eJCKCKT5TIm06Ob3YA_Q6WBYnkFAca5wYnGpdghLH0YIN--2rIls3t0tcdglrJ_JWg6aiIDmmWVS7i8LHq_XQ7HkCp32Bs9WvvLz1QNMwHfJR05XK_Tn13TA_9Bhyoaran09M1LuF6r-Hl70xXOF5AcUogfw.cmYpy-CqbIMpn7LmLHJxeEg9M60rrUfGDeQDSvX-mV4',
+  '22PVPuX7beuF':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PVPuX7beuG':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PVQ4skJPBM':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PVQ4skJPBN':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PVQ4skJPBP':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PVTPwC2tQ2':'https://cdn.jobtread.com/ixqAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZpUnVpb3c5IiwibiI6ImZpbGUifQM.I3H9A0gNRIbzRGXbhcSL5gAYGKGIMHE-i2JqWfBmRVA',
+  '22PVTPwC2tQ3':'https://cdn.jobtread.com/ixqAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZpUnVpb3c5IiwibiI6ImZpbGUifQM.I3H9A0gNRIbzRGXbhcSL5gAYGKGIMHE-i2JqWfBmRVA',
+  '22PVTPwC2tQ4':'https://cdn.jobtread.com/ixqAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZpUnVpb3c5IiwibiI6ImZpbGUifQM.I3H9A0gNRIbzRGXbhcSL5gAYGKGIMHE-i2JqWfBmRVA',
+  '22PVTXhdLTfs':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
+  '22PVTXhdLTft':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
+  '22PVTXwmntYs':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
+  '22PVTYN2tzs9':'https://cdn.jobtread.com/G5MAoIzVAWxjz0VvV1q2Oi5tV0OMXxoRPKHjhZLxj6aVBWYmFBNFRRPB3G0dBrBdBDp3TnB8TBcOiMGOJxS-VIm_vWm4V9Wm8MzqKo.nM7fRFKDHdVnH2H3dpZGHiSRN2NV7HZ-CUqsWG3eIyk',
+  '22PVTYf7Rjhf':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
+  '22PVTYwYVTRS':'https://cdn.jobtread.com/G08AgBSh0o1al-rN5uNDJcDdSHKD40C1osQCwtZbkOGQ5EfEOl6U8DBu5V0tKCZk20LTwjz19WYowkdg9UGIa_w1qVlMGkxpRDnSkWbn-QE.A9mN6KppX7MucEgnwoA5PTOA40KUXilsI2LmsMYOQBE',
+  '22PVTZAEcb6m':'https://cdn.jobtread.com/G5MAoIzVAWxjz0VvV1q2Oi5tV0OMXxoRPKHjhZLxj6aVBWYmFBNFRRPB3G0dBrBdBDp3TnB8TBcOiMGOJxS-VIm_vWm4V9Wm8MzqKo.nM7fRFKDHdVnH2H3dpZGHiSRN2NV7HZ-CUqsWG3eIyk',
+  '22PVTZN7DzYg':'https://cdn.jobtread.com/G5MAoIzVAWxjz0VvV1q2Oi5tV0OMXxoRPKHjhZLxj6aVBWYmFBNFRRPB3G0dBrBdBDp3TnB8TBcOiMGOJxS-VIm_vWm4V9Wm8MzqKo.nM7fRFKDHdVnH2H3dpZGHiSRN2NV7HZ-CUqsWG3eIyk',
+  '22PVWU72XDUt':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
+  '22PVWU72XDUu':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
+  '22PVWU72XDUv':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
+  '22PLictfFuRM':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGljdGNDQ1pRIiwibiI6IkltYWdlIDEifQM.I_UqPkfHHAx-3RCWcEvbiPrcnlLJ1JQLqRuxQn6j7BM',
+  '22PLidsWNdYp':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGljdGNDQ1pRIiwibiI6IkltYWdlIDEifQM.I_UqPkfHHAx-3RCWcEvbiPrcnlLJ1JQLqRuxQn6j7BM',
+  '22PMzkaL2eTH':'https://cdn.jobtread.com/G08AgBSh0s-2pcouvymZZtohmTWGGxwHqhUlFhC23oIMhyQ_ItbxwQAhzMfwVgsIFmTbVIii61s_RlMsBHYfhLjGXzBhMFOYy4AbJZntPD8.lIbsOqxExMHOlZT53_RCheVkbDGtGUBklLZhwHIPONM',
+  '22PLihEi33Hz':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGloRWU2d2RkIiwibiI6IkltYWdlIDEifQM.rB_FBB--O9y9Us4lL4hFte7iP5dp6xKj_hzLB6v9oIA',
+  '22PMzpqhYMcA':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTXpwcWhZTWVnIiwibiI6IkltYWdlIDEifQM.4lRxQ7DJQL-BnjkZLhULd5qTJJPWPF_Z6vOe1oBFIgI',
+  '22PLihfEsfeL':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGloZkdQYjlmIiwibiI6IkltYWdlIDEifQM.RzZ5lQqfJKvDRJqXXmLMXbXcLBTh8l8CQUuUZfnSJe4',
+  '22PVVRMYQsFD':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQTGloRWU2d2RkIiwibiI6IkltYWdlIDEifQM.rB_FBB--O9y9Us4lL4hFte7iP5dp6xKj_hzLB6v9oIA',
+  '22PVScAuHEv7':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
+  '22PVSdyhK8Te':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSdyhK8Tg':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSdyhKVN2':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSdyhKVN4':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSf6QFNqJ':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
+  '22PVSfMg5CAM':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
+  '22PVSfaDBtaX':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
+  '22PVSf6QFNqL':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSg9vxALY':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSg9vxALa':'https://cdn.jobtread.com/G2kAYJwHthuXCzgw5BdK0shqa6nebAdKosGbNTEpGbyiwUkWnT5oxnGg_HdBYvFAaAOd85COPyJ6ox07fmQI3ZwdtgX0INwusAI3r6pEGZ-i6SGvcsva4SDUTpxSMliYvrN5yiFfT-DTEBk.omggWyR7MsBT9F9UXmfV--H-HcRoth1FqgcdegUEK_0',
+  '22PVSnfWPtFy':'https://cdn.jobtread.com/G08AgBSh0kp4Ue_C5vw1QAF0d0EyTCHXqfh4Bkib4H2j36fVaEoT8nAZdV2Zyp3RinoSMWBmVD6FPVNRnqAqXbX2_IXiabOHFG2Sxh.mVNMOfCjkHfCZpLCKGg4Gkptu7lPmhAmF8O2B7vLK_Y',
+  '22PVSnw5sz95':'https://cdn.jobtread.com/G08AgBSh0kp4Ue_C5vw1QAF0d0EyTCHXqfh4Bkib4H2j36fVaEoT8nAZdV2Zyp3RinoSMWBmVD6FPVNRnqAqXbX2_IXiabOHFG2Sxh.mVNMOfCjkHfCZpLCKGg4Gkptu7lPmhAmF8O2B7vLK_Y',
+  '22PVSCAcunNJ':'https://cdn.jobtread.com/G08AgBSh0lpKTZ3Cn5K4Oi5oWUcECvLxLHXqLFuiMKMHkYi1bQIlT3Xj8Wuq0Yl0z9KuJM0r3L1Rh3Km6RM0Hp5TOJolxFiTg.nMJ_Bq_vTDIRkG1xG0yP6RVfZT0sJGMuoHqaEIHdSWk',
+  '22PVSCAcunNK':'https://cdn.jobtread.com/G08AgBSh0lpKTZ3Cn5K4Oi5oWUcECvLxLHXqLFuiMKMHkYi1bQIlT3Xj8Wuq0Yl0z9KuJM0r3L1Rh3Km6RM0Hp5TOJolxFiTg.nMJ_Bq_vTDIRkG1xG0yP6RVfZT0sJGMuoHqaEIHdSWk',
+  '22PVSCAcunNL':'https://cdn.jobtread.com/G08AgBSh0lpKTZ3Cn5K4Oi5oWUcECvLxLHXqLFuiMKMHkYi1bQIlT3Xj8Wuq0Yl0z9KuJM0r3L1Rh3Km6RM0Hp5TOJolxFiTg.nMJ_Bq_vTDIRkG1xG0yP6RVfZT0sJGMuoHqaEIHdSWk',
+  '22PVPA4XbxLK':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PPFWLyyfFk':'https://cdn.jobtread.com/G08AgBSh0huXCzgw5BdK0shqa6neDiHABmpqmtXqCqE8lKPr3b5oOr55GOjWDHBDM-1pzEpSy0cVCgXvJl31JgiBQluFz1_MJDvGGnxKjq4.4AZNlm82cBrHxH-xbkl6v0JE_C8y5TBo0RrjPRjr5Po',
+  '22PVPAc76cfU':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
+  '22PPFVEDBGuf':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQVlBQbW1LRVR6IiwibiI6IkltYWdlIDEifQM.dAoExMaFtEVCUbNWBCHHiXXPcY79MbFBsLWQOlxYGKo',
+  '22PPFVqFkepG':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
+  '22PNUVgrq9cs':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
+  '22PLy3vvsCHs':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
+  '22PNURteXhDX':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0',
+  '22PVSAzmQbWH':'https://cdn.jobtread.com/CxuAeyJiIjoiam9idHJlYWQiLCJrIjoiZmlsZXMvMjJQUEZWdXVzNlJNIiwibiI6IkltYWdlIDEifQM.nfUjDRs1b_Vljza6ijJ7LHcUIxzvhNAyrS-9M97Y_bZ0'
+};
+
+// ── DOOR HARDWARE ──
+var DOOR_PASS=[
+  {id:'22PVPLmRRLGA',name:'Kwikset Balboa Passage',price:33.81,fin:'Satin Nickel'},
+  {id:'22PVPKTZB6A7',name:'Kwikset Cove Passage',price:32.13,fin:'Matte Black'},
+  {id:'22PVPTFTuMJp',name:'Kwikset Balboa Passage',price:39.70,fin:'Venetian Bronze'}
+];
+var DOOR_PRIV=[
+  {id:'22PPFiRxVCMd',name:'Kwikset Cove Privacy',price:25.03,fin:'Satin Nickel'},
+  {id:'22PPJPLR8AAu',name:'Kwikset Cove Privacy',price:19.89,fin:'Matte Black'},
+  {id:'22PPFiRvqpC8',name:'Kwikset Balboa Privacy',price:32.74,fin:'Venetian Bronze'}
+];
+var DOOR_ENTRY=[
+  {id:'22PPFjNK2qMn',name:'Hartford Combo SN',price:40.47,fin:'Satin Nickel'},
+  {id:'22PPJQicPsZU',name:'B62 Deadbolt MB',price:54.39,fin:'Matte Black'},
+  {id:'22PVPTFTuMJp',name:'Kwikset Balboa VB',price:39.70,fin:'Venetian Bronze'}
+];
+
+// ── LIGHT FIXTURES (flush mount by finish) ──
+var FLUSH=[
+  [{id:'22PVPuX7beu7',name:'Hampton Bay Flaxmere 12" BN',price:39.33},{id:'22PVPxpDcvV4',name:'14" BN LED Flush Mount',price:64.94}],
+  [{id:'22PVPuX7beu8',name:'Hampton Bay Flaxmere 12" MB 2-Pack',price:70.83},{id:'22PVPxpDcvV5',name:'Flaxmere 14" MB',price:55.07}],
+  [{id:'22PVPuX7beu9',name:'Hampton Bay Chilton 15" ORB',price:62.96}]
+];
+// Decorative
+var DECO=[
+  {id:'22PVPyVmq8kS',name:'Castleford 3-Light Chandelier ORB',price:133.83},
+  {id:'22PVPzxqgdYz',name:'Southbourne Farmhouse Semi-Flush MB',price:141.70},
+  {id:'22PVQ4skJPBQ',name:'Moreland Wagon Wheel ORB',price:171.67},
+  {id:'22PVQ5KgFvz2',name:'Hastings Industrial Drum ORB',price:157.46}
+];
+// Can retrofit
+var CAN6={id:'22PVPuX7beuA',name:'HALO LT 5/6" LED Retrofit',price:20.43};
+var CAN4={id:'22PVPuX7beuB',name:'EnviroLite 4" LED Retrofit',price:14.24};
+// Vanity lights by finish
+var VANITY=[
+  [{id:'22PVPuX7beuC',name:'Ashhurst 3-Light BN',price:89.73},{id:'22PVPxpDcvV6',name:'Marsden 4-Light BN',price:141.70}],
+  [{id:'22PVPuX7beuD',name:'Eastburn 3-Light MB',price:110.20}],
+  [{id:'22PVPuX7beuE',name:'Ashhurst 3-Light ORB',price:89.73},{id:'22PVPxpDcvV7',name:'Ashhurst 4-Light ORB',price:110.20}]
+];
+// Bulbs
+var BULBS=[
+  {id:'22PVPuX7beuF',name:'Feit A19 Frosted 4-Pack',price:15.71},
+  {id:'22PVPuX7beuG',name:'Feit A19 Filament Clear 4-Pack',price:21.23},
+  {id:'22PVQ4skJPBM',name:'Feit Candelabra E12 4-Pack',price:25.17},
+  {id:'22PVQ4skJPBN',name:'Feit Globe G25 Clear 3-Pack',price:23.54},
+  {id:'22PVQ4skJPBP',name:'Feit Globe G25 Frosted 3-Pack',price:23.54}
+];
+
+// ── SMOKE/CO DETECTORS ──
+var SMOKE=[
+  {id:'22PVSCAcunNJ',name:'Kidde 10-Year Smoke+CO Battery',price:95.67},
+  {id:'22PVSCAcunNK',name:'Kidde 10-Year Smoke Only Battery',price:51.14},
+  {id:'22PVSCAcunNL',name:'Kidde Hardwired Interconnected',price:44.84}
+];
+
+// ── ELECTRICAL DEVICES ──
+var ELEC={
+  coverUp:[
+    {id:'22PVPA4XbxLK',name:'Duplex Cover-Up Textured/Paintable',price:1.83},
+    {id:'22PPFWLyyfFk',name:'Duplex Cover-Up Smooth',price:4.27},
+    {id:'22PVPAc76cfU',name:'Toggle Cover-Up Smooth',price:5.49}
+  ],
+  plates:[
+    {id:'22PPFVEDBGuf',name:'1-Gang Duplex Outlet Plate',price:1.29},
+    {id:'22PPFVqFkepG',name:'2-Gang Duplex Outlet Plate',price:3.91},
+    {id:'22PTpnC9hXqY',name:'3-Gang Duplex Device Plate',price:7.70},
+    {id:'22PPFWuxJFdF',name:'1-Gang Blank Plate',price:1.54},
+    {id:'22PNUST7QMYH',name:'1-Gang Decora Jumbo Plate',price:2.51},
+    {id:'22PVQBeygdHx',name:'2-Gang Rocker Switch Plate',price:3.07},
+    {id:'22PVP8cdJrAY',name:'3-Gang Rocker/Toggle Plate',price:5.90},
+    {id:'22PPFWuxJFdF',name:'Phone Jack Plate',price:6.17}, // Reverted exact ID provided by user
+    {id:'22PPFXrjWyXi',name:'Coaxial Cable Plate',price:6.04}
+  ],
+  decora:[
+    {id:'22PNUVgrq9cs',name:'Leviton Decora 15A TR Outlet',price:4.93},
+    {id:'22PLy3vvsCHs',name:'Leviton GFCI Self-Test Outlet',price:28.14},
+    {id:'22PNURteXhDX',name:'Leviton Decora Single-Pole Switch',price:4.00},
+    {id:'22PTpjEDhV7g',name:'Leviton 3-Way Decora Switch',price:7.39},
+    {id:'22PVSAzmQbWH',name:'Leviton LED Advanced Dimmer',price:36.99}
+  ],
+  standard:[
+    {id:'22PVS9JJ4Gwq',name:'Standard Duplex Outlet (broken swap)',price:1.53},
+    {id:'22PVS9bfvz7a',name:'Standard Toggle Switch (broken swap)',price:1.45}
+  ]
+};
+
+// ── BATH HARDWARE ──
+var BATH_HW=[
+  {id:'22PVTPwC2tQ2',name:'MOEN Banbury 4-pc w/ Robe Hook',price:145.61,fin:'Brushed Nickel'},
+  {id:'22PVTPwC2tQ3',name:'MOEN Genta 3-pc Set',price:133.84,fin:'Matte Black'},
+  {id:'22PVTPwC2tQ4',name:'Delta Porter 4-pc Set',price:126.31,fin:'Oil Rubbed Bronze'}
+];
+var BATH_FAU=[
+  {id:'22PVTXhdLTfs',name:'MOEN Banbury Centerset',price:124.43,fin:'Brushed Nickel'},
+  {id:'22PVTXhdLTft',name:'MOEN Banbury Centerset',price:124.43,fin:'Matte Black'},
+  {id:'22PVTXwmntYs',name:'MOEN Banbury Centerset',price:155.93,fin:'Mediterranean Bronze'}
+];
+var SHOWER_H=[
+  {id:'22PVTYN2tzs9',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Brushed Nickel'},
+  {id:'22PVTYf7Rjhf',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Matte Black'},
+  {id:'22PVTYwYVTRS',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Mediterranean Bronze'}
+];
+var TOILET_S=[
+  {id:'22PVTZAEcb6m',name:'BEMIS Weston Soft Close Elongated',price:69.27},
+  {id:'22PVTZN7DzYg',name:'BEMIS Weston Soft Close Round',price:59.81}
+];
+
+// ── CABINET PULLS ──
+var CAB_PULL=[
+  {id:'22PVWU72XDUt',name:'Franklin Brass Adjusta-Pull SN',price:7.00,fin:'Satin Nickel'},
+  {id:'22PVWU72XDUu',name:'Franklin Brass Adjusta-Pull MB',price:8.71,fin:'Matte Black'},
+  {id:'22PVWU72XDUv',name:'Franklin Brass Adjusta-Pull CZ',price:8.73,fin:'Champagne Bronze'}
+];
+
+// ── REGISTERS ──
+var REG_FL=[
+  {id:'22PVScAuHEv7',name:'Floor 4"x10"',price:25.17},
+  {id:'22PVSdyhK8Te',name:'Floor 4"x8"',price:31.37},
+  {id:'22PVSdyhK8Tg',name:'Floor 2"x10"',price:22.01},
+  {id:'22PVSdyhKVN2',name:'Floor 2"x12"',price:22.01},
+  {id:'22PVSdyhKVN4',name:'Floor 2"x14"',price:22.80}
+];
+var REG_WL=[
+  {id:'22PVSf6QFNqJ',name:'Wall 10"x4"',price:25.17},
+  {id:'22PVSfMg5CAM',name:'Wall 12"x4"',price:25.17},
+  {id:'22PVSfaDBtaX',name:'Wall 10"x6"',price:25.17},
+  {id:'22PVSf6QFNqL',name:'Wall 8"x6"',price:22.47},
+  {id:'22PVSg9vxALY',name:'Wall 14"x4"',price:25.17},
+  {id:'22PVSg9vxALa',name:'Wall 14"x6"',price:28.31}
+];
+
+// ── PLUMBING ──
+var PLB={
+  angleStop:{id:'22PLidsWNdYp',name:'SharkBite Angle Stop',price:21.09},
+  toiletAngle:{id:'22PLictfFuRM',name:'SharkBite Toilet Angle Stop',price:32.59},
+  supplyLine:{id:'22PMzkaL2eTH',name:'BrassCraft Supply Line 30"',price:15.59},
+  ptrap:{id:'22PLihEi33Hz',name:'P-Trap 1.5"',price:21.34},
+  escutcheon:{id:'22PLihfEsfeL',name:'Escutcheon Plate 1/2"',price:4.29},
+  popUpDrain:{id:'22PVVRMYQsFD',name:'Bathroom Sink Pop-Up Drain',price:27.03},
+  sinkStrainer:{id:'22PVVRLi8q6Z',name:'Sink Basket Strainer Stainless',price:26.24},
+  dishwasher:{id:'22PVZGTXEgWu',name:'Dishwasher Supply Line 3/8"',price:25.14},
+  snappyTrap:{id:'22PMzpqhYMcA',name:'Snappy Trap Double Bowl Kit',price:48.56}
+};
+
+// ── THERMOSTATS ──
+var THERMOS=[
+  {id:'22PVSnfWPtFy',name:'Honeywell X1N Non-Programmable',price:55.10},
+  {id:'22PVSnw5sz95',name:'ecobee Smart Essential',price:220.49}
+];
+
+// ── VALVE BRANDS ──
+var VALVES=[
+  {k:'moen-positempo',n:'Moen Posi-Temp',s:'Single handle round',b:'vb-chk',bt:'Verify trim'},
+  {k:'moen-mpact',n:'Moen M-Pact',s:'Universal valve',b:'vb-ok',bt:'Upgradeable ✓'},
+  {k:'delta-monitor',n:'Delta Monitor',s:'Single handle',b:'vb-chk',bt:'Verify trim'},
+  {k:'delta-multichoice',n:'Delta MultiChoice',s:'Universal valve',b:'vb-ok',bt:'Upgradeable ✓'},
+  {k:'pfister',n:'Pfister',s:'Various models',b:'vb-chk',bt:'Verify trim'},
+  {k:'kohler',n:'Kohler',s:'Various models',b:'vb-chk',bt:'Verify trim'},
+  {k:'american-standard',n:'American Standard',s:'Various models',b:'vb-chk',bt:'Verify trim'},
+  {k:'unknown',n:'Unknown Brand',s:'Needs ID on site',b:'vb-chk',bt:'Field verify'},
+  {k:'not-upgradeable',n:'⚠️ Not Upgradeable',s:'Custom / discontinued',b:'vb-no',bt:'Lock out trim',danger:true}
+];
+
+// PRICE MAP COMPILER FOR BUDGET
+var PMAP = {};
+function regP(arr) {
+  if (!arr) return;
+  if (Array.isArray(arr)) {
+    arr.forEach(regP);
+  } else if (arr.id && arr.price !== undefined) {
+    PMAP[arr.id] = arr.price;
+  }
+}
+regP(DOOR_PASS); regP(DOOR_PRIV); regP(DOOR_ENTRY);
+regP(FLUSH); regP(DECO); regP(CAN6); regP(CAN4); regP(VANITY); regP(BULBS);
+regP(SMOKE); regP(ELEC.coverUp); regP(ELEC.plates); regP(ELEC.decora); regP(ELEC.standard);
+regP(BATH_HW); regP(BATH_FAU); regP(SHOWER_H); regP(TOILET_S); regP(CAB_PULL);
+regP(REG_FL); regP(REG_WL); Object.values(PLB).forEach(regP); regP(THERMOS);
+
+// ═══════════ HELPERS ═══════════
+function pImg(id){
+  var u=IMG[id];
+  if(u) return '<img class="pcard-img" src="'+u+'" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML=\'<div class=pcard-ph>📦</div>\'">';
+  return '<div class="pcard-ph">📦</div>';
+}
+function mkPcard(item,selId,groupSel,rid){
+  var isSel=rid?getR(rid)[selId]===item.id:false;
+  return '<div class="pcard'+(isSel?' on':'')+'" onclick="selProd(\''+rid+'\',\''+selId+'\',\''+item.id+'\',this,\''+groupSel+'\')">'
+    +pImg(item.id)
+    +'<div class="pcard-info"><div class="pcard-name">'+item.name+'</div>'
+    +'<div class="pcard-price">$'+item.price.toFixed(2)+'</div>'
+    +(item.fin?'<div class="pcard-fin">'+item.fin+'</div>':'')
+    +'</div><div class="pcard-chk">✓ Selected</div></div>';
+}
+function qRow(rid,key,lbl,sub){
+  var r=getR(rid),v=r[key]||0;
+  return '<div class="qrow"><div class="qlbl">'+lbl+(sub?'<span class="qlbl-sub">'+sub+'</span>':'')+'</div>'
+    +'<div class="qctrl"><button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\''+',-1)">−</button>'
+    +'<div class="qval" id="qv-'+rid+'-'+key+'">'+v+'</div>'
+    +'<button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\',1)">+</button></div></div>';
+}
+function togRow(rid,key,lbl,sub,showId){
+  var r=getR(rid),v=r[key]?'checked':'';
+  var si=showId?' onchange="showHide(\''+showId+'\',this.checked)"':'';
+  return '<div class="trow"><div class="tlbl">'+lbl+(sub?'<span class="tlbl-sub">'+sub+'</span>':'')+'</div>'
+    +'<label class="tog"><input type="checkbox" '+v+si+' onchange="setRV(\''+rid+'\',\''+key+'\',this.checked)">'
+    +'<span class="tog-sl"></span></label></div>';
+}
+function getR(rid){return S.rooms.find(function(r){return r.id===rid;})||{};}
+function setRV(rid,key,val){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
+function adjR(rid,key,d){
+  var r=getR(rid);if(!r)return;
+  r.d[key]=Math.max(0,(r.d[key]||0)+d);
+  var el=document.getElementById('qv-'+rid+'-'+key);
+  if(el)el.textContent=r.d[key];
+  updSum(rid);
+}
+function adjH(id,d){
+  HW[id]=Math.max(0,(HW[id]||1)+d);
+  var el=document.getElementById(id);
+  if(el)el.textContent=HW[id];
+}
+function showHide(id,show){var el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+function selProd(rid,key,val,el,grp){
+  if(rid){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
+  var container=el.parentNode;
+  container.querySelectorAll('.pcard').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on');
+}
+function setPT(rid,tier,el){
+  var r=getR(rid);if(!r)return;
+  r.d.paintTier=tier;
+  el.parentNode.querySelectorAll('.pt').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  updSum(rid);
+}
+function setFin(idx,el){
+  S.finish=idx;
+  document.querySelectorAll('.fin-opt').forEach(function(o){o.classList.remove('on');});
+  el.classList.add('on');
+}
+function setValve(rid,k,el){
+  var r=getR(rid);if(!r)return;
+  r.d.valve=k;
+  var locked=k==='not-upgradeable';
+  var sb=document.getElementById('shower-body-'+rid);
+  if(sb){sb.style.opacity=locked?'0.4':'1';sb.style.pointerEvents=locked?'none':'';}
+  el.parentNode.querySelectorAll('.vopt').forEach(function(v){v.classList.remove('on');});
+  el.classList.add('on');
+  updSum(rid);
+}
+function updSum(rid){
+  var r=getR(rid);if(!r)return;
+  var d=r.d,p=[];
+  if(d.paintTier)p.push('T'+d.paintTier+' Paint');
+  var dqty=(d.passageQty||0)+(d.privacyQty||0)+(d.entryQty||0);
+  if(dqty>0)p.push(dqty+' Door HW');
+  if((d.flushQty||0)>0)p.push(d.flushQty+' Fixture');
+  if((d.can6Qty||0)>0||(d.can4Qty||0)>0)p.push('Cans');
+  if(d.faucet)p.push('Faucet');
+  if(d.bathHW)p.push('Bath HW');
+  if(d.toiletSeat)p.push('Toilet Seat');
+  if(d.showerHead)p.push('Shower');
+  var cqty=(d.drawerPullQty||0)+(d.doorPullQty||0);
+  if(cqty>0)p.push(cqty+' Cab HW');
+  var el=document.getElementById('rsum-'+rid);
+  if(el)el.textContent=p.length?p.join(' · '):'Tap to expand';
+}
+
+// ═══════════ NAVIGATION ═══════════
+function goTo(n){
+  if(n<0||n>4)return;
+  if(n===2)bldWalk();
+  if(n===3)bldReview();
+  if(n===4)setTimeout(initSig,150);
+  document.querySelectorAll('.pg').forEach(function(p,i){p.classList.toggle('on',i===n);});
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
+  CP=n;
+  document.getElementById('btn-back').style.display=n>0?'block':'none';
+  
+  var btnNext = document.getElementById('btn-next');
+  btnNext.style.display = (n === 4) ? 'none' : 'block';
+  btnNext.textContent = (n === 3) ? 'Sign & Push →' : 'Next →';
+  
+  document.getElementById('hdr-step').textContent=(n+1)+' / 5';
+  window.scrollTo(0,0);
+}
+
+// ═══════════ ROOMS ═══════════
+function addRoom(type,icon,name){
+  S.rooms.push({id:'r'+Date.now(),type:type,icon:icon,name:name,d:{}});
+  renderRooms();
+}
+function removeRoom(id){S.rooms=S.rooms.filter(function(r){return r.id!==id;});renderRooms();}
+function renderRooms(){
+  var el=document.getElementById('room-list');
+  if(!S.rooms.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No rooms yet.<br>Tap a type above to add.</div>';return;}
+  el.innerHTML=S.rooms.map(function(r,i){
+    return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;">'
+      +'<span style="font-size:22px;">'+r.icon+'</span>'
+      +'<input value="'+r.name+'" style="flex:1;border:none;font-size:14px;font-weight:700;padding:4px;background:transparent;" onchange="S.rooms['+i+'].name=this.value">'
+      +'<button onclick="removeRoom(\''+r.id+'\')" style="border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer;">×</button>'
+      +'</div>';
+  }).join('');
+}
+
+// ═══════════ WALK BUILD ═══════════
+function bldWalk(){
+  var el=document.getElementById('walk-list');
+  if(!S.rooms.length){el.innerHTML='<div class="a-warn">No rooms added. Go to Page 2 and add rooms first.</div>';return;}
+  el.innerHTML=S.rooms.map(function(r){return bldRoom(r);}).join('');
+  // Init thermostat grid on page 1
+  bldThermGrid();
+}
+
+function bldThermGrid(){
+  var g=document.getElementById('therm-grid');
+  if(!g)return;
+  g.innerHTML=THERMOS.map(function(t){
+    var sel=S.thermostatId===t.id;
+    return '<div class="pcard'+(sel?' on':'')+'" onclick="S.thermostatId=\''+t.id+'\';selProd(null,null,null,this,null)">'
+      +pImg(t.id)+'<div class="pcard-info"><div class="pcard-name">'+t.name+'</div><div class="pcard-price">$'+t.price.toFixed(2)+'</div></div>'
+      +'<div class="pcard-chk">✓ Selected</div></div>';
+  }).join('');
+}
+
+function bldRoom(r){
+  var d=r.d;
+  var fin=S.finish;
+  var s='';
+
+  // PAINT
+  s+='<div class="sh">🎨 Paint</div>';
+  s+='<div class="pt-grid">';
+  [1,2,3].forEach(function(t){
+    s+='<div class="pt'+(d.paintTier===t?' on':'')+'" onclick="setPT(\''+r.id+'\','+t+',this)">'
+      +'<div class="pt-lbl">T'+t+'</div>'
+      +'<div class="pt-sub">'+(t===1?'Touch-up':t===2?'Walls Only':'Full Room')+'</div></div>';
+  });
+  s+='</div>';
+
+  // DOOR HARDWARE
+  s+='<div class="sh">🚪 Door Hardware</div>';
+  s+='<div class="a-info" style="font-size:10px;">Select each door type used in this room and enter qty for each.</div>';
+  s+='<div class="lbl" style="margin-bottom:5px;">Passage — Hall / Closet</div>';
+  s+='<div class="pg2">'+DOOR_PASS.map(function(item){return mkPcard(item,'passageId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'passageQty','Passage Qty','');
+  s+='<div class="lbl" style="margin:8px 0 5px;">Privacy — Bed / Bath</div>';
+  s+='<div class="pg2">'+DOOR_PRIV.map(function(item){return mkPcard(item,'privacyId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'privacyQty','Privacy Qty','');
+  s+='<div class="lbl" style="margin:8px 0 5px;">Entry / Exterior</div>';
+  s+='<div class="pg2">'+DOOR_ENTRY.map(function(item){return mkPcard(item,'entryId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'entryQty','Entry Qty','');
+  s+='<div class="sh">💡 Lighting</div>';
+
+  // Flush mount
+  s+='<div class="lbl" style="margin-bottom:6px;">Ceiling Fixture (flush mount)</div>';
+  var flushItems=FLUSH[fin]||FLUSH[0];
+  s+='<div class="pg2">'+flushItems.map(function(item){return mkPcard(item,'flushId','pg2',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'flushQty','Quantity','# of ceiling fixtures');
+
+  // Recessed cans
+  s+='<div class="lbl" style="margin:8px 0 6px;">Recessed Can Retrofit</div>';
+  s+='<div class="pg2">'
+    +'<div class="pcard'+(d.can6Id?'on':'')+'" onclick="setRV(\''+r.id+'\',\'can6Id\',\''+CAN6.id+'\');selProd(\''+r.id+'\',\'can6Id\',\''+CAN6.id+'\',this,null)">'
+    +pImg(CAN6.id)+'<div class="pcard-info"><div class="pcard-name">'+CAN6.name+'</div><div class="pcard-price">$'+CAN6.price.toFixed(2)+'</div><div class="pcard-fin">5/6" — most common</div></div>'
+    +'<div class="pcard-chk">✓ Selected</div></div>'
+    +'<div class="pcard'+(d.can4Id?'on':'')+'" onclick="setRV(\''+r.id+'\',\'can4Id\',\''+CAN4.id+'\');selProd(\''+r.id+'\',\'can4Id\',\''+CAN4.id+'\',this,null)">'
+    +pImg(CAN4.id)+'<div class="pcard-info"><div class="pcard-name">'+CAN4.name+'</div><div class="pcard-price">$'+CAN4.price.toFixed(2)+'</div><div class="pcard-fin">4" only</div></div>'
+    +'<div class="pcard-chk">✓ Selected</div></div>'
+    +'</div>';
+  s+=qRow(r.id,'can6Qty','6" Can Qty','');
+  s+=qRow(r.id,'can4Qty','4" Can Qty','');
+
+  // Decorative (living/dining only)
+  if(r.type==='living'||r.type==='dining'){
+    s+='<div class="lbl" style="margin:8px 0 6px;">Decorative Fixture (optional)</div>';
+    s+='<div class="pg2">'+DECO.map(function(item){return mkPcard(item,'decoId','pg2',r.id);}).join('')+'</div>';
+  }
+
+  // Bulbs
+  s+='<div class="lbl" style="margin:8px 0 6px;">Bulb Type</div>';
+  s+='<div class="pg3">'+BULBS.map(function(item){return mkPcard(item,'bulbId','pg3',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'bulbQty','Bulb Packs Needed','count packs not individual bulbs');
+
+  // ELECTRICAL DEVICES (Fixed state keys)
+  s+='<div class="sh">🔌 Electrical Devices</div>';
+
+  s+='<div class="esub"><div class="esub-title">Cover-Up Plates (no electrical work)</div>';
+  ELEC.coverUp.forEach(function(item, i){
+    s+=qRow(r.id, 'cup_'+i, item.name, 'Snaps over existing — no wiring');
+  });
+  s+='</div>';
+
+  s+='<div class="esub"><div class="esub-title">Wall Plates (cosmetic replacement)</div>';
+  ELEC.plates.forEach(function(item, i){
+    s+=qRow(r.id, 'plt_'+i, item.name, '');
+  });
+  s+='</div>';
+
+  s+='<div class="esub"><div class="esub-title">Decora Devices (licensed electrical)</div>';
+  ELEC.decora.forEach(function(item, i){
+    s+=qRow(r.id, 'dev_'+i, item.name, '');
+  });
+  s+='</div>';
+
+  s+='<div class="esub"><div class="esub-title">Standard Device Swap (broken only)</div>';
+  ELEC.standard.forEach(function(item, i){
+    s+=qRow(r.id, 'std_'+i, item.name, 'Direct replacement for broken device');
+  });
+  s+='</div>';
+
+  // HEAT REGISTER
+  s+='<div class="sh">🌡 Heat Register</div>';
+  s+='<div class="fg"><label class="lbl">Register Type</label><select onchange="setRV(\''+r.id+'\',\'regType\',this.value);document.getElementById(\'reg-body-'+r.id+'\').style.display=this.value?\'block\':\'none\'">'
+    +'<option value="">None</option>'
+    +'<option value="floor"'+(d.regType==='floor'?' selected':'')+'>Floor Register</option>'
+    +'<option value="wall"'+(d.regType==='wall'?' selected':'')+'>Wall / Ceiling Register</option>'
+    +'</select></div>';
+  s+='<div id="reg-body-'+r.id+'" style="display:'+(d.regType?'block':'none')+'">';
+  var regItems=d.regType==='floor'?REG_FL:REG_WL;
+  s+='<div class="pg3">'+regItems.map(function(item){return mkPcard(item,'regId','pg3',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'regQty','Quantity','# of registers this size');
+  s+='</div>';
+
+  // SMOKE / CO (bedrooms and hallways only)
+  if(r.type==='bedroom'||r.type==='hall'){
+    s+='<div class="sh">🔥 Smoke / CO Detector</div>';
+    s+='<div class="a-info" style="font-size:10px;">CA law: Smoke detector required in each bedroom and hallway leading to sleeping areas.</div>';
+    s+='<div class="pg2">'+SMOKE.map(function(item){return mkPcard(item,'smokeId','pg2',r.id);}).join('')+'</div>';
+    s+=qRow(r.id, 'smokeQty', 'Quantity', 'Number of detectors');
+  }
+
+  // ── BATHROOM ──
+  if(r.type==='bathroom'){
+    s+='<div class="sh">🚿 Bathroom Fixtures</div>';
+
+    // Vanity light
+    s+='<div class="lbl" style="margin-bottom:6px;">Vanity Light Bar</div>';
+    var vanItems=VANITY[fin]||VANITY[0];
+    s+='<div class="pg2">'+vanItems.map(function(item){return mkPcard(item,'vanityId','pg2',r.id);}).join('')+'</div>';
+    s+=togRow(r.id,'hasVanityLight','Vanity Light Replacement','','');
+
+    // Faucet
+    s+='<div class="lbl" style="margin:8px 0 6px;">Vanity Faucet</div>';
+    s+='<div class="trow"><div class="tlbl">Faucet Replacement</div>'
+      +'<label class="tog"><input type="checkbox"'+(d.faucet?' checked':'')+' onchange="setRV(\''+r.id+'\',\'faucet\',this.checked);showHide(\'fau-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="fau-body-'+r.id+'" style="display:'+(d.faucet?'block':'none')+'">';
+    s+='<div class="pg2">'+BATH_FAU.map(function(item){return mkPcard(item,'faucetId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+
+    // Bath hardware
+    s+='<div class="lbl" style="margin:8px 0 6px;">Bath Hardware Set</div>';
+    s+='<div class="trow"><div class="tlbl">Bath Hardware Set<span class="tlbl-sub">Towel bar, TP holder, robe hook</span></div>'
+      +'<label class="tog"><input type="checkbox"'+(d.bathHW?' checked':'')+' onchange="setRV(\''+r.id+'\',\'bathHW\',this.checked);showHide(\'bhw-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="bhw-body-'+r.id+'" style="display:'+(d.bathHW?'block':'none')+'">';
+    s+='<div class="pg2">'+BATH_HW.map(function(item){return mkPcard(item,'bathHWId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+
+    // Toilet seat
+    s+='<div class="lbl" style="margin:8px 0 6px;">Toilet Seat</div>';
+    s+='<div class="trow"><div class="tlbl">Toilet Seat Replacement</div>'
+      +'<label class="tog"><input type="checkbox"'+(d.toiletSeat?' checked':'')+' onchange="setRV(\''+r.id+'\',\'toiletSeat\',this.checked);showHide(\'ts-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="ts-body-'+r.id+'" style="display:'+(d.toiletSeat?'block':'none')+'">';
+    s+='<div class="pg2">'+TOILET_S.map(function(item){return mkPcard(item,'toiletSeatId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+
+    // Shower / Tub valve
+    s+='<div class="sh">🚿 Shower / Tub</div>';
+    s+='<div class="a-warn" style="font-size:10px;">⚠️ Identify valve before selecting trim. Unknown or discontinued valves cannot be upgraded.</div>';
+    s+='<div class="lbl" style="margin-bottom:6px;">Valve Brand / Type</div>';
+    s+='<div class="vgrid">';
+    VALVES.forEach(function(v){
+      s+='<div class="vopt'+(v.danger?' danger':'')+(d.valve===v.k?' on':'')+'" onclick="setValve(\''+r.id+'\',\''+v.k+'\',this)">'
+        +'<div class="vname">'+v.n+'</div><div class="vsub">'+v.s+'</div>'
+        +'<span class="vbadge '+v.b+'">'+v.bt+'</span></div>';
+    });
+    s+='</div>';
+
+    var locked=d.valve==='not-upgradeable';
+    s+='<div id="shower-body-'+r.id+'" style="'+(locked?'opacity:.4;pointer-events:none':'')+'">';
+    s+='<div class="trow"><div class="tlbl">Shower Head Replacement</div>'
+      +'<label class="tog"><input type="checkbox"'+(d.showerHead?' checked':'')+' onchange="setRV(\''+r.id+'\',\'showerHead\',this.checked);showHide(\'sh-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="sh-body-'+r.id+'" style="display:'+(d.showerHead&&!locked?'block':'none')+'">';
+    s+='<div class="pg2">'+SHOWER_H.map(function(item){return mkPcard(item,'showerHeadId','pg2',r.id);}).join('')+'</div>';
+    s+='</div>';
+    s+=togRow(r.id,'tubSpout','Tub Spout Replacement','Placeholder — office orders after valve confirmed','');
+    s+='</div>';
+
+    // Plumbing trim
+    s+='<div class="sh">🔧 Plumbing Trim</div>';
+    s+=qRow(r.id,'angleStopQty','Angle Stops (vanity)','Under-sink shutoff valves');
+    s+=qRow(r.id,'toiletAngleQty','Toilet Angle Stops','');
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','Faucet supply lines');
+    s+=togRow(r.id,'ptrap','P-Trap Replacement','Under vanity sink','');
+    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','Pipe cover rings');
+    s+=togRow(r.id,'popUpDrain','Pop-Up Drain Replacement','Bathroom sink drain','');
+  }
+
+  // ── KITCHEN ──
+  if(r.type==='kitchen'){
+    s+='<div class="sh">🍳 Cabinet Hardware</div>';
+    s+='<div class="pg2">'+CAB_PULL.map(function(item){return mkPcard(item,'cabPullId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="fg"><label class="lbl">Hole Spacing</label>'
+      +'<select onchange="setRV(\''+r.id+'\',\'holeSpacing\',this.value)">'
+      +'<option value="">Not measured yet</option>'
+      +'<option value="96mm"'+(d.holeSpacing==='96mm'?' selected':'')+'>96mm (3-3/4")</option>'
+      +'<option value="128mm"'+(d.holeSpacing==='128mm'?' selected':'')+'>128mm (5-1/16")</option>'
+      +'<option value="160mm"'+(d.holeSpacing==='160mm'?' selected':'')+'>160mm (6-5/16")</option>'
+      +'<option value="adjusta"'+(d.holeSpacing==='adjusta'?' selected':'')+'>Adjusta-Pull (any spacing)</option>'
+      +'<option value="measure"'+(d.holeSpacing==='measure'?' selected':'')+'>⚠️ Needs measuring</option>'
+      +'</select></div>';
+    s+=qRow(r.id,'drawerPullQty','Drawer Pulls','');
+    s+=qRow(r.id,'doorPullQty','Cabinet Door Pulls','');
+
+    s+='<div class="sh">🔧 Kitchen Plumbing Trim</div>';
+    s+=qRow(r.id,'angleStopQty','Angle Stops','Under-sink shutoff valves');
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','');
+    s+=togRow(r.id,'ptrap','P-Trap Replacement','','');
+    s+=togRow(r.id,'snappyTrap','Snappy Trap Kit (double bowl)','','');
+    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','');
+    s+=togRow(r.id,'sinkStrainer','Sink Basket Strainer','','');
+    s+=togRow(r.id,'dishwasher','Dishwasher Supply Line','','');
+  }
+
+  // ── LAUNDRY ──
+  if(r.type==='laundry'){
+    s+='<div class="sh">🧺 Laundry Plumbing</div>';
+    s+=qRow(r.id,'angleStopQty','Angle Stops (washer valves)','');
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','');
+  }
+
+  // PHOTOS
+  s+='<div class="sh">📷 Room Photos</div>';
+  s+='<div class="photo-status" id="pstat-'+r.id+'">Tap + to add photos</div>';
+  s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
+  s+='<button type="button" class="photo-add" onclick="document.getElementById(\'pinput-'+r.id+'\').click()" style="-webkit-appearance:none;">'+'<span class="photo-add-icon">📷</span><span>Add Photo</span></button>';
+  s+='<input type="file" accept="image/*" capture="environment" id="pinput-'+r.id+'" style="display:none" onchange="handlePhoto(\''+r.id+'\',this)">';
+
+  s+='<div class="sh">📝 Notes</div>';
+  s+='<textarea placeholder="Room notes, flags, conditions..." onchange="setRV(\''+r.id+'\',\'notes\',this.value)">'+(d.notes||'')+'</textarea>';
+
+  return '<div class="rcard" id="rcard-'+r.id+'">'
+    +'<div class="rcard-hdr" id="rhdr-'+r.id+'" onclick="togRoom(\''+r.id+'\')">'
+    +'<span class="rcard-icon">'+r.icon+'</span>'
+    +'<div><div class="rcard-name">'+r.name+'</div><div class="rcard-sum" id="rsum-'+r.id+'">Tap to expand</div></div>'
+    +'<span class="rcard-arrow">›</span></div>'
+    +'<div class="rcard-body" id="rbody-'+r.id+'">'+s+'</div></div>';
+}
+
+function togRoom(rid){
+  var body=document.getElementById('rbody-'+rid);
+  var hdr=document.getElementById('rhdr-'+rid);
+  if(body){var open=body.classList.toggle('on');if(hdr)hdr.classList.toggle('open',open);}
+}
+
+// ═══════════ REVIEW (COMPREHENSIVE) ═══════════
+function bldReview(){
+  var el=document.getElementById('rev-content');
+  var addr=document.getElementById('f-addr').value||'[No address]';
+  var seller=document.getElementById('f-seller').value||'[No seller]';
+  var fins=['Satin Nickel','Matte Black','Venetian Bronze'];
+  var h='<div class="card"><div class="ctitle">📋 Summary</div><div style="font-size:13px;line-height:2;">';
+  h+='<b>Property:</b> '+addr+'<br><b>Seller:</b> '+seller+'<br><b>Finish:</b> '+fins[S.finish]+'<br><b>Rooms:</b> '+S.rooms.length+'</div></div>';
+  
+  S.rooms.forEach(function(r){
+    var d=r.d;
+    h+='<div class="card"><div class="ctitle">'+r.icon+' '+r.name+'</div><div style="font-size:11px;line-height:1.9;color:#444;">';
+    
+    if(d.paintTier) h+='Paint: Tier '+d.paintTier+'<br>';
+    if(d.passageQty>0) h+='Passage Door HW: '+d.passageQty+'<br>';
+    if(d.privacyQty>0) h+='Privacy Door HW: '+d.privacyQty+'<br>';
+    if(d.entryQty>0) h+='Entry Door HW: '+d.entryQty+'<br>';
+
+    if(d.flushQty>0) h+='Ceiling Fixtures: '+d.flushQty+'<br>';
+    if(d.can6Qty>0) h+='6" Can Retrofit: '+d.can6Qty+'<br>';
+    if(d.can4Qty>0) h+='4" Can Retrofit: '+d.can4Qty+'<br>';
+    if(d.decoId) h+='Decorative Fixture: Yes<br>';
+    if(d.bulbQty>0) h+='Bulb Packs: '+d.bulbQty+'<br>';
+    if(d.smokeQty>0) h+='Smoke/CO Detectors: '+d.smokeQty+'<br>';
+    
+    var eqty=0;
+    ['cup_','plt_','dev_','std_'].forEach(function(pfx) {
+      for(var i=0; i<20; i++){ if(d[pfx+i]) eqty += d[pfx+i]; }
+    });
+    if(eqty>0) h+='Electrical Devices & Plates: '+eqty+'<br>';
+
+    if(d.regQty>0) h+='Registers: '+d.regQty+'<br>';
+    if(d.carPaint||d.carReplace) h+='Cold Air Return: '+(d.carPaint?'Paint ':'')+(d.carReplace?'Replace ':'')+' ('+(d.carQty||1)+')<br>';
+    
+    if(d.hasVanityLight) h+='Vanity Light Bar: Yes<br>';
+    if(d.faucet) h+='Faucet Replacement: Yes<br>';
+    if(d.bathHW) h+='Bath HW Set: Yes<br>';
+    if(d.toiletSeat) h+='Toilet Seat: Yes<br>';
+    if(d.valve) h+='Shower Valve: '+d.valve+'<br>';
+    if(d.showerHead) h+='Shower Head: Yes<br>';
+    if(d.tubSpout) h+='Tub Spout: Yes<br>';
+    
+    if(d.angleStopQty>0) h+='Angle Stops: '+d.angleStopQty+'<br>';
+    if(d.toiletAngleQty>0) h+='Toilet Angle Stops: '+d.toiletAngleQty+'<br>';
+    if(d.supplyLineQty>0) h+='Supply Lines: '+d.supplyLineQty+'<br>';
+    if(d.ptrap) h+='P-Trap: Yes<br>';
+    if(d.escutcheonQty>0) h+='Escutcheons: '+d.escutcheonQty+'<br>';
+    if(d.popUpDrain) h+='Pop-Up Drain: Yes<br>';
+    if(
