@@ -482,7 +482,7 @@ var ELEC={
     {id:'22PNUST7QMYH',name:'1-Gang Decora Jumbo Plate',price:2.51},
     {id:'22PVQBeygdHx',name:'2-Gang Rocker Switch Plate',price:3.07},
     {id:'22PVP8cdJrAY',name:'3-Gang Rocker/Toggle Plate',price:5.90},
-    {id:'22PPFWuxJFdF',name:'Phone Jack Plate',price:6.17},
+    {id:'22PW9kLihCRA',name:'Phone Jack Plate',price:6.17},
     {id:'22PPFXrjWyXi',name:'Coaxial Cable Plate',price:6.04}
   ],
   decora:[
@@ -777,25 +777,25 @@ function bldRoom(r){
   s+='<div class="sh">🚪 Door Hardware</div>';
   s+='<div class="a-info" style="font-size:10px;">Select each door type used in this room and enter qty for each.</div>';
   s+='<div class="lbl" style="margin-bottom:5px;">Passage — Hall / Closet</div>';
-  s+='<div class="pg2">'+DOOR_PASS.map(function(item){return mkPcard(item,'passageId','pg2',r.id);}).join('')+'</div>';
+  s+='<div class="grp-passage">'+DOOR_PASS.map(function(item){return mkPcard(item,'passageId','grp-passage',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'passageQty','Passage Qty','');
   s+='<div class="lbl" style="margin:8px 0 5px;">Privacy — Bed / Bath</div>';
-  s+='<div class="pg2">'+DOOR_PRIV.map(function(item){return mkPcard(item,'privacyId','pg2',r.id);}).join('')+'</div>';
+  s+='<div class="grp-privacy">'+DOOR_PRIV.map(function(item){return mkPcard(item,'privacyId','grp-privacy',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'privacyQty','Privacy Qty','');
   s+='<div class="lbl" style="margin:8px 0 5px;">Entry / Exterior</div>';
-  s+='<div class="pg2">'+DOOR_ENTRY.map(function(item){return mkPcard(item,'entryId','pg2',r.id);}).join('')+'</div>';
+  s+='<div class="grp-entry">'+DOOR_ENTRY.map(function(item){return mkPcard(item,'entryId','grp-entry',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'entryQty','Entry Qty','');
   s+='<div class="sh">💡 Lighting</div>';
 
   // Flush mount
   s+='<div class="lbl" style="margin-bottom:6px;">Ceiling Fixture (flush mount)</div>';
   var flushItems=FLUSH[fin]||FLUSH[0];
-  s+='<div class="pg2">'+flushItems.map(function(item){return mkPcard(item,'flushId','pg2',r.id);}).join('')+'</div>';
+  s+='<div class="grp-flush">'+flushItems.map(function(item){return mkPcard(item,'flushId','grp-flush',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'flushQty','Quantity','# of ceiling fixtures');
 
   // Recessed cans
   s+='<div class="lbl" style="margin:8px 0 6px;">Recessed Can Retrofit</div>';
-  s+='<div class="pg2">'
+  s+='<div class="grp-cans">'
     +'<div class="pcard'+(d.can6Id?'on':'')+'" onclick="setRV(\''+r.id+'\',\'can6Id\',\''+CAN6.id+'\');selProd(\''+r.id+'\',\'can6Id\',\''+CAN6.id+'\',this,null)">'
     +pImg(CAN6.id)+'<div class="pcard-info"><div class="pcard-name">'+CAN6.name+'</div><div class="pcard-price">$'+CAN6.price.toFixed(2)+'</div><div class="pcard-fin">5/6" — most common</div></div>'
     +'<div class="pcard-chk">✓ Selected</div></div>'
@@ -809,12 +809,12 @@ function bldRoom(r){
   // Decorative (living/dining only)
   if(r.type==='living'||r.type==='dining'){
     s+='<div class="lbl" style="margin:8px 0 6px;">Decorative Fixture (optional)</div>';
-    s+='<div class="pg2">'+DECO.map(function(item){return mkPcard(item,'decoId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-deco">'+DECO.map(function(item){return mkPcard(item,'decoId','grp-deco',r.id);}).join('')+'</div>';
   }
 
   // Bulbs
   s+='<div class="lbl" style="margin:8px 0 6px;">Bulb Type</div>';
-  s+='<div class="pg3">'+BULBS.map(function(item){return mkPcard(item,'bulbId','pg3',r.id);}).join('')+'</div>';
+  s+='<div class="grp-bulb">'+BULBS.map(function(item){return mkPcard(item,'bulbId','grp-bulb',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'bulbQty','Bulb Packs Needed','count packs not individual bulbs');
 
   // ELECTRICAL DEVICES
@@ -853,7 +853,7 @@ function bldRoom(r){
     +'</select></div>';
   s+='<div id="reg-body-'+r.id+'" style="display:'+(d.regType?'block':'none')+'">';
   var regItems=d.regType==='floor'?REG_FL:REG_WL;
-  s+='<div class="pg3">'+regItems.map(function(item){return mkPcard(item,'regId','pg3',r.id);}).join('')+'</div>';
+  s+='<div class="grp-reg">'+regItems.map(function(item){return mkPcard(item,'regId','grp-reg',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'regQty','Quantity','# of registers this size');
   s+='</div>';
 
@@ -863,7 +863,7 @@ function bldRoom(r){
   if(r.type==='bedroom'||r.type==='hall'){
     s+='<div class="sh">🔥 Smoke / CO Detector</div>';
     s+='<div class="a-info" style="font-size:10px;">CA law: Smoke detector required in each bedroom and hallway leading to sleeping areas.</div>';
-    s+='<div class="pg2">'+SMOKE.map(function(item){return mkPcard(item,'smokeId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-smoke">'+SMOKE.map(function(item){return mkPcard(item,'smokeId','grp-smoke',r.id);}).join('')+'</div>';
   }
 
   // ── BATHROOM ──
@@ -873,7 +873,7 @@ function bldRoom(r){
     // Vanity light
     s+='<div class="lbl" style="margin-bottom:6px;">Vanity Light Bar</div>';
     var vanItems=VANITY[fin]||VANITY[0];
-    s+='<div class="pg2">'+vanItems.map(function(item){return mkPcard(item,'vanityId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-vanity">'+vanItems.map(function(item){return mkPcard(item,'vanityId','grp-vanity',r.id);}).join('')+'</div>';
     s+=togRow(r.id,'hasVanityLight','Vanity Light Replacement','','');
 
     // Faucet
@@ -881,7 +881,7 @@ function bldRoom(r){
     s+='<div class="trow"><div class="tlbl">Faucet Replacement</div>'
       +'<label class="tog"><input type="checkbox"'+(d.faucet?' checked':'')+' onchange="setRV(\''+r.id+'\',\'faucet\',this.checked);showHide(\'fau-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
     s+='<div id="fau-body-'+r.id+'" style="display:'+(d.faucet?'block':'none')+'">';
-    s+='<div class="pg2">'+BATH_FAU.map(function(item){return mkPcard(item,'faucetId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-faucet">'+BATH_FAU.map(function(item){return mkPcard(item,'faucetId','grp-faucet',r.id);}).join('')+'</div>';
     s+='</div>';
 
     // Bath hardware
@@ -889,7 +889,7 @@ function bldRoom(r){
     s+='<div class="trow"><div class="tlbl">Bath Hardware Set<span class="tlbl-sub">Towel bar, TP holder, robe hook</span></div>'
       +'<label class="tog"><input type="checkbox"'+(d.bathHW?' checked':'')+' onchange="setRV(\''+r.id+'\',\'bathHW\',this.checked);showHide(\'bhw-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
     s+='<div id="bhw-body-'+r.id+'" style="display:'+(d.bathHW?'block':'none')+'">';
-    s+='<div class="pg2">'+BATH_HW.map(function(item){return mkPcard(item,'bathHWId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-bathHW">'+BATH_HW.map(function(item){return mkPcard(item,'bathHWId','grp-bathHW',r.id);}).join('')+'</div>';
     s+='</div>';
 
     // Toilet seat
@@ -897,7 +897,7 @@ function bldRoom(r){
     s+='<div class="trow"><div class="tlbl">Toilet Seat Replacement</div>'
       +'<label class="tog"><input type="checkbox"'+(d.toiletSeat?' checked':'')+' onchange="setRV(\''+r.id+'\',\'toiletSeat\',this.checked);showHide(\'ts-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
     s+='<div id="ts-body-'+r.id+'" style="display:'+(d.toiletSeat?'block':'none')+'">';
-    s+='<div class="pg2">'+TOILET_S.map(function(item){return mkPcard(item,'toiletSeatId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-toilet">'+TOILET_S.map(function(item){return mkPcard(item,'toiletSeatId','grp-toilet',r.id);}).join('')+'</div>';
     s+='</div>';
 
     // Shower / Tub valve
@@ -917,7 +917,7 @@ function bldRoom(r){
     s+='<div class="trow"><div class="tlbl">Shower Head Replacement</div>'
       +'<label class="tog"><input type="checkbox"'+(d.showerHead?' checked':'')+' onchange="setRV(\''+r.id+'\',\'showerHead\',this.checked);showHide(\'sh-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
     s+='<div id="sh-body-'+r.id+'" style="display:'+(d.showerHead&&!locked?'block':'none')+'">';
-    s+='<div class="pg2">'+SHOWER_H.map(function(item){return mkPcard(item,'showerHeadId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-shower">'+SHOWER_H.map(function(item){return mkPcard(item,'showerHeadId','grp-shower',r.id);}).join('')+'</div>';
     s+='</div>';
     s+=togRow(r.id,'tubSpout','Tub Spout Replacement','Placeholder — office orders after valve confirmed','');
     s+='</div>';
@@ -935,7 +935,7 @@ function bldRoom(r){
   // ── KITCHEN ──
   if(r.type==='kitchen'){
     s+='<div class="sh">🍳 Cabinet Hardware</div>';
-    s+='<div class="pg2">'+CAB_PULL.map(function(item){return mkPcard(item,'cabPullId','pg2',r.id);}).join('')+'</div>';
+    s+='<div class="grp-cabPull">'+CAB_PULL.map(function(item){return mkPcard(item,'cabPullId','grp-cabPull',r.id);}).join('')+'</div>';
     s+='<div class="fg"><label class="lbl">Hole Spacing</label>'
       +'<select onchange="setRV(\''+r.id+'\',\'holeSpacing\',this.value)">'
       +'<option value="">Not measured yet</option>'
@@ -1147,6 +1147,295 @@ function initHWToggles(){
 }
 
 // ═══════════ PUSH TO JOBTREAD ═══════════
+// ═══════════ WALK REPORT ═══════════
+async function generateWalkReport(){
+  var fins=['Satin Nickel','Matte Black','Venetian Bronze'];
+  var finName=fins[S.finish]||'Satin Nickel';
+  var addr=(document.getElementById('f-addr').value||'').trim()||'[Address]';
+  var seller=(document.getElementById('f-seller').value||'').trim()||'[Seller]';
+  var agent=(document.getElementById('f-agent').value||'').trim();
+  var brok=(document.getElementById('f-brokerage').value||'').trim();
+  var today=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // House-wide items
+  var hwChecked=[];
+  var hwMap=[
+    ['hw-whs','Water Heater Strapping'],['hw-pw','Pressure Washing'],
+    ['hw-junk','Debris/Junk Removal ('+(HW['hw-junk-qty']||1)+' load'+(HW['hw-junk-qty']>1?'s':'')+')'],
+    ['hw-clean','Deep Clean'],['hw-land','Light Landscaping'],
+    ['hw-caulk','Caulking & Sealing'],['hw-drywall','Minor Drywall Repair'],
+    ['hw-therm','Thermostat Replacement'],
+  ];
+  hwMap.forEach(function(m){var el=document.getElementById(m[0]);if(el&&el.checked)hwChecked.push(m[1]);});
+  var fsel=document.getElementById('hw-filter-sel').value;
+  if(fsel==='standard')hwChecked.push('HVAC Filter Standard');
+  if(fsel==='allergen')hwChecked.push('HVAC Filter Allergen Defense');
+  var carEl=document.getElementById('hw-car');
+  if(carEl&&carEl.checked){
+    var carAct=document.getElementById('hw-car-action').value;
+    var carLoc=(document.getElementById('hw-car-loc').value||'').trim();
+    hwChecked.push('Cold Air Return — '+carAct+(carLoc?' ('+carLoc+')':''));
+  }
+
+  // Build HTML
+  var RED='#c0392b';
+  var h='<!DOCTYPE html><html><head><meta charset="utf-8">';
+  h+='<style>';
+  h+='*{box-sizing:border-box;margin:0;padding:0;}';
+  h+='body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:0;}';
+  h+='.page{max-width:900px;margin:0 auto;padding:32px;}';
+  h+='.header{background:'+RED+';color:#fff;padding:24px 32px;margin-bottom:0;}';
+  h+='.header h1{font-size:22px;font-weight:700;letter-spacing:-0.3px;}';
+  h+='.header p{font-size:13px;opacity:0.85;margin-top:4px;}';
+  h+='.meta{background:#f8f8f8;border-bottom:2px solid #e0e0e0;padding:16px 32px;display:flex;gap:32px;flex-wrap:wrap;}';
+  h+='.meta-item{display:flex;flex-direction:column;gap:2px;}';
+  h+='.meta-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;}';
+  h+='.meta-val{font-size:14px;font-weight:600;color:#1a1a1a;}';
+  h+='.section{margin:24px 32px 0;}';
+  h+='.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:'+RED+';border-bottom:2px solid '+RED+';padding-bottom:6px;margin-bottom:12px;}';
+  h+='.hw-grid{display:flex;flex-wrap:wrap;gap:8px;}';
+  h+='.hw-tag{background:#f0f0f0;border:1px solid #ddd;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;}';
+  h+='.room-card{border:2px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:20px;page-break-inside:avoid;}';
+  h+='.room-header{background:'+RED+';color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;}';
+  h+='.room-icon{font-size:18px;}';
+  h+='.room-name{font-size:16px;font-weight:700;}';
+  h+='.room-body{padding:16px;}';
+  h+='.room-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}';
+  h+='.room-section{padding:8px 12px;border-bottom:1px solid #f0f0f0;}';
+  h+='.room-section:nth-child(odd){border-right:1px solid #f0f0f0;}';
+  h+='.rs-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;margin-bottom:3px;}';
+  h+='.rs-val{font-size:13px;font-weight:600;color:#1a1a1a;}';
+  h+='.rs-desc{font-size:11px;color:#666;margin-top:1px;}';
+  h+='.elec-section{padding:8px 12px;border-top:2px solid #f0f0f0;margin-top:4px;}';
+  h+='.elec-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f8f8f8;font-size:12px;}';
+  h+='.elec-name{color:#444;}';
+  h+='.elec-qty{font-weight:700;color:'+RED+';background:#fff5f5;border-radius:4px;padding:1px 8px;}';
+  h+='.photo-section{padding:12px 12px 8px;border-top:2px solid #f0f0f0;}';
+  h+='.photo-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}';
+  h+='.photo-thumb{width:120px;height:90px;object-fit:cover;border-radius:6px;border:2px solid #ddd;}';
+  h+='.notes-section{padding:8px 12px;border-top:1px solid #f0f0f0;background:#fffef0;}';
+  h+='.notes-text{font-size:12px;color:#555;font-style:italic;}';
+  h+='.full-row{grid-column:1/-1;padding:8px 12px;border-bottom:1px solid #f0f0f0;}';
+  h+='.badge{display:inline-block;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:4px;padding:1px 8px;font-size:11px;font-weight:600;margin-right:4px;}';
+  h+='.badge.red{background:#fff5f5;color:'+RED+';border-color:#ffcdd2;}';
+  h+='.footer{margin-top:32px;padding:16px 32px;border-top:2px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#888;}';
+  h+='.sig-block{text-align:center;}';
+  h+='.sig-line{width:200px;border-bottom:1px solid #999;margin:0 auto 4px;}';
+  h+='@media print{.room-card{page-break-inside:avoid;}.section{margin:16px 32px 0;}}';
+  h+='</style></head><body>';
+
+  // Header
+  h+='<div class="header"><h1>🏠 LMC Make Ready — Site Walk Report</h1>';
+  h+='<p>Pre-Listing Market Prep Survey · Generated '+today+'</p></div>';
+
+  // Meta bar
+  h+='<div class="meta">';
+  h+='<div class="meta-item"><div class="meta-label">Property</div><div class="meta-val">'+addr+'</div></div>';
+  h+='<div class="meta-item"><div class="meta-label">Seller</div><div class="meta-val">'+seller+'</div></div>';
+  h+='<div class="meta-item"><div class="meta-label">Finish</div><div class="meta-val">'+finName+'</div></div>';
+  if(agent)h+='<div class="meta-item"><div class="meta-label">Referring Agent</div><div class="meta-val">'+agent+(brok?' — '+brok:'')+'</div></div>';
+  h+='<div class="meta-item"><div class="meta-label">Rooms</div><div class="meta-val">'+S.rooms.length+'</div></div>';
+  h+='</div>';
+  h+='<div class="page">';
+
+  // House-wide section
+  if(hwChecked.length>0){
+    h+='<div class="section"><div class="section-title">🏡 House-Wide Items</div>';
+    h+='<div class="hw-grid">';
+    hwChecked.forEach(function(item){h+='<div class="hw-tag">'+item+'</div>';});
+    h+='</div></div>';
+  }
+
+  // Rooms
+  h+='<div class="section"><div class="section-title">🚶 Room Walk</div>';
+
+  S.rooms.forEach(function(r){
+    var d=r.d;
+    var fins2=['Satin Nickel','Matte Black','Venetian Bronze'];
+    h+='<div class="room-card">';
+    h+='<div class="room-header"><span class="room-icon">'+r.icon+'</span><span class="room-name">'+r.name+'</span></div>';
+    h+='<div class="room-body">';
+    h+='<div class="room-grid">';
+
+    // Paint
+    if(d.paintTier){
+      h+='<div class="room-section"><div class="rs-label">Paint</div>';
+      h+='<div class="rs-val">Tier '+d.paintTier+'</div></div>';
+    }
+
+    // Door hardware
+    var dhParts=[];
+    if(d.passageId&&d.passageQty>0){var pn=DESC[d.passageId]||'Passage';dhParts.push('<span class="badge">Passage ×'+d.passageQty+'</span><div class="rs-desc">'+pn.split(' - ')[0]+'</div>');}
+    if(d.privacyId&&d.privacyQty>0){var pn2=DESC[d.privacyId]||'Privacy';dhParts.push('<span class="badge">Privacy ×'+d.privacyQty+'</span><div class="rs-desc">'+pn2.split(' - ')[0]+'</div>');}
+    if(d.entryId&&d.entryQty>0){var en=DESC[d.entryId]||'Entry';dhParts.push('<span class="badge">Entry ×'+d.entryQty+'</span><div class="rs-desc">'+en.split(' - ')[0]+'</div>');}
+    if(dhParts.length>0){
+      h+='<div class="room-section"><div class="rs-label">Door Hardware</div><div class="rs-val">'+dhParts.join('')+'</div></div>';
+    }
+
+    // Light fixtures
+    var lightParts=[];
+    if(d.flushId&&d.flushQty>0){var fn2=DESC[d.flushId]||'Flush Mount';lightParts.push('<span class="badge">Flush Mount ×'+d.flushQty+'</span><div class="rs-desc">'+fn2.split(' - ')[0]+'</div>');}
+    if(d.can6Qty>0)lightParts.push('<span class="badge">6" Can Retrofit ×'+d.can6Qty+'</span>');
+    if(d.can4Qty>0)lightParts.push('<span class="badge">4" Can Retrofit ×'+d.can4Qty+'</span>');
+    if(d.decoId){var dn=DESC[d.decoId]||'Decorative';lightParts.push('<span class="badge">Decorative</span><div class="rs-desc">'+dn.split(' - ')[0]+'</div>');}
+    if(d.vanityId){var vn=DESC[d.vanityId]||'Vanity';lightParts.push('<span class="badge">Vanity Light</span><div class="rs-desc">'+vn.split(' - ')[0]+'</div>');}
+    if(lightParts.length>0){
+      h+='<div class="room-section"><div class="rs-label">Light Fixtures</div><div class="rs-val">'+lightParts.join('')+'</div></div>';
+    }
+
+    // Bulbs
+    if(d.bulbId&&d.bulbQty>0){
+      var bn=DESC[d.bulbId]||'Bulbs';
+      h+='<div class="room-section"><div class="rs-label">Bulbs</div>';
+      h+='<div class="rs-val"><span class="badge">'+d.bulbQty+' Pack'+(d.bulbQty>1?'s':'')+'</span>';
+      h+='<div class="rs-desc">'+bn.split(' - ')[0]+'</div></div></div>';
+    }
+
+    // Smoke/CO
+    if(d.smokeId){
+      var sn=DESC[d.smokeId]||'Detector';
+      h+='<div class="room-section"><div class="rs-label">Smoke/CO Detector</div>';
+      h+='<div class="rs-val"><span class="badge">1</span>';
+      h+='<div class="rs-desc">'+sn.split(' - ')[0]+'</div></div></div>';
+    }
+
+    // Register
+    if(d.regId&&d.regQty>0){
+      var rn=DESC[d.regId]||'Register';
+      h+='<div class="room-section"><div class="rs-label">Heat Register</div>';
+      h+='<div class="rs-val"><span class="badge">×'+d.regQty+'</span>';
+      h+='<div class="rs-desc">'+rn.split(' - ')[0]+'</div></div></div>';
+    }
+
+    // Bath fixtures
+    var bathParts=[];
+    if(d.faucetId){var faucN=DESC[d.faucetId]||'Faucet';bathParts.push('<span class="badge">Faucet</span><div class="rs-desc">'+faucN.split(' - ')[0]+'</div>');}
+    if(d.bathHWId){var bhN=DESC[d.bathHWId]||'Bath HW';bathParts.push('<span class="badge">Bath HW Set</span><div class="rs-desc">'+bhN.split(' - ')[0]+'</div>');}
+    if(d.toiletSeatId){var tsN=DESC[d.toiletSeatId]||'Toilet Seat';bathParts.push('<span class="badge">Toilet Seat</span><div class="rs-desc">'+tsN.split(' - ')[0]+'</div>');}
+    if(d.showerHeadId){var shN=DESC[d.showerHeadId]||'Shower Head';bathParts.push('<span class="badge">Shower Head</span><div class="rs-desc">'+shN.split(' - ')[0]+'</div>');}
+    if(d.tubSpout)bathParts.push('<span class="badge red">Tub Spout — Verify</span>');
+    if(d.valve)bathParts.push('<span class="badge red">Valve ID: '+d.valve+'</span>');
+    if(bathParts.length>0){
+      h+='<div class="room-section"><div class="rs-label">Plumbing Fixtures</div><div class="rs-val">'+bathParts.join('')+'</div></div>';
+    }
+
+    // Plumbing trim
+    var plbParts=[];
+    if(d.angleStopQty>0)plbParts.push('Angle Stops ×'+d.angleStopQty);
+    if(d.toiletAngleQty>0)plbParts.push('Toilet Stops ×'+d.toiletAngleQty);
+    if(d.supplyLineQty>0)plbParts.push('Supply Lines ×'+d.supplyLineQty);
+    if(d.ptrap)plbParts.push('P-Trap');
+    if(d.escutcheonQty>0)plbParts.push('Escutcheons ×'+d.escutcheonQty);
+    if(d.popUpDrain)plbParts.push('Pop-Up Drain');
+    if(plbParts.length>0){
+      h+='<div class="full-row"><div class="rs-label">Plumbing Trim</div>';
+      h+='<div class="rs-val">'+plbParts.map(function(p){return '<span class="badge">'+p+'</span>';}).join('')+'</div></div>';
+    }
+
+    // Cabinet hardware
+    if(d.cabPullId){
+      var cpN=DESC[d.cabPullId]||'Cabinet Pulls';
+      var pqty=(d.drawerPullQty||0)+(d.doorPullQty||0);
+      h+='<div class="full-row"><div class="rs-label">Cabinet Hardware</div>';
+      h+='<div class="rs-val"><span class="badge">'+pqty+' Pulls ('+d.holeSpacing+')</span>';
+      h+='<div class="rs-desc">Drawer: '+d.drawerPullQty+' · Door: '+d.doorPullQty+' · '+cpN.split(' - ')[0]+'</div></div></div>';
+    }
+
+    h+='</div>'; // end room-grid
+
+    // Electrical devices (if any)
+    var elecRows=[];
+    // Cover-ups
+    ELEC.coverUp.forEach(function(item){var q=d['cup_'+item.id];if(q>0)elecRows.push({name:'Cover-Up: '+item.name,qty:q});});
+    // Plates
+    ELEC.plates.forEach(function(item){var q=d['plt_'+item.id];if(q>0)elecRows.push({name:'Plate: '+item.name,qty:q});});
+    // Decora
+    ELEC.decora.forEach(function(item){var q=d['dev_'+item.id];if(q>0)elecRows.push({name:'Device: '+item.name,qty:q});});
+    // Standard
+    ELEC.standard.forEach(function(item){var q=d['std_'+item.id];if(q>0)elecRows.push({name:'Std: '+item.name,qty:q});});
+
+    if(elecRows.length>0){
+      h+='<div class="elec-section"><div class="rs-label">⚡ Electrical Devices</div>';
+      elecRows.forEach(function(row){
+        h+='<div class="elec-row"><span class="elec-name">'+row.name+'</span><span class="elec-qty">×'+row.qty+'</span></div>';
+      });
+      h+='</div>';
+    }
+
+    // Photos
+    if(r.photos&&r.photos.length>0){
+      h+='<div class="photo-section"><div class="rs-label">📷 Walk Photos ('+r.photos.length+')</div>';
+      h+='<div class="photo-row">';
+      // Convert blob to data URL for embedding in HTML
+      for(var pi=0;pi<r.photos.length;pi++){
+        if(r.photos[pi].previewUrl){
+          h+='<img class="photo-thumb" src="'+r.photos[pi].previewUrl+'">';
+        }
+      }
+      h+='</div></div>';
+    }
+
+    // Notes
+    if(d.notes&&d.notes.trim()){
+      h+='<div class="notes-section"><div class="rs-label">📝 Notes</div>';
+      h+='<div class="notes-text">'+d.notes.replace(/\n/g,'<br>')+'</div></div>';
+    }
+
+    h+='</div></div>'; // end room-body, room-card
+  });
+
+  h+='</div>'; // end section
+
+  // Footer with signature
+  h+='<div class="footer">';
+  h+='<div><strong>LMC Contracting</strong><br>Pre-Listing Market Prep Program</div>';
+  h+='<div class="sig-block">';
+  var sigDataUrl='';
+  try{sigDataUrl=sigC?sigC.toDataURL():'';} catch(e){}
+  if(sigDataUrl&&sigDataUrl.length>100){
+    h+='<img src="'+sigDataUrl+'" style="height:50px;margin-bottom:4px;display:block;margin:0 auto 4px;"><div style="font-size:11px;color:#666;">Field Tech Signature</div>';
+  } else {
+    h+='<div class="sig-line"></div><div style="font-size:11px;color:#888;">Field Tech Signature</div>';
+  }
+  h+='</div>';
+  h+='<div style="text-align:right;">'+today+'<br><span style="color:'+RED+';">'+addr.split(',')[0]+'</span></div>';
+  h+='</div>';
+
+  h+='</div></body></html>'; // end page, body, html
+  return h;
+}
+
+async function uploadReportToJT(jobId, htmlContent){
+  // Convert HTML to a Blob
+  var blob = new Blob([htmlContent], {type:'text/html'});
+  var addr = (document.getElementById('f-addr').value||'').trim().split(',')[0]||'Walk';
+  var filename = addr.replace(/[^a-zA-Z0-9]/g,'-')+'-Walk-Report.html';
+
+  // Step 1: get upload URL
+  var upResp = await jtQ({createUploadRequest:{'$':{
+    organizationId:ORG,
+    size:blob.size,
+    type:'text/html'
+  },createdUploadRequest:{id:{},url:{},method:{},headers:{}}}});
+  var up = gc(upResp,'createUploadRequest');
+  if(!up||!up.id) throw new Error('No upload URL for report');
+
+  // Step 2: PUT to GCS
+  var putResp = await fetch(up.url,{method:up.method||'PUT',headers:up.headers||{'content-type':'text/html'},body:blob});
+  if(!putResp.ok) throw new Error('Report upload HTTP '+putResp.status);
+
+  // Step 3: attach to job Files tab
+  await jtQ({createFile:{'$':{
+    uploadRequestId:up.id,
+    targetType:'job',
+    targetId:jobId,
+    name:filename
+  },createdFile:{id:{},name:{}}}});
+
+  return filename;
+}
+
+
 async function pushToJT(){
   var btn=document.getElementById('jt-btn');
   var log=document.getElementById('jt-log');
@@ -1424,6 +1713,16 @@ async function pushToJT(){
     // 10. DOCUMENTS
     // Documents created manually in JobTread
     jl('\u2139 In JobTread: Documents tab \u2192 create Proposal & PO','info');
+
+    // Generate and upload walk report
+    try{
+      jl('Generating walk report...','info');
+      var _reportHtml = await generateWalkReport();
+      var _reportName = await uploadReportToJT(jobId, _reportHtml);
+      jl('\u2705 Walk report saved to job files: '+_reportName,'ok');
+    }catch(_re){
+      jl('\u26a0 Report: '+_re.message,'err');
+    }
 
     jl('','');
     jl('\u2713 DONE! Open JobTread to review. Job: '+jobName,'ok');
