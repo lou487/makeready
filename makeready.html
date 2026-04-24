@@ -2164,6 +2164,24 @@ function renderWalkDrawer(){
 
 // ── PATCH capturePhoto TO SAVE base64 ──
 
+
+document.addEventListener('DOMContentLoaded',function(){
+  initHWToggles();
+  bldThermGrid();
+  document.addEventListener('touchstart',function(){},{passive:true});
+  CURRENT_WALK_ID='w'+Date.now();
+  // Hook form fields to FORM_CACHE
+  ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
+   'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
+   'f-walknotes','f-rendr-link','f-rendr-notes'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){
+      el.addEventListener('input',function(){FORM_CACHE[id]=el.value;autoSave();});
+      el.addEventListener('change',function(){FORM_CACHE[id]=el.value;autoSave();});
+    }
+  });
+  saveWalk();
+});
 </script>
 
 <div id="walk-drawer-bg" onclick="closeWalkDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;"></div>
