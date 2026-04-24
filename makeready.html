@@ -672,26 +672,30 @@ function renderPhotos(rid){
   var grid=document.getElementById('pgrid-'+rid);
   if(!grid||!room)return;
   if(!room.photos||!room.photos.length){grid.innerHTML='';return;}
+  // Always create fresh blob URLs before rendering
   room.photos.forEach(function(p){
-    if(p.blob&&(!p.previewUrl||p.previewUrl==='')){
+    if(p.blob){
+      // Revoke stale URL and create fresh one
+      if(p.previewUrl){try{URL.revokeObjectURL(p.previewUrl);}catch(e){}}
       p.previewUrl=URL.createObjectURL(p.blob);
     }
   });
   grid.innerHTML=room.photos.map(function(p,i){
     return '<div class="photo-thumb">'
-      +'<img src="'+p.previewUrl+'" onclick="viewPhoto(\''+rid+'\','+i+')">'
+      +'<img src="'+p.previewUrl+'" onclick="viewPhoto(\''+rid+'\','+i+')" onerror="fixPhoto(\''+rid+'\','+i+',this)">'
       +'<div class="photo-del" onclick="delPhoto(\''+rid+'\','+i+')">\u00D7</div>'
       +'</div>';
   }).join('');
-  setTimeout(function(){
-    var imgs=grid.querySelectorAll('img');
-    imgs.forEach(function(img,i){
-      if(img.naturalWidth===0&&room.photos[i]&&room.photos[i].blob){
-        room.photos[i].previewUrl=URL.createObjectURL(room.photos[i].blob);
-        img.src=room.photos[i].previewUrl;
-      }
-    });
-  },150);
+}
+
+function fixPhoto(rid,idx,imgEl){
+  var room=S.rooms.find(function(r){return r.id===rid;});
+  if(!room||!room.photos[idx]||!room.photos[idx].blob)return;
+  // Create a completely fresh URL from the blob
+  var freshUrl=URL.createObjectURL(room.photos[idx].blob);
+  room.photos[idx].previewUrl=freshUrl;
+  imgEl.onerror=null; // prevent infinite loop
+  imgEl.src=freshUrl;
 }
 
 
