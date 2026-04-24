@@ -1876,7 +1876,9 @@ function saveWalk(){
   if(!CURRENT_WALK_ID) return;
   try{
     var state = collectState();
-    localStorage.setItem(WALK_PREFIX + CURRENT_WALK_ID, JSON.stringify(state));
+    var data = JSON.stringify(state);
+    var sizeKB = (data.length/1024).toFixed(0);
+    localStorage.setItem(WALK_PREFIX + CURRENT_WALK_ID, data);
     // Update index
     var index = getWalkIndex();
     if(index.indexOf(CURRENT_WALK_ID) < 0){
@@ -1884,7 +1886,22 @@ function saveWalk(){
       localStorage.setItem(WALK_PREFIX + 'index', JSON.stringify(index));
     }
   }catch(e){
-    console.warn('Save failed:', e.message);
+    if(e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED'){
+      // Try saving without photos as fallback
+      console.warn('Storage quota exceeded - saving without photos');
+      try{
+        var state2 = collectState();
+        state2.rooms = state2.rooms.map(function(r){return Object.assign({},r,{photos:[]});});
+        localStorage.setItem(WALK_PREFIX + CURRENT_WALK_ID, JSON.stringify(state2));
+        var index2 = getWalkIndex();
+        if(index2.indexOf(CURRENT_WALK_ID) < 0){
+          index2.push(CURRENT_WALK_ID);
+          localStorage.setItem(WALK_PREFIX + 'index', JSON.stringify(index2));
+        }
+      }catch(e2){console.warn('Save without photos also failed:',e2.message);}
+    } else {
+      console.warn('Save failed:', e.message);
+    }
   }
 }
 
@@ -2102,7 +2119,6 @@ function renderWalkDrawer(){
 // ── PATCH capturePhoto TO SAVE base64 ──
 var _origCapturePhoto = null;
 function patchCapturePhoto(){
-  // Override capturePhoto to store b64 alongside blob
   var _orig = window.capturePhoto;
   window.capturePhoto = function(rid, input){
     if(!input.files||!input.files.length)return;
@@ -2113,35 +2129,56 @@ function patchCapturePhoto(){
     var stat=document.getElementById('pstat-'+rid);
     if(stat){stat.textContent='Saving...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
     input.value='';
-    // Read as base64 first, then create blob and store everything together
     var reader=new FileReader();
     reader.onload=function(e){
-      var dataUrl=e.target.result;
-      var b64=dataUrl.split(',')[1];
-      var mimeType=file.type||'image/jpeg';
-      // Create blob from base64
-      var binary=atob(b64);
-      var bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-      var blob=new Blob([bytes],{type:mimeType});
-      var photoObj={
-        blob:blob,
-        size:blob.size,
-        type:mimeType,
-        roomName:room.name,
-        roomId:rid,
-        name:room.name.replace(/\s+/g,'-')+'-'+(room.photos.length+1)+'.jpg',
-        previewUrl:URL.createObjectURL(blob),
-        b64:b64
+      // Compress using canvas - resize to max 1024px wide, JPEG quality 0.7
+      var img=new Image();
+      img.onload=function(){
+        var maxW=1024,maxH=1024;
+        var w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+        if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+        var canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        var ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        var compressed=canvas.toDataURL('image/jpeg',0.72);
+        var b64=compressed.split(',')[1];
+        // Convert compressed b64 back to blob
+        var binary=atob(b64);
+        var bytes=new Uint8Array(binary.length);
+        for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+        var blob=new Blob([bytes],{type:'image/jpeg'});
+        var photoObj={
+          blob:blob, size:blob.size, type:'image/jpeg',
+          roomName:room.name, roomId:rid,
+          name:room.name.replace(/\s+/g,'-')+'-'+(room.photos.length+1)+'.jpg',
+          previewUrl:URL.createObjectURL(blob),
+          b64:b64
+        };
+        room.photos.push(photoObj);
+        renderPhotos(rid);
+        var n=room.photos.length;
+        if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';stat.style.fontWeight='bold';}
+        // Test save size before committing
+        try{
+          var testKey='_lmc_test_';
+          localStorage.setItem(testKey,'x');
+          localStorage.removeItem(testKey);
+          autoSave();
+        }catch(e){
+          // Storage full - warn but keep photo in memory for this session
+          if(stat){stat.textContent='\u26a0 '+n+' photo'+(n!==1?'s':'')+' (storage full - will push but wont save)';stat.style.color='#e67e22';}
+          console.warn('localStorage full:',e.message);
+        }
       };
-      room.photos.push(photoObj);
-      renderPhotos(rid);
-      var n=room.photos.length;
-      if(stat){stat.textContent='✅ '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';stat.style.fontWeight='bold';}
-      autoSave(); // b64 is guaranteed here
+      img.onerror=function(){
+        if(stat){stat.textContent='\u274c Could not read photo';stat.style.color='red';}
+      };
+      img.src=e.target.result;
     };
     reader.onerror=function(){
-      if(stat){stat.textContent='❌ Could not read photo';stat.style.color='red';}
+      if(stat){stat.textContent='\u274c Could not read photo';stat.style.color='red';}
     };
     reader.readAsDataURL(file);
   };
