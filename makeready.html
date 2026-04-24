@@ -774,6 +774,10 @@ function bldWalk(){
   var el=document.getElementById('walk-list');
   if(!S.rooms.length){el.innerHTML='<div class="a-warn">No rooms added. Go to Page 2 and add rooms first.</div>';return;}
   el.innerHTML=S.rooms.map(function(r){return bldRoom(r);}).join('');
+  // Restore photo thumbnails for every room
+  S.rooms.forEach(function(r){
+    if(r.photos&&r.photos.length) renderPhotos(r.id);
+  });
   // Init thermostat grid on page 1
   bldThermGrid();
 }
@@ -1024,7 +1028,15 @@ function bldRoom(r){
 function togRoom(rid){
   var body=document.getElementById('rbody-'+rid);
   var hdr=document.getElementById('rhdr-'+rid);
-  if(body){var open=body.classList.toggle('on');if(hdr)hdr.classList.toggle('open',open);}
+  if(body){
+    var open=body.classList.toggle('on');
+    if(hdr)hdr.classList.toggle('open',open);
+    // Re-render photos when room is expanded
+    if(open){
+      var room=getR(rid);
+      if(room&&room.photos&&room.photos.length) renderPhotos(rid);
+    }
+  }
 }
 
 // ═══════════ REVIEW ═══════════
@@ -2072,23 +2084,46 @@ function renderWalkDrawer(){
 // ── PATCH capturePhoto TO SAVE base64 ──
 var _origCapturePhoto = null;
 function patchCapturePhoto(){
-  _origCapturePhoto = window.capturePhoto;
+  // Override capturePhoto to store b64 alongside blob
+  var _orig = window.capturePhoto;
   window.capturePhoto = function(rid, input){
     if(!input.files||!input.files.length)return;
     var file=input.files[0];
-    // Read as base64 for persistent storage
-    var reader = new FileReader();
-    reader.onload = function(e){
-      var b64 = e.target.result.split(',')[1];
-      // Store b64 on the input for the original capturePhoto to pick up
-      input._pendingB64 = b64;
-      _origCapturePhoto(rid, input);
-      // After original runs, attach b64 to the photo object
-      var room = S.rooms.find(function(r){return r.id===rid;});
-      if(room && room.photos.length>0){
-        room.photos[room.photos.length-1].b64 = b64;
-      }
-      autoSave();
+    var room=S.rooms.find(function(r){return r.id===rid;});
+    if(!room)return;
+    if(!room.photos)room.photos=[];
+    var stat=document.getElementById('pstat-'+rid);
+    if(stat){stat.textContent='Saving...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
+    input.value='';
+    // Read as base64 first, then create blob and store everything together
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var dataUrl=e.target.result;
+      var b64=dataUrl.split(',')[1];
+      var mimeType=file.type||'image/jpeg';
+      // Create blob from base64
+      var binary=atob(b64);
+      var bytes=new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+      var blob=new Blob([bytes],{type:mimeType});
+      var photoObj={
+        blob:blob,
+        size:blob.size,
+        type:mimeType,
+        roomName:room.name,
+        roomId:rid,
+        name:room.name.replace(/\s+/g,'-')+'-'+(room.photos.length+1)+'.jpg',
+        previewUrl:URL.createObjectURL(blob),
+        b64:b64
+      };
+      room.photos.push(photoObj);
+      renderPhotos(rid);
+      var n=room.photos.length;
+      if(stat){stat.textContent='✅ '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';stat.style.fontWeight='bold';}
+      autoSave(); // b64 is guaranteed here
+    };
+    reader.onerror=function(){
+      if(stat){stat.textContent='❌ Could not read photo';stat.style.color='red';}
     };
     reader.readAsDataURL(file);
   };
