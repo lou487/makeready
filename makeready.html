@@ -1005,7 +1005,7 @@ function bldRoom(r){
   // NOTES
   // PHOTOS
   s+='<div class="sh">📷 Room Photos</div>';
-  s+='<div class="photo-status" id="pstat-'+r.id+'">Tap + to add photos</div>';
+  s+='<div class="photo-status" id="pstat-'+r.id+'" style="'+(r.photos&&r.photos.length?'color:green;font-weight:bold;':'')+'">'+(r.photos&&r.photos.length?'✅ '+r.photos.length+' photo'+(r.photos.length!==1?'s':'')+' captured':'')+' </div>';
   s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
   s+='<button type="button" class="photo-add" onclick="document.getElementById(\'pinput-'+r.id+'\').click()" style="-webkit-appearance:none;">'+'<span class="photo-add-icon">📷</span><span>Add Photo</span></button>';
   s+='<input type="file" accept="image/*" capture="environment" id="pinput-'+r.id+'" style="display:none" onchange="handlePhoto(\"'+r.id+'\",this)">';
