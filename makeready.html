@@ -1876,15 +1876,17 @@ function collectState(){
   var roomsSafe = S.rooms.map(function(r){
     var rc = JSON.parse(JSON.stringify({id:r.id,name:r.name,type:r.type,icon:r.icon,d:r.d||{}}));
     rc.photos = (r.photos||[]).map(function(p){
+      if(!p.b64) return null; // only save photos with b64
       return {
         size: p.size,
-        type: p.type,
+        type: p.type||'image/jpeg',
         roomName: p.roomName,
         roomId: p.roomId,
         name: p.name,
-        b64: p.b64 || null  // stored on capture
+        b64: p.b64
+        // NOTE: previewUrl intentionally NOT saved - blob URLs die on reload
       };
-    }).filter(function(p){return p.b64;});
+    }).filter(function(p){return p!==null;});
     return rc;
   });
 
@@ -2053,10 +2055,11 @@ function loadWalk(id){
           var bytes = new Uint8Array(binary.length);
           for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
           var blob = new Blob([bytes],{type:p.type||'image/jpeg'});
+          var freshUrl=URL.createObjectURL(blob);
           room.photos.push({
             blob:blob, size:p.size, type:p.type||'image/jpeg',
             roomName:p.roomName, roomId:p.roomId, name:p.name,
-            previewUrl:URL.createObjectURL(blob), b64:p.b64
+            previewUrl:freshUrl, b64:p.b64
           });
         }catch(e){console.warn('Photo restore failed:',e.message);}
       });
