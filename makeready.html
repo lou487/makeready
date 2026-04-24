@@ -661,54 +661,76 @@ function capturePhoto(rid,input){
   if(!room.photos)room.photos=[];
   var stat=document.getElementById('pstat-'+rid);
   if(stat){stat.textContent='Saving...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
-  var photoObj={blob:file,size:file.size,type:file.type||'image/jpeg',roomName:room.name,roomId:rid,name:room.name.replace(/\s+/g,'-')+'-'+(room.photos.length+1)+'.jpg',previewUrl:URL.createObjectURL(file)};
-  room.photos.push(photoObj);
-  renderPhotos(rid);
-  var n=room.photos.length;
-  if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';stat.style.fontWeight='bold';}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var srcUrl=e.target.result;
+    var img=new Image();
+    img.onload=function(){
+      var maxW=1024,maxH=1024,w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+      var cv=document.createElement('canvas');
+      cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      var compressed=cv.toDataURL('image/jpeg',0.72);
+      var b64=compressed.split(',')[1];
+      var binary=atob(b64),bytes=new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+      var blob=new Blob([bytes],{type:'image/jpeg'});
+      room.photos.push({
+        blob:blob, size:blob.size, type:'image/jpeg',
+        roomName:room.name, roomId:rid,
+        name:room.name.replace(/\s+/g,'-')+'-'+(room.photos.length+1)+'.jpg',
+        dataUrl:compressed,
+        b64:b64
+      });
+      renderPhotos(rid);
+      var n=room.photos.length;
+      if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';stat.style.fontWeight='bold';}
+      autoSave();
+    };
+    img.onerror=function(){if(stat){stat.textContent='\u274c Could not read photo';stat.style.color='red';}};
+    img.src=srcUrl;
+  };
+  reader.onerror=function(){if(stat){stat.textContent='\u274c Could not read photo';stat.style.color='red';}};
+  reader.readAsDataURL(file);
 }
+
+
 function renderPhotos(rid){
   var room=S.rooms.find(function(r){return r.id===rid;});
   var grid=document.getElementById('pgrid-'+rid);
   if(!grid||!room)return;
   if(!room.photos||!room.photos.length){grid.innerHTML='';return;}
-  // Always create fresh blob URLs before rendering
+  // Ensure dataUrl (permanent, works on iOS)
   room.photos.forEach(function(p){
-    if(p.blob){
-      // Revoke stale URL and create fresh one
-      if(p.previewUrl){try{URL.revokeObjectURL(p.previewUrl);}catch(e){}}
-      p.previewUrl=URL.createObjectURL(p.blob);
-    }
+    if(!p.dataUrl&&p.b64) p.dataUrl='data:image/jpeg;base64,'+p.b64;
   });
   grid.innerHTML=room.photos.map(function(p,i){
     return '<div class="photo-thumb">'
-      +'<img src="'+p.previewUrl+'" onclick="viewPhoto(\''+rid+'\','+i+')" onerror="fixPhoto(\''+rid+'\','+i+',this)">'
+      +'<img src="'+(p.dataUrl||'')+'" onclick="viewPhoto(\''+rid+'\','+i+')">'
       +'<div class="photo-del" onclick="delPhoto(\''+rid+'\','+i+')">\u00D7</div>'
       +'</div>';
   }).join('');
 }
 
-function fixPhoto(rid,idx,imgEl){
+
+function viewPhoto(rid,idx){
   var room=S.rooms.find(function(r){return r.id===rid;});
-  if(!room||!room.photos[idx]||!room.photos[idx].blob)return;
-  // Create a completely fresh URL from the blob
-  var freshUrl=URL.createObjectURL(room.photos[idx].blob);
-  room.photos[idx].previewUrl=freshUrl;
-  imgEl.onerror=null; // prevent infinite loop
-  imgEl.src=freshUrl;
+  if(room&&room.photos[idx]){
+    var url=room.photos[idx].dataUrl||('data:image/jpeg;base64,'+room.photos[idx].b64);
+    window.open(url,'_blank');
+  }
 }
-
-
-function viewPhoto(rid,idx){var room=S.rooms.find(function(r){return r.id===rid;});if(room&&room.photos[idx])window.open(room.photos[idx].previewUrl,'_blank');}
 function delPhoto(rid,idx){
   var room=S.rooms.find(function(r){return r.id===rid;});
   if(!room||!room.photos)return;
-  if(room.photos[idx]&&room.photos[idx].previewUrl)URL.revokeObjectURL(room.photos[idx].previewUrl);
   room.photos.splice(idx,1);
   renderPhotos(rid);
   var stat=document.getElementById('pstat-'+rid);
   var n=room.photos.length;
-  if(stat){if(n===0){stat.textContent='';stat.style.fontWeight='';}else{stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';}}
+  if(stat){if(n===0){stat.textContent='';stat.style.fontWeight='';}else{stat.textContent='✅ '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';}}
+  autoSave();
 }
 
 
@@ -801,12 +823,7 @@ function bldWalk(){
   setTimeout(function(){
     S.rooms.forEach(function(r){
       if(!r.photos||!r.photos.length) return;
-      // Ensure each photo has a valid fresh previewUrl
-      r.photos.forEach(function(p){
-        if(p.blob && (!p.previewUrl || p.previewUrl==='')) {
-          p.previewUrl = URL.createObjectURL(p.blob);
-        }
-      });
+  
       renderPhotos(r.id);
     });
   }, 100);
@@ -1069,12 +1086,6 @@ function togRoom(rid){
     if(open){
       var room=getR(rid);
       if(room&&room.photos&&room.photos.length){
-        // Refresh previewUrls from blob if needed
-        room.photos.forEach(function(p){
-          if(p.blob && (!p.previewUrl || p.previewUrl==='')){
-            p.previewUrl=URL.createObjectURL(p.blob);
-          }
-        });
         renderPhotos(rid);
         var stat=document.getElementById('pstat-'+rid);
         if(stat){
@@ -1459,8 +1470,9 @@ async function generateWalkReport(){
       h+='<div class="photo-row">';
       // Convert blob to data URL for embedding in HTML
       for(var pi=0;pi<r.photos.length;pi++){
-        if(r.photos[pi].previewUrl){
-          h+='<img class="photo-thumb" src="'+r.photos[pi].previewUrl+'">';
+        var photoSrc=r.photos[pi].dataUrl||(r.photos[pi].b64?'data:image/jpeg;base64,'+r.photos[pi].b64:'');
+        if(photoSrc){
+          h+='<img class="photo-thumb" src="'+photoSrc+'">';
         }
       }
       h+='</div></div>';
@@ -2059,11 +2071,11 @@ function loadWalk(id){
           var bytes = new Uint8Array(binary.length);
           for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
           var blob = new Blob([bytes],{type:p.type||'image/jpeg'});
-          var freshUrl=URL.createObjectURL(blob);
           room.photos.push({
             blob:blob, size:p.size, type:p.type||'image/jpeg',
             roomName:p.roomName, roomId:p.roomId, name:p.name,
-            previewUrl:freshUrl, b64:p.b64
+            dataUrl:'data:image/jpeg;base64,'+p.b64,
+            b64:p.b64
           });
         }catch(e){console.warn('Photo restore failed:',e.message);}
       });
@@ -2071,12 +2083,7 @@ function loadWalk(id){
     });
 
     closeWalkDrawer();
-    // Revoke any stale blob URLs from previous walk
-    if(S.rooms) S.rooms.forEach(function(r){
-      if(r.photos) r.photos.forEach(function(p){
-        if(p.previewUrl) try{URL.revokeObjectURL(p.previewUrl);}catch(e){}
-      });
-    });
+
     // Always go to page 0 first so form fields exist in DOM
     goTo(0);
     // NOW restore form fields (DOM exists after goTo(0))
@@ -2156,92 +2163,7 @@ function renderWalkDrawer(){
 }
 
 // ── PATCH capturePhoto TO SAVE base64 ──
-var _origCapturePhoto = null;
-function patchCapturePhoto(){
-  var _orig = window.capturePhoto;
-  window.capturePhoto = function(rid, input){
-    if(!input.files||!input.files.length)return;
-    var file=input.files[0];
-    var room=S.rooms.find(function(r){return r.id===rid;});
-    if(!room)return;
-    if(!room.photos)room.photos=[];
-    var stat=document.getElementById('pstat-'+rid);
-    if(stat){stat.textContent='Saving...';stat.style.color='#e67e22';stat.style.fontWeight='bold';}
-    input.value='';
-    var reader=new FileReader();
-    reader.onload=function(e){
-      // Compress using canvas - resize to max 1024px wide, JPEG quality 0.7
-      var img=new Image();
-      img.onload=function(){
-        var maxW=1024,maxH=1024;
-        var w=img.width,h=img.height;
-        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
-        if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
-        var canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        var ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,w,h);
-        var compressed=canvas.toDataURL('image/jpeg',0.72);
-        var b64=compressed.split(',')[1];
-        // Convert compressed b64 back to blob
-        var binary=atob(b64);
-        var bytes=new Uint8Array(binary.length);
-        for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-        var blob=new Blob([bytes],{type:'image/jpeg'});
-        var photoObj={
-          blob:blob, size:blob.size, type:'image/jpeg',
-          roomName:room.name, roomId:rid,
-          name:room.name.replace(/\s+/g,'-')+'-'+(room.photos.length+1)+'.jpg',
-          previewUrl:URL.createObjectURL(blob),
-          b64:b64
-        };
-        room.photos.push(photoObj);
-        renderPhotos(rid);
-        var n=room.photos.length;
-        if(stat){stat.textContent='\u2705 '+n+' photo'+(n!==1?'s':'')+' captured';stat.style.color='green';stat.style.fontWeight='bold';}
-        // Test save size before committing
-        try{
-          var testKey='_lmc_test_';
-          localStorage.setItem(testKey,'x');
-          localStorage.removeItem(testKey);
-          autoSave();
-        }catch(e){
-          // Storage full - warn but keep photo in memory for this session
-          if(stat){stat.textContent='\u26a0 '+n+' photo'+(n!==1?'s':'')+' (storage full - will push but wont save)';stat.style.color='#e67e22';}
-          console.warn('localStorage full:',e.message);
-        }
-      };
-      img.onerror=function(){
-        if(stat){stat.textContent='\u274c Could not read photo';stat.style.color='red';}
-      };
-      img.src=e.target.result;
-    };
-    reader.onerror=function(){
-      if(stat){stat.textContent='\u274c Could not read photo';stat.style.color='red';}
-    };
-    reader.readAsDataURL(file);
-  };
-}
 
-
-document.addEventListener('DOMContentLoaded',function(){
-  initHWToggles();
-  bldThermGrid();
-  document.addEventListener('touchstart',function(){},{passive:true});
-  patchCapturePhoto();
-  CURRENT_WALK_ID='w'+Date.now();
-  // Hook all client form fields to update FORM_CACHE on change
-  ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
-   'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
-   'f-walknotes','f-rendr-link','f-rendr-notes'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el){
-      el.addEventListener('input',function(){FORM_CACHE[id]=el.value;autoSave();});
-      el.addEventListener('change',function(){FORM_CACHE[id]=el.value;autoSave();});
-    }
-  });
-  saveWalk();
-});
 </script>
 
 <div id="walk-drawer-bg" onclick="closeWalkDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;"></div>
