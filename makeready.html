@@ -1790,6 +1790,7 @@ function openRendr(){
 
 var WALK_PREFIX = 'lmc_walk_';
 var CURRENT_WALK_ID = null;
+var FORM_CACHE = {}; // mirrors form field values for saves when not on client page
 var _saveTimer = null;
 
 // ── COLLECT CURRENT STATE ──
@@ -1797,10 +1798,10 @@ function collectState(){
   var fields = ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
                 'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
                 'f-walknotes','f-rendr-link','f-rendr-notes'];
-  var formData = {};
+  var formData = Object.assign({}, FORM_CACHE); // start with cached values
   fields.forEach(function(id){
     var el = document.getElementById(id);
-    if(el) formData[id] = el.value || '';
+    if(el){ formData[id] = el.value || ''; FORM_CACHE[id] = el.value || ''; }
   });
 
   var hwData = {};
@@ -1910,16 +1911,10 @@ function deleteWalk(id){
 // ── START NEW WALK ──
 function newWalk(){
   CURRENT_WALK_ID = 'w'+Date.now();
+  FORM_CACHE = {};
   // Reset state
   S.finish=0; S.rooms=[]; S.signed=false; S.thermostatId=null;
   HW={'hw-junk-qty':1,'hw-car-qty':1};
-  // Reset form fields
-  ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
-   'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
-   'f-walknotes','f-rendr-link','f-rendr-notes'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el) el.value='';
-  });
   // Reset HW checkboxes
   ['hw-whs','hw-pw','hw-junk','hw-clean','hw-land','hw-caulk','hw-drywall','hw-therm','hw-car'].forEach(function(id){
     var el=document.getElementById(id);
@@ -1936,6 +1931,15 @@ function newWalk(){
   // Go to page 0
   closeWalkDrawer();
   goTo(0);
+  // Clear form fields AFTER goTo(0) so DOM elements exist
+  ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
+   'f-agent-phone','f-agent-email','f-access','f-listdate',
+   'f-walknotes','f-rendr-link','f-rendr-notes'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  var occEl=document.getElementById('f-occ');
+  if(occEl) occEl.value='Vacant';
   saveWalk();
 }
 
@@ -1947,17 +1951,7 @@ function loadWalk(id){
     var w = JSON.parse(raw);
     CURRENT_WALK_ID = id;
 
-    // Restore form fields
-    Object.keys(w.formData||{}).forEach(function(fid){
-      var el=document.getElementById(fid);
-      if(el) el.value = w.formData[fid]||'';
-    });
-
-    // Restore finish
-    S.finish = w.finish||0;
-    document.querySelectorAll('.fin-opt').forEach(function(b,i){b.classList.toggle('on',i===S.finish);});
-
-    // Restore HW
+    // Restore HW (form fields restored after goTo(0) below)
     var hd = w.hwData||{};
     ['hw-whs','hw-pw','hw-junk','hw-clean','hw-land','hw-caulk','hw-drywall','hw-therm','hw-car'].forEach(function(id2){
       var el=document.getElementById(id2);
@@ -1997,9 +1991,23 @@ function loadWalk(id){
     });
 
     closeWalkDrawer();
-    goTo(w.page||0);
-    // Re-render rooms if on walk page
-    if(w.page===2) bldWalk();
+    // Always go to page 0 first so form fields exist in DOM
+    goTo(0);
+    // NOW restore form fields (DOM exists after goTo(0))
+    FORM_CACHE = Object.assign({}, w.formData||{});
+    Object.keys(w.formData||{}).forEach(function(fid){
+      var el=document.getElementById(fid);
+      if(el) el.value = w.formData[fid]||'';
+    });
+    // Restore finish buttons
+    S.finish = w.finish||0;
+    document.querySelectorAll('.fin-opt').forEach(function(b,i){b.classList.toggle('on',i===S.finish);});
+    // Navigate to saved page if not page 0
+    if((w.page||0) > 0){
+      goTo(w.page);
+      if(w.page===2) bldWalk();
+      if(w.page===3) bldReview();
+    }
   }catch(e){
     alert('Could not load walk: '+e.message);
   }
@@ -2093,6 +2101,16 @@ document.addEventListener('DOMContentLoaded',function(){
   document.addEventListener('touchstart',function(){},{passive:true});
   patchCapturePhoto();
   CURRENT_WALK_ID='w'+Date.now();
+  // Hook all client form fields to update FORM_CACHE on change
+  ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
+   'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
+   'f-walknotes','f-rendr-link','f-rendr-notes'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){
+      el.addEventListener('input',function(){FORM_CACHE[id]=el.value;autoSave();});
+      el.addEventListener('change',function(){FORM_CACHE[id]=el.value;autoSave();});
+    }
+  });
   saveWalk();
 });
 </script>
