@@ -193,6 +193,32 @@ textarea{resize:none;min-height:56px;}
 .pcard-sel{color:var(--red);font-size:22px;font-weight:700;opacity:0;flex-shrink:0;}
 .pcard.on .pcard-sel{opacity:1;}
 .pcard-grid{display:flex;flex-direction:column;gap:0;}
+.walks-btn{position:fixed;top:12px;right:44px;z-index:100;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:4px 8px;font-size:16px;cursor:pointer;line-height:1;}
+
+#walk-drawer-bg.open{display:block !important;opacity:1;}
+#walk-drawer.open{display:flex !important;transform:translateX(0);}
+.wdr-item{display:flex;align-items:center;border-bottom:1px solid #f0f0f0;}
+.wdr-item.active{background:#fff8f8;}
+.wdr-main{flex:1;padding:12px 16px;cursor:pointer;}
+.wdr-addr{font-weight:600;font-size:13px;color:#1a1a1a;}
+.wdr-meta{font-size:11px;color:#888;margin-top:2px;}
+.wdr-status{display:inline-block;margin-top:4px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;background:#fff3e0;color:#e65100;}
+.wdr-status.pushed{background:#e8f5e9;color:#2e7d32;}
+.wdr-del{background:none;border:none;color:#ccc;font-size:16px;padding:16px 12px;cursor:pointer;flex-shrink:0;}
+.wdr-del:active{color:#c0392b;}
+.walks-btn{position:absolute;top:50%;right:12px;transform:translateY(-50%);background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:6px;padding:5px 9px;font-size:16px;cursor:pointer;line-height:1;}
+
+#walk-drawer-bg.open{display:block !important;opacity:1;pointer-events:auto;}
+#walk-drawer.open{display:flex !important;transform:translateX(0);}
+.wdr-item{display:flex;align-items:center;border-bottom:1px solid #f0f0f0;}
+.wdr-item.active{background:#fff8f8;}
+.wdr-main{flex:1;padding:12px 16px;cursor:pointer;}
+.wdr-addr{font-weight:600;font-size:13px;color:#1a1a1a;}
+.wdr-meta{font-size:11px;color:#888;margin-top:2px;}
+.wdr-status{display:inline-block;margin-top:4px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;background:#fff3e0;color:#e65100;}
+.wdr-status.pushed{background:#e8f5e9;color:#2e7d32;}
+.wdr-del{background:none;border:none;color:#ccc;font-size:18px;padding:12px 14px;cursor:pointer;flex-shrink:0;}
+.walks-btn{position:absolute;top:50%;right:12px;transform:translateY(-50%);background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:6px;padding:5px 9px;font-size:15px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -610,7 +636,7 @@ function togRow(rid,key,lbl,sub,showId){
     +'<span class="tog-sl"></span></label></div>';
 }
 function getR(rid){return S.rooms.find(function(r){return r.id===rid;})||{};}
-function setRV(rid,key,val){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
+function setRV(rid,key,val){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);autoSave();}}
 function adjR(rid,key,d){
   var r=getR(rid);if(!r)return;
   r.d[key]=Math.max(0,(r.d[key]||0)+d);
@@ -666,6 +692,7 @@ function selProd(rid,key,val,el,grp){
   var container=el.parentNode;
   container.querySelectorAll('.pcard').forEach(function(c){c.classList.remove('on');});
   el.classList.add('on');
+  autoSave();
 }
 function setPT(rid,tier,el){
   var r=getR(rid);if(!r)return;
@@ -724,6 +751,7 @@ function goTo(n){
 function addRoom(type,icon,name){
   S.rooms.push({id:'r'+Date.now(),type:type,icon:icon,name:name,d:{}});
   renderRooms();
+  autoSave();
 }
 function removeRoom(id){S.rooms=S.rooms.filter(function(r){return r.id!==id;});renderRooms();}
 function renderRooms(){
@@ -736,6 +764,7 @@ function renderRooms(){
       +'<button onclick="removeRoom(\''+r.id+'\')" style="border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer;">×</button>'
       +'</div>';
   }).join('');
+  autoSave();
 }
 
 // ═══════════ WALK BUILD ═══════════
@@ -1142,7 +1171,7 @@ function initHWToggles(){
   pairs.forEach(function(p){
     var cb=document.getElementById(p[0]);
     var nb=document.getElementById(p[1]);
-    if(cb&&nb)cb.addEventListener('change',function(){nb.style.display=this.checked?'block':'none';});
+    if(cb&&nb)cb.addEventListener('change',function(){autoSave();nb.style.display=this.checked?'block':'none';});
   });
 }
 
@@ -1401,7 +1430,7 @@ async function generateWalkReport(){
   h+='<div style="text-align:right;">'+today+'<br><span style="color:'+RED+';">'+addr.split(',')[0]+'</span></div>';
   h+='</div>';
 
-  h+='</div></body></html>'; // end page, body, html
+
   return h;
 }
 
@@ -1725,6 +1754,7 @@ async function pushToJT(){
     }
 
     jl('','');
+    markWalkPushed();
     jl('\u2713 DONE! Open JobTread to review. Job: '+jobName,'ok');
     btn.textContent='Pushed \u2713';
   }catch(e){
@@ -1753,11 +1783,324 @@ function openRendr(){
   }
 }
 
+
+// ═══════════ WALK SAVE / RECALL SYSTEM ═══════════
+
+var WALK_PREFIX = 'lmc_walk_';
+var CURRENT_WALK_ID = null;
+var _saveTimer = null;
+
+// ── COLLECT CURRENT STATE ──
+function collectState(){
+  var fields = ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
+                'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
+                'f-walknotes','f-rendr-link','f-rendr-notes'];
+  var formData = {};
+  fields.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) formData[id] = el.value || '';
+  });
+
+  var hwData = {};
+  ['hw-whs','hw-pw','hw-junk','hw-clean','hw-land','hw-caulk','hw-drywall','hw-therm','hw-car'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) hwData[id] = el.checked;
+  });
+  ['hw-filter-sel','hw-car-action','hw-car-loc'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) hwData[id] = el.value || '';
+  });
+  hwData['hw-junk-qty'] = HW['hw-junk-qty'] || 1;
+  hwData['hw-car-qty'] = HW['hw-car-qty'] || 1;
+
+  // Serialize rooms - photos as base64
+  var roomsSafe = S.rooms.map(function(r){
+    var rc = JSON.parse(JSON.stringify({id:r.id,name:r.name,type:r.type,icon:r.icon,d:r.d||{}}));
+    rc.photos = (r.photos||[]).map(function(p){
+      return {
+        size: p.size,
+        type: p.type,
+        roomName: p.roomName,
+        roomId: p.roomId,
+        name: p.name,
+        b64: p.b64 || null  // stored on capture
+      };
+    }).filter(function(p){return p.b64;});
+    return rc;
+  });
+
+  return {
+    id: CURRENT_WALK_ID,
+    addr: formData['f-addr'] || '[No address]',
+    date: new Date().toISOString(),
+    status: 'draft',
+    page: CP,
+    finish: S.finish,
+    thermostatId: S.thermostatId,
+    signed: S.signed,
+    formData: formData,
+    hwData: hwData,
+    rooms: roomsSafe
+  };
+}
+
+// ── SAVE CURRENT WALK ──
+function saveWalk(){
+  if(!CURRENT_WALK_ID) return;
+  try{
+    var state = collectState();
+    localStorage.setItem(WALK_PREFIX + CURRENT_WALK_ID, JSON.stringify(state));
+    // Update index
+    var index = getWalkIndex();
+    if(index.indexOf(CURRENT_WALK_ID) < 0){
+      index.push(CURRENT_WALK_ID);
+      localStorage.setItem(WALK_PREFIX + 'index', JSON.stringify(index));
+    }
+  }catch(e){
+    console.warn('Save failed:', e.message);
+  }
+}
+
+// ── AUTO-SAVE (debounced) ──
+function autoSave(){
+  if(_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveWalk, 800);
+}
+
+// ── GET WALK INDEX ──
+function getWalkIndex(){
+  try{ return JSON.parse(localStorage.getItem(WALK_PREFIX+'index')||'[]'); }
+  catch(e){ return []; }
+}
+
+// ── GET ALL SAVED WALKS (summary) ──
+function getSavedWalks(){
+  var index = getWalkIndex();
+  var walks = [];
+  index.forEach(function(id){
+    try{
+      var raw = localStorage.getItem(WALK_PREFIX+id);
+      if(!raw) return;
+      var w = JSON.parse(raw);
+      walks.push({
+        id: w.id,
+        addr: w.addr||'[No address]',
+        date: w.date,
+        status: w.status||'draft',
+        rooms: (w.rooms||[]).length,
+        page: w.page||0
+      });
+    }catch(e){}
+  });
+  // Sort newest first
+  walks.sort(function(a,b){return b.date > a.date ? 1 : -1;});
+  return walks;
+}
+
+// ── DELETE A WALK ──
+function deleteWalk(id){
+  localStorage.removeItem(WALK_PREFIX+id);
+  var index = getWalkIndex().filter(function(i){return i!==id;});
+  localStorage.setItem(WALK_PREFIX+'index', JSON.stringify(index));
+  renderWalkDrawer();
+}
+
+// ── START NEW WALK ──
+function newWalk(){
+  CURRENT_WALK_ID = 'w'+Date.now();
+  // Reset state
+  S.finish=0; S.rooms=[]; S.signed=false; S.thermostatId=null;
+  HW={'hw-junk-qty':1,'hw-car-qty':1};
+  // Reset form fields
+  ['f-addr','f-seller','f-phone','f-email','f-agent','f-brokerage',
+   'f-agent-phone','f-agent-email','f-occ','f-access','f-listdate',
+   'f-walknotes','f-rendr-link','f-rendr-notes'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  // Reset HW checkboxes
+  ['hw-whs','hw-pw','hw-junk','hw-clean','hw-land','hw-caulk','hw-drywall','hw-therm','hw-car'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.checked=false;
+  });
+  var filterSel=document.getElementById('hw-filter-sel');
+  if(filterSel) filterSel.value='';
+  var carAction=document.getElementById('hw-car-action');
+  if(carAction) carAction.value='paint';
+  // Reset finish buttons
+  document.querySelectorAll('.fin-opt').forEach(function(b,i){b.classList.toggle('on',i===0);});
+  // Reset signature
+  if(sigC){var ctx=sigC.getContext('2d');ctx.clearRect(0,0,sigC.width,sigC.height);}
+  // Go to page 0
+  closeWalkDrawer();
+  goTo(0);
+  saveWalk();
+}
+
+// ── LOAD A WALK ──
+function loadWalk(id){
+  try{
+    var raw = localStorage.getItem(WALK_PREFIX+id);
+    if(!raw) return alert('Walk not found');
+    var w = JSON.parse(raw);
+    CURRENT_WALK_ID = id;
+
+    // Restore form fields
+    Object.keys(w.formData||{}).forEach(function(fid){
+      var el=document.getElementById(fid);
+      if(el) el.value = w.formData[fid]||'';
+    });
+
+    // Restore finish
+    S.finish = w.finish||0;
+    document.querySelectorAll('.fin-opt').forEach(function(b,i){b.classList.toggle('on',i===S.finish);});
+
+    // Restore HW
+    var hd = w.hwData||{};
+    ['hw-whs','hw-pw','hw-junk','hw-clean','hw-land','hw-caulk','hw-drywall','hw-therm','hw-car'].forEach(function(id2){
+      var el=document.getElementById(id2);
+      if(el) el.checked = !!hd[id2];
+    });
+    ['hw-filter-sel','hw-car-action','hw-car-loc'].forEach(function(id2){
+      var el=document.getElementById(id2);
+      if(el && hd[id2]!==undefined) el.value=hd[id2];
+    });
+    HW['hw-junk-qty'] = hd['hw-junk-qty']||1;
+    HW['hw-car-qty'] = hd['hw-car-qty']||1;
+    initHWToggles();
+
+    // Restore thermostat
+    S.thermostatId = w.thermostatId||null;
+    bldThermGrid();
+
+    // Restore rooms with photos as object URLs
+    S.rooms = (w.rooms||[]).map(function(r){
+      var room = {id:r.id,name:r.name,type:r.type,icon:r.icon,d:r.d||{},photos:[]};
+      (r.photos||[]).forEach(function(p){
+        if(!p.b64) return;
+        try{
+          // Convert base64 back to blob
+          var binary = atob(p.b64);
+          var bytes = new Uint8Array(binary.length);
+          for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+          var blob = new Blob([bytes],{type:p.type||'image/jpeg'});
+          room.photos.push({
+            blob:blob, size:p.size, type:p.type||'image/jpeg',
+            roomName:p.roomName, roomId:p.roomId, name:p.name,
+            previewUrl:URL.createObjectURL(blob), b64:p.b64
+          });
+        }catch(e){console.warn('Photo restore failed:',e.message);}
+      });
+      return room;
+    });
+
+    closeWalkDrawer();
+    goTo(w.page||0);
+    // Re-render rooms if on walk page
+    if(w.page===2) bldWalk();
+  }catch(e){
+    alert('Could not load walk: '+e.message);
+  }
+}
+
+// ── MARK WALK AS PUSHED ──
+function markWalkPushed(){
+  if(!CURRENT_WALK_ID) return;
+  try{
+    var raw = localStorage.getItem(WALK_PREFIX+CURRENT_WALK_ID);
+    if(!raw) return;
+    var w = JSON.parse(raw);
+    w.status = 'pushed';
+    localStorage.setItem(WALK_PREFIX+CURRENT_WALK_ID, JSON.stringify(w));
+  }catch(e){}
+}
+
+// ── WALK DRAWER UI ──
+function openWalkDrawer(){
+  renderWalkDrawer();
+  document.getElementById('walk-drawer').classList.add('open');
+  document.getElementById('walk-drawer-bg').classList.add('open');
+}
+
+function closeWalkDrawer(){
+  document.getElementById('walk-drawer').classList.remove('open');
+  document.getElementById('walk-drawer-bg').classList.remove('open');
+}
+
+function renderWalkDrawer(){
+  var walks = getSavedWalks();
+  var el = document.getElementById('walk-drawer-list');
+  if(!el) return;
+
+  if(walks.length===0){
+    el.innerHTML='<div style="padding:24px;text-align:center;color:#888;font-size:13px;">No saved walks yet.<br>Start a new walk to begin.</div>';
+    return;
+  }
+
+  el.innerHTML = walks.map(function(w){
+    var date = new Date(w.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var isActive = w.id === CURRENT_WALK_ID;
+    var isPushed = w.status === 'pushed';
+    var pageLabels = ['Client','Rooms','Walk','Review','Push'];
+    return '<div class="wdr-item'+(isActive?' active':'')+'">'
+      +'<div class="wdr-main" onclick="loadWalk(\''+w.id+'\')">'
+      +'<div class="wdr-addr">'+(w.addr||'[No address]')+'</div>'
+      +'<div class="wdr-meta">'+date+' · '+w.rooms+' room'+(w.rooms!==1?'s':'')
+      +(isActive?' · <b>Current</b>':' · Page: '+pageLabels[w.page||0])+'</div>'
+      +'<div class="wdr-status '+(isPushed?'pushed':'draft')+'">'+(isPushed?'✓ Pushed':'Draft')+'</div>'
+      +'</div>'
+      +'<button class="wdr-del" onclick="event.stopPropagation();if(confirm(\'Delete walk for '+
+        (w.addr||'this property')+'?\'))deleteWalk(\''+w.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+// ── PATCH capturePhoto TO SAVE base64 ──
+var _origCapturePhoto = null;
+function patchCapturePhoto(){
+  _origCapturePhoto = window.capturePhoto;
+  window.capturePhoto = function(rid, input){
+    if(!input.files||!input.files.length)return;
+    var file=input.files[0];
+    // Read as base64 for persistent storage
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var b64 = e.target.result.split(',')[1];
+      // Store b64 on the input for the original capturePhoto to pick up
+      input._pendingB64 = b64;
+      _origCapturePhoto(rid, input);
+      // After original runs, attach b64 to the photo object
+      var room = S.rooms.find(function(r){return r.id===rid;});
+      if(room && room.photos.length>0){
+        room.photos[room.photos.length-1].b64 = b64;
+      }
+      autoSave();
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+
 document.addEventListener('DOMContentLoaded',function(){
   initHWToggles();
   bldThermGrid();
   document.addEventListener('touchstart',function(){},{passive:true});
+  patchCapturePhoto();
+  CURRENT_WALK_ID='w'+Date.now();
+  saveWalk();
 });
 </script>
+
+<div id="walk-drawer-bg" onclick="closeWalkDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;"></div>
+<div id="walk-drawer" style="display:none;position:fixed;top:0;right:0;width:310px;max-width:90vw;height:100%;background:#fff;z-index:1000;box-shadow:-4px 0 20px rgba(0,0,0,0.2);transform:translateX(100%);transition:transform .25s;overflow:hidden;flex-direction:column;">
+  <div style="background:#c0392b;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+    <div><div style="font-weight:700;font-size:15px;">📋 Saved Walks</div><div style="font-size:11px;opacity:0.8;margin-top:2px;">Tap to resume any walk</div></div>
+    <button onclick="closeWalkDrawer()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:26px;height:26px;font-size:15px;cursor:pointer;line-height:1;">✕</button>
+  </div>
+  <div style="padding:10px 14px;border-bottom:1px solid #eee;flex-shrink:0;">
+    <button onclick="newWalk()" style="width:100%;background:#c0392b;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">＋ New Walk</button>
+  </div>
+  <div id="walk-drawer-list" style="flex:1;overflow-y:auto;padding:6px 0;-webkit-overflow-scrolling:touch;"></div>
+</div>
 </body>
 </html>
