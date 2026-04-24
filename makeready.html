@@ -1023,7 +1023,10 @@ function bldRoom(r){
 
   // ── LAUNDRY ──
   if(r.type==='laundry'){
-      // PHOTOS
+    s+='<div class="sh">📝 Notes</div>';
+    s+='<textarea placeholder="Room notes, flags, conditions..." onchange="setRV(\''+r.id+'\',\'notes\',this.value)">'+(d.notes||'')+'</textarea>';
+  }
+  // PHOTOS — shown for every room
   s+='<div class="sh">📷 Room Photos</div>';
   s+='<div class="photo-status" id="pstat-'+r.id+'"></div>';
   s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
@@ -1032,11 +1035,7 @@ function bldRoom(r){
     'style="display:none" onchange="capturePhoto(\''+r.id+'\',this)">'+
     '📷 Add Photo</label>';
 
-s+='<div class="sh">📝 Notes</div>';
-  s+='<textarea placeholder="Room notes, flags, conditions..." onchange="setRV(\''+r.id+'\',\'notes\',this.value)">'+(d.notes||'')+'</textarea>';
-
-  }
-  return '<div class="rcard" id="rcard-'+r.id+'">'
+    return '<div class="rcard" id="rcard-'+r.id+'">'
     +'<div class="rcard-hdr" id="rhdr-'+r.id+'" onclick="togRoom(\''+r.id+'\')">'
     +'<span class="rcard-icon">'+r.icon+'</span>'
     +'<div><div class="rcard-name">'+r.name+'</div><div class="rcard-sum" id="rsum-'+r.id+'">Tap to expand</div></div>'
