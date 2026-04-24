@@ -774,10 +774,12 @@ function bldWalk(){
   var el=document.getElementById('walk-list');
   if(!S.rooms.length){el.innerHTML='<div class="a-warn">No rooms added. Go to Page 2 and add rooms first.</div>';return;}
   el.innerHTML=S.rooms.map(function(r){return bldRoom(r);}).join('');
-  // Restore photo thumbnails for every room
-  S.rooms.forEach(function(r){
-    if(r.photos&&r.photos.length) renderPhotos(r.id);
-  });
+  // Restore photo thumbnails for every room (after DOM is built)
+  setTimeout(function(){
+    S.rooms.forEach(function(r){
+      if(r.photos&&r.photos.length) renderPhotos(r.id);
+    });
+  }, 50);
   // Init thermostat grid on page 1
   bldThermGrid();
 }
@@ -1013,7 +1015,9 @@ function bldRoom(r){
 
   // PHOTOS — every room
   s+='<div class="sh">📷 Room Photos</div>';
-  s+='<div class="photo-status" id="pstat-'+r.id+'"></div>';
+  s+='<div class="photo-status" id="pstat-'+r.id+'" style="'+(r.photos&&r.photos.length?'color:green;font-weight:bold;':'')+'">'+
+    (r.photos&&r.photos.length ? '✅ '+r.photos.length+' photo'+(r.photos.length!==1?'s':'')+' captured' : '')+
+    '</div>';
   s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
   s+='<label class="photo-add-btn"><input type="file" accept="image/*" capture="environment" style="display:none" onchange="capturePhoto(\''+r.id+'\',this)">📷 Add Photo</label>';
 
@@ -1034,7 +1038,15 @@ function togRoom(rid){
     // Re-render photos when room is expanded
     if(open){
       var room=getR(rid);
-      if(room&&room.photos&&room.photos.length) renderPhotos(rid);
+      if(room&&room.photos&&room.photos.length){
+        renderPhotos(rid);
+        var stat=document.getElementById('pstat-'+rid);
+        if(stat){
+          stat.textContent='✅ '+room.photos.length+' photo'+(room.photos.length!==1?'s':'')+' captured';
+          stat.style.color='green';
+          stat.style.fontWeight='bold';
+        }
+      }
     }
   }
 }
@@ -2003,6 +2015,12 @@ function loadWalk(id){
     });
 
     closeWalkDrawer();
+    // Revoke any stale blob URLs from previous walk
+    if(S.rooms) S.rooms.forEach(function(r){
+      if(r.photos) r.photos.forEach(function(p){
+        if(p.previewUrl) try{URL.revokeObjectURL(p.previewUrl);}catch(e){}
+      });
+    });
     // Always go to page 0 first so form fields exist in DOM
     goTo(0);
     // NOW restore form fields (DOM exists after goTo(0))
