@@ -569,6 +569,21 @@ var VALVES=[
 
 // ═══════════ HELPERS ═══════════
 
+function qRow(rid,key,lbl,sub){
+  var r=getR(rid),v=r[key]||0;
+  return '<div class="qrow"><div class="qlbl">'+lbl+(sub?'<span class="qlbl-sub">'+sub+'</span>':'')+'</div>'
+    +'<div class="qctrl"><button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\''+',-1)">−</button>'
+    +'<div class="qval" id="qv-'+rid+'-'+key+'">'+v+'</div>'
+    +'<button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\',1)">+</button></div></div>';
+}
+function togRow(rid,key,lbl,sub,showId){
+  var r=getR(rid),v=r[key]?'checked':'';
+  var si=showId?' onchange="showHide(\''+showId+'\',this.checked)"':'';
+  return '<div class="trow"><div class="tlbl">'+lbl+(sub?'<span class="tlbl-sub">'+sub+'</span>':'')+'</div>'
+    +'<label class="tog"><input type="checkbox" '+v+si+' onchange="setRV(\''+rid+'\',\''+key+'\',this.checked)">'
+    +'<span class="tog-sl"></span></label></div>';
+}
+
 function getR(rid){return S.rooms.find(function(r){return r.id===rid;})||{};}
 function setRV(rid,key,val){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
 function adjR(rid,key,d){
