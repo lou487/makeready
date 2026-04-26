@@ -481,21 +481,37 @@ var HW={junkQty:1,'hw-car-qty':1,'hw-junk-qty':1};
 var IMG={};
 
 // ── DOOR HARDWARE ──
-var DOOR_PASS=[
-  {id:'22PVPLmRRLGA',name:'Kwikset Balboa Passage',price:33.81,fin:'Satin Nickel'},
-  {id:'22PVPKTZB6A7',name:'Kwikset Cove Passage',price:32.13,fin:'Matte Black'},
-  {id:'22PVPTFTuMJp',name:'Kwikset Balboa Passage',price:39.70,fin:'Venetian Bronze'}
+// Passage hardware — Hall/Closet (no lock). Knob and Lever variants in 3 finishes each.
+var DOOR_PASS_KNOB=[
+  {id:'22PVPJjAbv65',name:'Kwikset Cove Passage Knob',price:29.09,fin:'Satin Nickel'},
+  {id:'22PVPKTZB6A7',name:'Kwikset Cove Passage Knob',price:32.13,fin:'Matte Black'},
+  {id:'22PVPKxSsuQp',name:'Kwikset Polo Passage Knob',price:34.46,fin:'Venetian Bronze'}
 ];
-var DOOR_PRIV=[
-  {id:'22PVPUBefYmf',name:'Kwikset Cove Privacy',price:25.03,fin:'Satin Nickel'},
-  {id:'22PVPUT5Fmhr',name:'Kwikset Cove Privacy',price:19.89,fin:'Matte Black'},
-  {id:'22PVPVKkYh8j',name:'Kwikset Balboa Privacy',price:32.74,fin:'Venetian Bronze'}
+var DOOR_PASS_LEVER=[
+  {id:'22PVPLmRRLGA',name:'Kwikset Balboa Passage Lever',price:33.81,fin:'Satin Nickel'},
+  {id:'22PVPStXy4eX',name:'Kwikset Balboa Passage Lever',price:39.70,fin:'Matte Black'},
+  {id:'22PVPWwSHQHT',name:'Kwikset Tustin Passage Lever',price:57.44,fin:'Venetian Bronze'}
 ];
+// Privacy hardware — Bed/Bath (locks from inside). Knob and Lever variants in 3 finishes each.
+var DOOR_PRIV_KNOB=[
+  {id:'22PVPUBefYmf',name:'Kwikset Cove Privacy Knob',price:25.03,fin:'Satin Nickel'},
+  {id:'22PVPUT5Fmhr',name:'Kwikset Cove Privacy Knob',price:19.89,fin:'Matte Black'},
+  {id:'22PVPVKkYh8j',name:'Kwikset Polo Privacy Knob',price:25.76,fin:'Venetian Bronze'}
+];
+var DOOR_PRIV_LEVER=[
+  {id:'22PVPVfemSs8',name:'Kwikset Balboa Privacy Lever',price:39.33,fin:'Satin Nickel'},
+  {id:'22PVPVzVA738',name:'Kwikset Balboa Privacy Lever',price:33.06,fin:'Matte Black'},
+  {id:'22PVPWGKYtVt',name:'Kwikset Balboa Privacy Lever',price:43.27,fin:'Venetian Bronze'}
+];
+// Entry/Exterior — entryway ONLY (not other rooms)
 var DOOR_ENTRY=[
-  {id:'22PVPVfemSs8',name:'Hartford Combo SN',price:40.47,fin:'Satin Nickel'},
-  {id:'22PVPVzVA738',name:'B62 Deadbolt MB',price:54.39,fin:'Matte Black'},
-  {id:'22PVPTFTuMJp',name:'Kwikset Balboa VB',price:39.70,fin:'Venetian Bronze'}
+  {id:'22PVPZ6kQA9P',name:'Kwikset Cove Keyed Entry + Deadbolt Combo',price:56.66,fin:'Satin Nickel'},
+  {id:'22PVPauMVfyw',name:'Kwikset Cove Keyed Entry Knob',price:43.93,fin:'Matte Black'},
+  {id:'22PVPe6J5bDy',name:'Kwikset Cove Keyed Entry + Deadbolt Project Pack',price:94.46,fin:'Venetian Bronze'}
 ];
+// Backwards-compat aliases (so existing code that references DOOR_PASS/DOOR_PRIV doesn't break)
+var DOOR_PASS=DOOR_PASS_KNOB.concat(DOOR_PASS_LEVER);
+var DOOR_PRIV=DOOR_PRIV_KNOB.concat(DOOR_PRIV_LEVER);
 
 // ── INDOOR DOOR HARDWARE ──
 var DOOR_HINGE=[
@@ -1088,7 +1104,7 @@ function updSum(rid){
   var d=r.d,p=[];
   function hasItems(arr){return arr&&arr.length>0;}
   if(d.paintTier)p.push('T'+d.paintTier+' Paint');
-  if(hasItems(d.passage)||hasItems(d.privacy)||hasItems(d.entry))p.push('Door HW');
+  if(hasItems(d.passageKnob)||hasItems(d.passageLever)||hasItems(d.privacyKnob)||hasItems(d.privacyLever)||hasItems(d.entry))p.push('Door HW');
   if(hasItems(d.flush))p.push('Fixture');
   if(d.can6Qty||d.can4Qty)p.push('Cans');
   if(hasItems(d.deco))p.push('Deco');
@@ -1212,6 +1228,25 @@ function migrateRoomData(d){
       if(qtyKey) delete d[qtyKey];
     }
   });
+  // Migrate old combined door arrays (d.passage / d.privacy) into new split arrays (knob/lever)
+  // Decision: items go into the lever bucket since old format mostly stored levers
+  function migrateOldDoorHW(combinedKey, knobKey, leverKey, knobIds, leverIds){
+    if(!d[combinedKey] || !d[combinedKey].length) return;
+    var knobIdSet={}; knobIds.forEach(function(p){knobIdSet[p.id]=true;});
+    var leverIdSet={}; leverIds.forEach(function(p){leverIdSet[p.id]=true;});
+    var knobs=[], levers=[];
+    d[combinedKey].forEach(function(s){
+      if(knobIdSet[s.id]) knobs.push(s);
+      else if(leverIdSet[s.id]) levers.push(s);
+      else levers.push(s); // unknown ID → default to lever bucket
+    });
+    if(knobs.length && !d[knobKey]) d[knobKey]=knobs;
+    if(levers.length && !d[leverKey]) d[leverKey]=levers;
+    delete d[combinedKey];
+  }
+  if(typeof DOOR_PASS_KNOB!=='undefined') migrateOldDoorHW('passage','passageKnob','passageLever',DOOR_PASS_KNOB,DOOR_PASS_LEVER);
+  if(typeof DOOR_PRIV_KNOB!=='undefined') migrateOldDoorHW('privacy','privacyKnob','privacyLever',DOOR_PRIV_KNOB,DOOR_PRIV_LEVER);
+
   // Handle door stops: combine doorStopRigid+doorStopHinge+doorStopQty into separate selBox arrays
   if(d.doorStopQty && (d.doorStopRigid||d.doorStopHinge)){
     if(d.doorStopRigid && !d.hingeStopSolid){
@@ -1265,10 +1300,12 @@ function bldRoomBody(r){
   // DOOR HARDWARE — selBox per door type, qty embedded
   s+='<div class="sh">🚪 Door Hardware</div>';
   s+='<div class="a-info" style="font-size:10px;">Tap to add. Each style can be added with its own quantity.</div>';
-  s+=selBox(r.id,'passage','Passage — Hall / Closet','🚪',DOOR_PASS);
-  s+=selBox(r.id,'privacy','Privacy — Bed / Bath','🔒',DOOR_PRIV);
+  s+=selBox(r.id,'passageKnob','Passage Knob — Hall / Closet','🚪',DOOR_PASS_KNOB);
+  s+=selBox(r.id,'passageLever','Passage Lever — Hall / Closet','🚪',DOOR_PASS_LEVER);
+  s+=selBox(r.id,'privacyKnob','Privacy Knob — Bed / Bath','🔒',DOOR_PRIV_KNOB);
+  s+=selBox(r.id,'privacyLever','Privacy Lever — Bed / Bath','🔒',DOOR_PRIV_LEVER);
   if(r.type==='entryway'){
-    s+=selBox(r.id,'entry','Entry / Exterior Locksets','🗝️',DOOR_ENTRY);
+    s+=selBox(r.id,'entry','Entry / Exterior Locksets (Entry Only)','🗝️',DOOR_ENTRY);
   }
 
   // INTERIOR HINGES & DOOR STOPS
@@ -1456,8 +1493,10 @@ function bldReview(){
     h+='<div class="card"><div class="ctitle">'+r.icon+' '+r.name+'</div><div style="font-size:11px;line-height:1.9;color:#444;">';
     if(d.paintTier)h+='Paint: Tier '+d.paintTier+'<br>';
     // Door hardware
-    h+=arrSum(d.passage,'Passage Door HW');
-    h+=arrSum(d.privacy,'Privacy Door HW');
+    h+=arrSum(d.passageKnob,'Passage Knob');
+    h+=arrSum(d.passageLever,'Passage Lever');
+    h+=arrSum(d.privacyKnob,'Privacy Knob');
+    h+=arrSum(d.privacyLever,'Privacy Lever');
     h+=arrSum(d.entry,'Entry Door HW');
     h+=arrSum(d.hinge,'Door Hinges');
     h+=arrSum(d.hingeStopSolid,'Door Stops (Solid Mount)');
@@ -1757,8 +1796,10 @@ async function generateWalkReport(){
 
     // Door hardware
     var dhParts=[];
-    dhParts.push(arrBadges(d.passage,'Passage'));
-    dhParts.push(arrBadges(d.privacy,'Privacy'));
+    dhParts.push(arrBadges(d.passageKnob,'Pass Knob'));
+    dhParts.push(arrBadges(d.passageLever,'Pass Lever'));
+    dhParts.push(arrBadges(d.privacyKnob,'Priv Knob'));
+    dhParts.push(arrBadges(d.privacyLever,'Priv Lever'));
     dhParts.push(arrBadges(d.entry,'Entry'));
     dhParts.push(arrBadges(d.hinge,'Hinges'));
     dhParts.push(arrBadges(d.hingeStopSolid,'Door Stop (Solid)'));
@@ -2032,8 +2073,10 @@ async function generateFieldCrewDoc(){
       var tasks=[];
       
       // Door hardware
-      if(d.passage&&d.passage.length){d.passage.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Passage hardware (no lock)'});});}
-      if(d.privacy&&d.privacy.length){d.privacy.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Privacy hardware — bedroom/bathroom (lock from inside)'});});}
+      if(d.passageKnob&&d.passageKnob.length){d.passageKnob.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Passage knob (no lock)'});});}
+      if(d.passageLever&&d.passageLever.length){d.passageLever.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Passage lever (no lock)'});});}
+      if(d.privacyKnob&&d.privacyKnob.length){d.privacyKnob.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Privacy knob — bedroom/bathroom (lock inside)'});});}
+      if(d.privacyLever&&d.privacyLever.length){d.privacyLever.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Privacy lever — bedroom/bathroom (lock inside)'});});}
       if(d.entry&&d.entry.length){d.entry.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Entry hardware — exterior keyed'});});}
       if(d.hinge&&d.hinge.length){d.hinge.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Hinge 3-pack — replace all on door'});});}
       if(d.hingeStopSolid&&d.hingeStopSolid.length){d.hingeStopSolid.forEach(function(s){tasks.push({qty:s.qty,name:s.name,detail:'Door stop — solid wall mount'});});}
