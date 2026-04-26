@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2429,6 +2432,45 @@ async function pushToJT(){
         await jtQ({updateLocation:{'$':{id:locId,customFieldValues:{'Entry Code':access}},updateLocation:{}}});
         jl('Entry code set','ok');
       }catch(e){jl('Location fields: '+e.message,'err');}
+    }
+
+    // 5b. NOTES → JT pinned comments (so management sees them on the job page)
+    try{
+      // 5b.1 General walk notes
+      if(walknotes && walknotes.trim()){
+        var _wn='\ud83d\udcdd WALK NOTES\n\n'+walknotes.trim();
+        await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:_wn,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+        jl('\u2713 Walk notes pinned to job','ok');
+      }
+      // 5b.2 House-wide condition notes from text inputs
+      var _hwNotes=[];
+      var _cleanTxt=(document.getElementById('hw-clean-txt')||{}).value||'';
+      if(_cleanTxt.trim()) _hwNotes.push('CLEAN: '+_cleanTxt.trim());
+      var _landTxt=(document.getElementById('hw-land-txt')||{}).value||'';
+      if(_landTxt.trim()) _hwNotes.push('LANDSCAPING: '+_landTxt.trim());
+      var _dwTxt=(document.getElementById('hw-dw-txt')||{}).value||'';
+      if(_dwTxt.trim()) _hwNotes.push('DRYWALL: '+_dwTxt.trim());
+      var _junkTxtEl=document.getElementById('hw-junk-txt');
+      if(_junkTxtEl && _junkTxtEl.value && _junkTxtEl.value.trim()) _hwNotes.push('JUNK/DEBRIS: '+_junkTxtEl.value.trim());
+      if(_hwNotes.length>0){
+        var _hwMsg='\ud83c\udfe1 HOUSE-WIDE CONDITION NOTES\n\n'+_hwNotes.join('\n\n');
+        await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:_hwMsg,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+        jl('\u2713 House-wide notes pinned','ok');
+      }
+      // 5b.3 Per-room notes — one combined pinned comment so they're scannable as a group
+      var _roomNotesArr=[];
+      S.rooms.forEach(function(r){
+        if(r.d.notes && r.d.notes.trim()){
+          _roomNotesArr.push((r.icon||'\ud83c\udfe0')+' '+r.name.toUpperCase()+'\n'+r.d.notes.trim());
+        }
+      });
+      if(_roomNotesArr.length>0){
+        var _rmMsg='\ud83d\udccc ROOM-BY-ROOM NOTES\n\n'+_roomNotesArr.join('\n\n\u2500\u2500\u2500\n\n');
+        await jtQ({createComment:{'$':{targetType:'job',targetId:jobId,message:_rmMsg,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+        jl('\u2713 Room notes pinned ('+_roomNotesArr.length+' rooms)','ok');
+      }
+    }catch(_ne){
+      jl('\u26a0 Notes: '+_ne.message,'err');
     }
 
     // 6. BUDGET STRUCTURE: Root group + House-Wide + per-room groups (matches Jackson structure)
