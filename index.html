@@ -278,6 +278,7 @@ textarea{resize:none;min-height:56px;}
   <button class="tab" onclick="goTo(2)"><span>🚶</span>Walk</button>
   <button class="tab" onclick="goTo(3)"><span>👁</span>Review</button>
   <button class="tab" onclick="goTo(4)"><span>✍️</span>Push</button>
+  <button class="tab" onclick="goTo(5)"><span>🔧</span>Field</button>
 </div>
 
 <!-- PAGE 1 CLIENT -->
@@ -318,6 +319,29 @@ textarea{resize:none;min-height:56px;}
       <div class="fin-opt on" onclick="setFin(0,this)"><div class="swatch sw-sn"></div><div class="fin-name">Satin Nickel</div><div class="fin-sub">Most popular</div></div>
       <div class="fin-opt" onclick="setFin(1,this)"><div class="swatch sw-mb"></div><div class="fin-name">Matte Black</div><div class="fin-sub">Modern</div></div>
       <div class="fin-opt" onclick="setFin(2,this)"><div class="swatch sw-vb"></div><div class="fin-name">Venetian Bronze</div><div class="fin-sub">Wine country</div></div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="lbl" style="margin-bottom:6px;">Interior Door Style — Entire Home</div>
+      <div class="fin-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="fin-opt on" id="hw-style-knob" onclick="setHWStyle('knob')">
+          <div style="font-size:22px;margin-bottom:2px;">🔵</div>
+          <div class="fin-name">Knob</div>
+          <div class="fin-sub">Traditional</div>
+        </div>
+        <div class="fin-opt" id="hw-style-lever" onclick="setHWStyle('lever')">
+          <div style="font-size:22px;margin-bottom:2px;">🔑</div>
+          <div class="fin-name">Lever</div>
+          <div class="fin-sub">Modern / ADA</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="lbl" style="margin-bottom:6px;">Interior Door Brand — Entire Home</div>
+      <div id="hw-brand-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <!-- populated by renderBrandGrid() -->
+      </div>
     </div>
   </div>
 
@@ -463,27 +487,23 @@ textarea{resize:none;min-height:56px;}
     <button class="btn btn-red" id="jt-btn" onclick="pushToJT()">Push to JobTread</button>
     <div id="jt-log"></div>
   </div>
-  <div class="card" id="send-to-field-card" style="display:none;">
-    <div class="ctitle"><span class="ctitle-icon">🔧</span>Send to Field</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Send the field crew their work order via JobTread. They'll get a link to view tasks, check off work, and upload photos — no app needed.</p>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Field Lead Name</label>
-      <input id="field-lead-name" type="text" placeholder="e.g. Mike Torres" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
-    </div>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Email or Phone</label>
-      <input id="field-lead-contact" type="text" placeholder="email@example.com or (707) 555-0000" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
-    </div>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Scheduled Start Date</label>
-      <input id="field-start-date" type="date" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
-    </div>
-    <button class="btn btn-red" id="send-field-btn" onclick="sendToField()">Send to Field Crew</button>
-    <div id="send-field-log" style="margin-top:8px;font-size:12px;min-height:18px;"></div>
-  </div>
 </div>
 
 <button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
+
+<!-- PAGE 6 FIELD CHECKLIST -->
+<div class="pg" id="pg5">
+  <div class="card" id="field-search-card">
+    <div class="ctitle"><span class="ctitle-icon">🔧</span>Field Crew Checklist</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Search for a job, then check off tasks as you complete them. Progress syncs to JobTread.</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="field-search-input" type="text" placeholder="Address or job name..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
+      <button onclick="fieldSearch()" style="padding:10px 16px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Search</button>
+    </div>
+    <div id="field-search-results"></div>
+  </div>
+  <div id="field-checklist-area"></div>
+</div>
 <div class="bnav">
   <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
   <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
@@ -492,7 +512,7 @@ textarea{resize:none;min-height:56px;}
 <script>
 // ═══════════ STATE ═══════════
 var CP=0;
-var S={finish:0,rooms:[],signed:false,thermostatId:null};
+var S={finish:0,hwStyle:'knob',hwBrand:'cove',rooms:[],signed:false,thermostatId:null};
 var sigC,sigX,drawing=false,lx=0,ly=0;
 
 // House-wide qty tracking
@@ -884,12 +904,22 @@ function selBox(rid,key,label,icon,options){
   var isOpen=window.__selboxOpen&&window.__selboxOpen[openKey]===true;
   var totalQty=sels.reduce(function(a,s){return a+(s.qty||0);},0);
   var summary=sels.length===0?'Tap to add':sels.length+' item'+(sels.length>1?'s':'')+' / '+totalQty+' total';
-  var fin=(window.__selboxFilter&&window.__selboxFilter[openKey])||'all';
-  // Find finishes available in this set
+  var finNames = ['Satin Nickel','Matte Black','Venetian Bronze'];
+  var houseFin = finNames[S.finish] || 'Satin Nickel';
+  // Map finish index to the short codes used in some arrays
+  var houseFinShort = ['BN','MB','ORB'][S.finish] || 'BN';
+  // Default fin filter: use house finish if options have fin tags, otherwise 'all'
   var fins={};
   options.forEach(function(o){if(o.fin)fins[o.fin]=true;});
   var finList=Object.keys(fins);
   var hasFins=finList.length>1;
+  // Auto-select house finish — check both long names and short codes
+  var defaultFin = 'all';
+  if(hasFins){
+    if(fins[houseFin]) defaultFin = houseFin;
+    else if(fins[houseFinShort]) defaultFin = houseFinShort;
+  }
+  var fin=(window.__selboxFilter&&window.__selboxFilter[openKey]!==undefined) ? window.__selboxFilter[openKey] : defaultFin;
   var html='<div class="selbox'+(isOpen?' open':'')+'" id="sb-'+rid+'-'+key+'">';
   html+='<div class="selbox-hdr" onclick="selboxToggle(\''+rid+'\',\''+key+'\')">';
   html+='<span class="selbox-hdr-icon">'+(icon||'📦')+'</span>';
@@ -1110,6 +1140,185 @@ function setFin(idx,el){
   S.finish=idx;
   document.querySelectorAll('.fin-opt').forEach(function(o){o.classList.remove('on');});
   el.classList.add('on');
+  // Clear all selbox finish filters so they re-default to the new house finish
+  window.__selboxFilter = {};
+  renderBrandGrid();
+  refreshAllRoomCards();
+}
+
+// ── HARDWARE STYLE / BRAND SELECTORS ──
+// Brand catalog: which brands exist per style
+var HW_BRANDS = {
+  knob: [
+    {key:'cove',   label:'Kwikset Cove',   sub:'Classic round'},
+    {key:'polo',   label:'Kwikset Polo',   sub:'Traditional'},
+  ],
+  lever: [
+    {key:'balboa', label:'Kwikset Balboa', sub:'Modern arc'},
+    {key:'tustin', label:'Kwikset Tustin', sub:'Traditional'},
+  ]
+};
+
+// Maps [style][brand][finish-idx] → passage item, privacy item, hinge item
+// finish idx: 0=SN, 1=MB, 2=VB
+var HW_MAP = {
+  knob: {
+    cove: {
+      passage: [
+        {id:'22PVPJjAbv65',name:'Kwikset Cove Passage Knob',price:29.09},  // SN
+        {id:'22PVPKTZB6A7',name:'Kwikset Cove Passage Knob',price:32.13},  // MB
+        {id:'22PVPKxSsuQp',name:'Kwikset Polo Passage Knob',price:34.46},  // VB (Polo VB only)
+      ],
+      privacy: [
+        {id:'22PVPUBefYmf',name:'Kwikset Cove Privacy Knob',price:25.03},  // SN
+        {id:'22PVPUT5Fmhr',name:'Kwikset Cove Privacy Knob',price:19.89},  // MB
+        {id:'22PVPVKkYh8j',name:'Kwikset Polo Privacy Knob',price:25.76},  // VB
+      ]
+    },
+    polo: {
+      passage: [
+        {id:'22PVPJjAbv65',name:'Kwikset Cove Passage Knob',price:29.09},  // SN
+        {id:'22PVPKTZB6A7',name:'Kwikset Cove Passage Knob',price:32.13},  // MB
+        {id:'22PVPKxSsuQp',name:'Kwikset Polo Passage Knob',price:34.46},  // VB
+      ],
+      privacy: [
+        {id:'22PVPUBefYmf',name:'Kwikset Cove Privacy Knob',price:25.03},
+        {id:'22PVPUT5Fmhr',name:'Kwikset Cove Privacy Knob',price:19.89},
+        {id:'22PVPVKkYh8j',name:'Kwikset Polo Privacy Knob',price:25.76},
+      ]
+    }
+  },
+  lever: {
+    balboa: {
+      passage: [
+        {id:'22PVPLmRRLGA',name:'Kwikset Balboa Passage Lever',price:33.81},  // SN
+        {id:'22PVPStXy4eX',name:'Kwikset Balboa Passage Lever',price:39.70},  // MB
+        {id:'22PVPWwSHQHT',name:'Kwikset Tustin Passage Lever',price:57.44},  // VB (Tustin VB)
+      ],
+      privacy: [
+        {id:'22PVPVfemSs8',name:'Kwikset Balboa Privacy Lever',price:39.33},  // SN
+        {id:'22PVPVzVA738',name:'Kwikset Balboa Privacy Lever',price:33.06},  // MB
+        {id:'22PVPWGKYtVt',name:'Kwikset Balboa Privacy Lever',price:43.27},  // VB
+      ]
+    },
+    tustin: {
+      passage: [
+        {id:'22PVPLmRRLGA',name:'Kwikset Balboa Passage Lever',price:33.81},  // SN
+        {id:'22PVPStXy4eX',name:'Kwikset Balboa Passage Lever',price:39.70},  // MB
+        {id:'22PVPWwSHQHT',name:'Kwikset Tustin Passage Lever',price:57.44},  // VB
+      ],
+      privacy: [
+        {id:'22PVPVfemSs8',name:'Kwikset Balboa Privacy Lever',price:39.33},
+        {id:'22PVPVzVA738',name:'Kwikset Balboa Privacy Lever',price:33.06},
+        {id:'22PVPWGKYtVt',name:'Kwikset Balboa Privacy Lever',price:43.27},
+      ]
+    }
+  }
+};
+
+// Hinge by finish idx
+var HINGE_BY_FIN = [
+  {id:'22PVPfT9Hv85',name:'Hinge 3-Pack Satin Nickel',price:16.50},
+  {id:'22PVPfgVEfSx',name:'Hinge 3-Pack Matte Black',price:15.64},
+  {id:'22PVPftVVnn6',name:'Hinge 3-Pack Oil-Rubbed Bronze',price:17.30}
+];
+
+// Get the correct passage item for current house settings
+function getHWPassage(){ return (HW_MAP[S.hwStyle]&&HW_MAP[S.hwStyle][S.hwBrand]) ? HW_MAP[S.hwStyle][S.hwBrand].passage[S.finish] : null; }
+function getHWPrivacy(){ return (HW_MAP[S.hwStyle]&&HW_MAP[S.hwStyle][S.hwBrand]) ? HW_MAP[S.hwStyle][S.hwBrand].privacy[S.finish] : null; }
+function getHWHinge(){   return HINGE_BY_FIN[S.finish] || HINGE_BY_FIN[0]; }
+
+function setHWStyle(style){
+  S.hwStyle = style;
+  document.getElementById('hw-style-knob').classList.toggle('on', style==='knob');
+  document.getElementById('hw-style-lever').classList.toggle('on', style==='lever');
+  // Default brand for this style
+  var brands = HW_BRANDS[style]||[];
+  S.hwBrand = brands.length ? brands[0].key : '';
+  window.__selboxFilter = {};
+  renderBrandGrid();
+  refreshAllRoomCards();
+}
+
+function setHWBrand(brand){
+  S.hwBrand = brand;
+  renderBrandGrid();
+  refreshAllRoomCards();
+}
+
+function renderBrandGrid(){
+  var grid = document.getElementById('hw-brand-grid');
+  if(!grid) return;
+  var brands = HW_BRANDS[S.hwStyle]||[];
+  // Validate current brand is valid for style
+  if(!brands.find(function(b){return b.key===S.hwBrand;})) S.hwBrand = brands.length ? brands[0].key : '';
+  grid.innerHTML = brands.map(function(b){
+    var active = b.key===S.hwBrand;
+    return '<div class="fin-opt'+(active?' on':'')+'" onclick="setHWBrand(\''+b.key+'\')" style="text-align:left;padding:10px 12px;">'
+      +'<div class="fin-name" style="font-size:13px;">'+b.label+'</div>'
+      +'<div class="fin-sub">'+b.sub+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// Handle +/- qty buttons for door hardware in room cards
+function hwQtyAdj(rid, type, delta){
+  var r = getR(rid);
+  if(!r) return;
+  var d = r.d;
+
+  if(type==='passage'){
+    var item = getHWPassage();
+    if(!item) return;
+    // Use correct array based on style
+    var key = S.hwStyle==='knob' ? 'passageKnob' : 'passageLever';
+    var clearKey = S.hwStyle==='knob' ? 'passageLever' : 'passageKnob';
+    if(!d[key]||!d[key].length) d[key]=[{id:item.id,qty:0,name:item.name,price:item.price}];
+    d[key][0].id=item.id; d[key][0].name=item.name; d[key][0].price=item.price;
+    d[key][0].qty = Math.max(0, (d[key][0].qty||0)+delta);
+    if(d[key][0].qty===0) d[key]=[];
+    d[clearKey]=[]; // clear the other style
+    var el = document.getElementById('hw-passage-qty-'+rid);
+    if(el) el.textContent = d[key].length ? d[key][0].qty : 0;
+
+  } else if(type==='privacy'){
+    var item = getHWPrivacy();
+    if(!item) return;
+    var key = S.hwStyle==='knob' ? 'privacyKnob' : 'privacyLever';
+    var clearKey = S.hwStyle==='knob' ? 'privacyLever' : 'privacyKnob';
+    if(!d[key]||!d[key].length) d[key]=[{id:item.id,qty:0,name:item.name,price:item.price}];
+    d[key][0].id=item.id; d[key][0].name=item.name; d[key][0].price=item.price;
+    d[key][0].qty = Math.max(0, (d[key][0].qty||0)+delta);
+    if(d[key][0].qty===0) d[key]=[];
+    d[clearKey]=[];
+    var el = document.getElementById('hw-privacy-qty-'+rid);
+    if(el) el.textContent = d[key].length ? d[key][0].qty : 0;
+
+  } else if(type==='hinge'){
+    var item = getHWHinge();
+    if(!item) return;
+    if(!d.hinge||!d.hinge.length) d.hinge=[{id:item.id,qty:0,name:item.name,price:item.price}];
+    d.hinge[0].id=item.id; d.hinge[0].name=item.name; d.hinge[0].price=item.price;
+    d.hinge[0].qty = Math.max(0, (d.hinge[0].qty||0)+delta);
+    if(d.hinge[0].qty===0) d.hinge=[];
+    var el = document.getElementById('hw-hinge-qty-'+rid);
+    if(el) el.textContent = d.hinge.length ? d.hinge[0].qty : 0;
+  }
+
+  updSum(rid);
+  autoSave();
+}
+
+// Re-render all currently expanded room cards when house-level HW settings change
+function refreshAllRoomCards(){
+  S.rooms.forEach(function(r){
+    var body = document.getElementById('rbody-'+r.id);
+    if(body && body.style.display!=='none'){
+      body.innerHTML = bldRoomBody(r);
+    }
+    updSum(r.id);
+  });
+  autoSave();
 }
 function setValve(rid,k,el){
   var r=getR(rid);if(!r)return;
@@ -1154,17 +1363,18 @@ function rebuildRegCards(rid,regType){
 
 // ═══════════ NAVIGATION ═══════════
 function goTo(n){
-  if(n<0||n>4)return;
+  if(n<0||n>5)return;
   if(n===2)bldWalk();
   if(n===3)bldReview();
   if(n===4)setTimeout(initSig,150);
+  if(n===5)initFieldTab();
   document.querySelectorAll('.pg').forEach(function(p,i){p.classList.toggle('on',i===n);});
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
   CP=n;
   document.getElementById('btn-back').style.display=n>0?'block':'none';
-  document.getElementById('btn-next').style.display='block';
+  document.getElementById('btn-next').style.display=n===5?'none':'block';
   document.getElementById('btn-next').textContent=n===3?'Sign & Push →':'Next →';
-  document.getElementById('hdr-step').textContent=(n+1)+' / 5';
+  document.getElementById('hdr-step').textContent=(n+1)+' / 6';
   window.scrollTo(0,0);
 }
 
@@ -1320,23 +1530,64 @@ function bldRoomBody(r){
   });
   s+='</div>';
 
-  // DOOR HARDWARE — selBox per door type, qty embedded
+  // DOOR HARDWARE — pre-selected by house finish+style+brand, just count doors
   s+='<div class="sh">🚪 Door Hardware</div>';
-  s+='<div class="a-info" style="font-size:10px;">Tap to add. Each style can be added with its own quantity.</div>';
-  s+=selBox(r.id,'passageKnob','Passage Knob — Hall / Closet','🚪',DOOR_PASS_KNOB);
-  s+=selBox(r.id,'passageLever','Passage Lever — Hall / Closet','🚪',DOOR_PASS_LEVER);
-  s+=selBox(r.id,'privacyKnob','Privacy Knob — Bed / Bath','🔒',DOOR_PRIV_KNOB);
-  s+=selBox(r.id,'privacyLever','Privacy Lever — Bed / Bath','🔒',DOOR_PRIV_LEVER);
-  if(r.type==='entryway'){
-    s+=selBox(r.id,'entry','Entry / Exterior Locksets (Entry Only)','🗝️',DOOR_ENTRY);
-  }
 
-  // INTERIOR HINGES & DOOR STOPS
-  s+='<div class="sh">🔧 Hinges & Door Stops</div>';
-  s+='<div class="a-info" style="font-size:10px;">Hinge packs are 3 per pack. Door stops can be a mix of mount styles per room.</div>';
-  s+=selBox(r.id,'hinge','Interior Door Hinges (3-pack)','🪛',DOOR_HINGE);
+  var hwPass = getHWPassage();
+  var hwPriv = getHWPrivacy();
+  var hwHinge = getHWHinge();
+  var finNames = ['Satin Nickel','Matte Black','Venetian Bronze'];
+  var styleLabel = S.hwStyle==='knob'?'Knob':'Lever';
+  var brandLabel = (HW_BRANDS[S.hwStyle]||[]).find(function(b){return b.key===S.hwBrand;});
+  brandLabel = brandLabel ? brandLabel.label : '';
+
+  s+='<div class="a-info" style="font-size:10px;margin-bottom:8px;">'+brandLabel+' '+styleLabel+' — '+finNames[S.finish]+'. Set finish, style & brand on Client tab. Just enter door counts below.</div>';
+
+  // Passage doors (hall/closet) — qty input only
+  var passQty = (d.passageKnob&&d.passageKnob.length) ? d.passageKnob[0].qty : (d.passageLever&&d.passageLever.length) ? d.passageLever[0].qty : 0;
+  s+='<div style="display:table;width:100%;margin-bottom:8px;">'
+    +'<div style="display:table-cell;vertical-align:middle;font-size:13px;font-weight:600;">🚪 Passage Doors <span style="font-size:11px;color:var(--muted);font-weight:400;">(hall/closet)</span></div>'
+    +'<div style="display:table-cell;vertical-align:middle;text-align:right;width:120px;">'
+    +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">'
+    +'<button onclick="hwQtyAdj(\''+r.id+'\',\'passage\',-1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">−</button>'
+    +'<span id="hw-passage-qty-'+r.id+'" style="font-size:18px;font-weight:700;min-width:24px;text-align:center;">'+passQty+'</span>'
+    +'<button onclick="hwQtyAdj(\''+r.id+'\',\'passage\',1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">+</button>'
+    +'</div></div></div>';
+
+  // Privacy doors (bed/bath) — qty input only
+  var privQty = (d.privacyKnob&&d.privacyKnob.length) ? d.privacyKnob[0].qty : (d.privacyLever&&d.privacyLever.length) ? d.privacyLever[0].qty : 0;
+  s+='<div style="display:table;width:100%;margin-bottom:8px;">'
+    +'<div style="display:table-cell;vertical-align:middle;font-size:13px;font-weight:600;">🔒 Privacy Doors <span style="font-size:11px;color:var(--muted);font-weight:400;">(bed/bath)</span></div>'
+    +'<div style="display:table-cell;vertical-align:middle;text-align:right;width:120px;">'
+    +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">'
+    +'<button onclick="hwQtyAdj(\''+r.id+'\',\'privacy\',-1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">−</button>'
+    +'<span id="hw-privacy-qty-'+r.id+'" style="font-size:18px;font-weight:700;min-width:24px;text-align:center;">'+privQty+'</span>'
+    +'<button onclick="hwQtyAdj(\''+r.id+'\',\'privacy\',1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">+</button>'
+    +'</div></div></div>';
+
+  // Hinges — qty input (auto-finish)
+  var hingeQty = (d.hinge&&d.hinge.length) ? d.hinge[0].qty : 0;
+  s+='<div style="display:table;width:100%;margin-bottom:8px;">'
+    +'<div style="display:table-cell;vertical-align:middle;font-size:13px;font-weight:600;">🔩 Hinge Packs <span style="font-size:11px;color:var(--muted);font-weight:400;">(3 hinges/pack)</span></div>'
+    +'<div style="display:table-cell;vertical-align:middle;text-align:right;width:120px;">'
+    +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;">'
+    +'<button onclick="hwQtyAdj(\''+r.id+'\',\'hinge\',-1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">−</button>'
+    +'<span id="hw-hinge-qty-'+r.id+'" style="font-size:18px;font-weight:700;min-width:24px;text-align:center;">'+hingeQty+'</span>'
+    +'<button onclick="hwQtyAdj(\''+r.id+'\',\'hinge\',1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">+</button>'
+    +'</div></div></div>';
+
+  // Door stops — keep as selBox (finish-neutral, mixed styles OK)
+  s+='<div class="sh" style="margin-top:4px;">🛑 Door Stops</div>';
+  s+='<div class="a-info" style="font-size:10px;">Can mix solid wall mount and hinge pin per room.</div>';
   s+=selBox(r.id,'hingeStopSolid','Door Stop — Solid Mount','🛑',HINGE_STOP_SOLID);
   s+=selBox(r.id,'hingeStopPin','Door Stop — Hinge Pin Mount','📎',HINGE_STOP_PIN);
+
+  // Entry hardware — entryway rooms only, full selector filtered by finish
+  if(r.type==='entryway'||r.type==='garage'){
+    s+='<div class="sh" style="margin-top:4px;">🗝️ Entry / Exterior Hardware</div>';
+    var entryItems = DOOR_ENTRY.filter(function(x){ return !x.fin || x.fin===finNames[S.finish]; });
+    s+=selBox(r.id,'entry','Entry Lockset','🗝️',entryItems.length ? entryItems : DOOR_ENTRY);
+  }
 
   // LIGHTING
   s+='<div class="sh">💡 Lighting</div>';
@@ -2407,7 +2658,6 @@ async function pushToJT(){
     var r3=await jtQ({createJob:{'$':{locationId:locId,name:jobName,description:desc,customFieldValues:jcf},createdJob:{id:{},name:{}}}});
     var jobId=gc(r3,'createJob').id;
     if(!jobId)throw new Error('No job ID');
-    _pushedJobId = jobId; // store for Send to Field
     jl('Job created: '+jobName,'ok');
 
     // 4. CONTACTS
@@ -2982,6 +3232,263 @@ async function pushToJT(){
   }
 }
 
+// ═══════════ FIELD CHECKLIST ═══════════
+// Lets field tech load any MP job from JT, check off tasks, syncs to JT to-dos
+// PM can see real-time progress in JobTread
+
+var FC = {
+  jobId: null,
+  jobName: null,
+  tasks: [],       // [{id, roomName, roomIcon, taskName, detail, qty, done, jtTaskId}]
+  parentTaskId: null  // JT parent to-do group ID for this job
+};
+
+function initFieldTab(){
+  // On first open, pre-fill search with current walk address if available
+  var addr = (document.getElementById('f-addr').value||'').trim().split(',')[0];
+  var inp = document.getElementById('field-search-input');
+  if(addr && !inp.value) inp.value = addr;
+  renderFieldState();
+}
+
+async function fieldSearch(){
+  var term = (document.getElementById('field-search-input').value||'').trim();
+  if(!term){ showFieldMsg('Enter an address or job name to search.','warn'); return; }
+  var res = document.getElementById('field-search-results');
+  res.innerHTML = '<div style="color:#888;font-size:13px;padding:8px 0;">Searching JobTread...</div>';
+
+  try {
+    var resp = await jtQ({jobs:{'$':{organizationId:ORG, where:['name','like','%'+term+'%'], size:10, orderBy:'updatedAt', orderByDirection:'desc'},
+      nodes:{id:{},name:{},number:{},location:{address:{},account:{name:{},primaryContact:{name:{}}}}}}});
+    var jobs = (resp && resp.jobs && resp.jobs.nodes) || [];
+    if(!jobs.length){ res.innerHTML='<div style="color:#888;font-size:13px;padding:8px 0;">No jobs found matching "'+term+'"</div>'; return; }
+    
+    res.innerHTML = jobs.map(function(j){
+      var loc = (j.location&&j.location.address)||j.name;
+      var seller = (j.location&&j.location.account&&(j.location.account.primaryContact&&j.location.account.primaryContact.name||j.location.account.name))||'';
+      return '<div onclick="selectFieldJob(\''+j.id+'\',\''+j.name.replace(/'/g,"\\'")+'\')" style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin:6px 0;cursor:pointer;background:#fff;">'
+        +'<div style="font-weight:700;font-size:14px;">'+j.name+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);">#'+j.number+(seller?' · '+seller:'')+'</div>'
+        +'</div>';
+    }).join('');
+  } catch(e){
+    res.innerHTML='<div style="color:var(--red);font-size:13px;padding:8px 0;">Error: '+e.message+'</div>';
+  }
+}
+
+async function selectFieldJob(jobId, jobName){
+  FC.jobId = jobId;
+  FC.jobName = jobName;
+  FC.tasks = [];
+  FC.parentTaskId = null;
+  document.getElementById('field-search-results').innerHTML='';
+  showFieldMsg('Loading tasks for '+jobName+'...','info');
+
+  try {
+    // 1. Load budget groups + items to rebuild task list
+    var treeResp = await jtQ({job:{'$':{id:jobId},
+      costGroups:{'$':{size:100},nodes:{id:{},name:{},parentCostGroup:{id:{}}}},
+      costItems:{'$':{size:200},nodes:{id:{},name:{},quantity:{},costGroup:{id:{}}}}}});
+    var groups = ((treeResp.job||{}).costGroups||{}).nodes || [];
+    var items  = ((treeResp.job||{}).costItems||{}).nodes || [];
+
+    // 2. Load existing to-do tasks for this job to check what's already done
+    var taskResp = await jtQ({job:{'$':{id:jobId},
+      tasks:{'$':{size:200, where:['isToDo',true]},
+        nodes:{id:{},name:{},progress:{},parentTask:{id:{}}}}}});
+    var existingTasks = ((taskResp.job||{}).tasks||{}).nodes || [];
+
+    // Find our checklist parent task group (named "Field Checklist")
+    var parentTask = existingTasks.find(function(t){ return t.name==='Field Checklist' && !t.parentTask; });
+    FC.parentTaskId = parentTask ? parentTask.id : null;
+
+    // Build a map of existing task completion by name
+    var doneMap = {};
+    existingTasks.forEach(function(t){
+      if(t.parentTask) doneMap[t.name] = (t.progress||0) >= 100;
+    });
+
+    // 3. Build task list from budget items — group by parent cost group name
+    var groupMap = {};
+    groups.forEach(function(g){ groupMap[g.id] = g; });
+
+    // Identify top-level room groups (no parent)
+    var roomGroups = groups.filter(function(g){ return !g.parentCostGroup; });
+    var roomGroupIds = roomGroups.map(function(g){ return g.id; });
+
+    // Assign items to their room group
+    items.forEach(function(item){
+      var gid = (item.costGroup&&item.costGroup.id)||null;
+      // Walk up to find room group
+      var cur = gid;
+      var roomGid = null;
+      for(var safety=0;safety<5;safety++){
+        var g = groupMap[cur];
+        if(!g) break;
+        if(roomGroupIds.indexOf(cur) >= 0){ roomGid = cur; break; }
+        cur = (g.parentCostGroup&&g.parentCostGroup.id)||null;
+        if(!cur) break;
+      }
+      var roomName = roomGid ? groupMap[roomGid].name : 'General';
+      var taskName = item.name + (item.quantity>1?' ×'+item.quantity:'');
+      FC.tasks.push({
+        id: item.id,
+        roomName: roomName,
+        taskName: taskName,
+        qty: item.quantity||1,
+        done: !!doneMap[taskName],
+        jtTaskId: null  // will be created on first check
+      });
+    });
+
+    // 4. Load house-wide tasks from pinned comments  
+    renderFieldState();
+    showFieldMsg('','');
+  } catch(e){
+    showFieldMsg('Error loading job: '+e.message,'err');
+  }
+}
+
+function renderFieldState(){
+  var area = document.getElementById('field-checklist-area');
+  if(!FC.jobId || !FC.tasks.length){
+    area.innerHTML = '';
+    return;
+  }
+
+  var done = FC.tasks.filter(function(t){return t.done;}).length;
+  var total = FC.tasks.length;
+  var pct = total ? Math.round((done/total)*100) : 0;
+  var RED = '#B32025';
+
+  // Group by room
+  var rooms = {};
+  var roomOrder = [];
+  FC.tasks.forEach(function(t){
+    if(!rooms[t.roomName]){ rooms[t.roomName]=[]; roomOrder.push(t.roomName); }
+    rooms[t.roomName].push(t);
+  });
+
+  var html = '<div class="card" style="padding:16px 18px;">';
+  html += '<div style="font-weight:700;font-size:16px;color:#1a1a1a;margin-bottom:2px;">'+FC.jobName+'</div>';
+  html += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+done+' of '+total+' tasks complete</div>';
+  
+  // Progress bar
+  html += '<div style="background:#eee;border-radius:20px;height:10px;overflow:hidden;margin-bottom:6px;">';
+  html += '<div style="background:'+RED+';height:100%;width:'+pct+'%;border-radius:20px;transition:width .3s;"></div>';
+  html += '</div>';
+  html += '<div style="font-size:12px;color:'+(pct===100?'#2e7d32':RED)+';font-weight:700;margin-bottom:14px;">'+pct+'% Complete'+(pct===100?' ✅':'')+'</div>';
+
+  if(pct===100){
+    html += '<button onclick="uploadChecklistToJT()" style="width:100%;padding:12px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">📤 Upload Completion to JobTread</button>';
+  }
+
+  roomOrder.forEach(function(roomName){
+    var roomTasks = rooms[roomName];
+    var roomDone = roomTasks.filter(function(t){return t.done;}).length;
+    var allDone = roomDone === roomTasks.length;
+
+    html += '<div style="border:2px solid '+(allDone?'#a5d6a7':'#e0e0e0')+';border-radius:8px;margin-bottom:10px;overflow:hidden;">';
+    html += '<div style="background:'+(allDone?'#e8f5e9':'#2c3e50')+';padding:9px 14px;display:table;width:100%;box-sizing:border-box;">';
+    html += '<span style="display:table-cell;font-weight:700;font-size:14px;color:'+(allDone?'#2e7d32':'#fff')+';vertical-align:middle;">'+roomName+'</span>';
+    html += '<span style="display:table-cell;text-align:right;font-size:12px;color:'+(allDone?'#2e7d32':'rgba(255,255,255,0.7)')+';vertical-align:middle;">'+roomDone+'/'+roomTasks.length+'</span>';
+    html += '</div>';
+
+    roomTasks.forEach(function(t, idx){
+      var tid = 'fc_'+t.id;
+      html += '<div onclick="toggleFieldTask(\''+t.id+'\')" style="padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;background:'+(t.done?'#f9fef9':'#fff')+';display:table;width:100%;box-sizing:border-box;">';
+      html += '<span style="display:table-cell;width:32px;vertical-align:middle;">';
+      html += '<span style="display:inline-block;width:22px;height:22px;border:2px solid '+(t.done?'#2e7d32':RED)+';border-radius:4px;background:'+(t.done?'#2e7d32':'transparent')+';text-align:center;line-height:18px;font-size:14px;color:#fff;">'+(t.done?'✓':'')+'</span>';
+      html += '</span>';
+      html += '<span style="display:table-cell;vertical-align:middle;font-size:13px;font-weight:600;color:'+(t.done?'#2e7d32':'#1a1a1a')+';'+(t.done?'text-decoration:line-through;':'')+'">'+t.taskName+'</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div id="field-status-msg" style="margin-top:6px;font-size:13px;min-height:20px;"></div>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+async function toggleFieldTask(taskId){
+  var task = FC.tasks.find(function(t){ return t.id===taskId; });
+  if(!task) return;
+  task.done = !task.done;
+  renderFieldState();
+
+  // Sync to JT — create or update to-do task
+  try {
+    // Ensure parent "Field Checklist" group exists
+    if(!FC.parentTaskId){
+      var pResp = await jtQ({createTask:{'$':{
+        targetType:'job', targetId:FC.jobId,
+        name:'Field Checklist', isToDo:true
+      },createdTask:{id:{}}}});
+      FC.parentTaskId = gc(pResp,'createTask').id;
+    }
+
+    if(!task.jtTaskId){
+      // Find existing JT task by name
+      var taskResp = await jtQ({job:{'$':{id:FC.jobId},
+        tasks:{'$':{size:200, where:['isToDo',true]},
+          nodes:{id:{},name:{},progress:{},parentTask:{id:{}}}}}});
+      var allJTTasks = ((taskResp.job||{}).tasks||{}).nodes||[];
+      var match = allJTTasks.find(function(t){
+        return t.name===task.taskName && t.parentTask && t.parentTask.id===FC.parentTaskId;
+      });
+      if(match) task.jtTaskId = match.id;
+    }
+
+    if(task.jtTaskId){
+      // Update existing task progress
+      await jtQ({updateTask:{'$':{id:task.jtTaskId, progress:task.done?100:0},updatedTask:{id:{}}}});
+    } else {
+      // Create new to-do task under parent
+      var cResp = await jtQ({createTask:{'$':{
+        targetType:'job', targetId:FC.jobId,
+        parentTaskId: FC.parentTaskId,
+        name:task.taskName, isToDo:true,
+        progress:task.done?100:0
+      },createdTask:{id:{}}}});
+      task.jtTaskId = gc(cResp,'createTask').id;
+    }
+    showFieldStatusMsg(task.done?'✓ Synced to JobTread':'↩ Updated in JobTread','ok');
+  } catch(e){
+    showFieldStatusMsg('Sync error: '+e.message,'err');
+  }
+}
+
+async function uploadChecklistToJT(){
+  // Post a pinned completion comment to the job
+  var done = FC.tasks.filter(function(t){return t.done;}).length;
+  var total = FC.tasks.length;
+  var today = new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  var msg = '\u2705 FIELD CHECKLIST COMPLETE\n'+today+'\n\n'+done+'/'+total+' tasks completed.\n\nAll items checked off in LMC Make Ready Field tab.';
+  try {
+    await jtQ({createComment:{'$':{targetType:'job',targetId:FC.jobId,message:msg,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+    showFieldStatusMsg('✅ Completion comment posted to JobTread!','ok');
+  } catch(e){
+    showFieldStatusMsg('Error: '+e.message,'err');
+  }
+}
+
+function showFieldMsg(msg, type){
+  var el = document.getElementById('field-search-results');
+  if(!el) return;
+  if(!msg){ el.innerHTML=''; return; }
+  var col = type==='err'?'#c0392b':type==='warn'?'#e67e22':'#555';
+  el.innerHTML='<div style="font-size:13px;color:'+col+';padding:8px 0;">'+msg+'</div>';
+}
+
+function showFieldStatusMsg(msg, type){
+  var el = document.getElementById('field-status-msg');
+  if(!el) return;
+  var col = type==='ok'?'#2e7d32':'#c0392b';
+  el.style.color = col;
+  el.textContent = msg;
+  setTimeout(function(){ if(el) el.textContent=''; }, 3000);
+}
 
 // ═══════════ INIT ═══════════
 // ═══════════ PHOTOS ═══════════
@@ -3059,6 +3566,8 @@ function collectState(){
     status: 'draft',
     page: CP,
     finish: S.finish,
+    hwStyle: S.hwStyle,
+    hwBrand: S.hwBrand,
     thermostatId: S.thermostatId,
     signed: S.signed,
     formData: formData,
@@ -3151,6 +3660,8 @@ function newWalk(){
   FORM_CACHE = {};
   // Reset state
   S.finish=0; S.rooms=[]; S.signed=false; S.thermostatId=null;
+  S.hwStyle='knob'; S.hwBrand='cove';
+  window.__selboxFilter = {};
   HW={'hw-junk-qty':1,'hw-car-qty':1};
   // Reset HW checkboxes
   ['hw-whs','hw-pw','hw-junk','hw-clean','hw-land','hw-caulk','hw-drywall','hw-therm','hw-car'].forEach(function(id){
@@ -3163,6 +3674,12 @@ function newWalk(){
   if(carAction) carAction.value='paint';
   // Reset finish buttons
   document.querySelectorAll('.fin-opt').forEach(function(b,i){b.classList.toggle('on',i===0);});
+  // Reset HW style buttons
+  var styleKnob = document.getElementById('hw-style-knob');
+  var styleLev  = document.getElementById('hw-style-lever');
+  if(styleKnob) styleKnob.classList.add('on');
+  if(styleLev)  styleLev.classList.remove('on');
+  renderBrandGrid();
   // Reset signature
   if(sigC){var ctx=sigC.getContext('2d');ctx.clearRect(0,0,sigC.width,sigC.height);}
   // Go to page 0
@@ -3241,6 +3758,14 @@ function loadWalk(id){
     // Restore finish buttons
     S.finish = w.finish||0;
     document.querySelectorAll('.fin-opt').forEach(function(b,i){b.classList.toggle('on',i===S.finish);});
+    // Restore hardware style + brand
+    if(w.hwStyle){ S.hwStyle = w.hwStyle; }
+    if(w.hwBrand){ S.hwBrand = w.hwBrand; }
+    var styleKnob = document.getElementById('hw-style-knob');
+    var styleLev  = document.getElementById('hw-style-lever');
+    if(styleKnob) styleKnob.classList.toggle('on', S.hwStyle==='knob');
+    if(styleLev)  styleLev.classList.toggle('on', S.hwStyle==='lever');
+    renderBrandGrid();
     // Navigate to saved page if not page 0
     if((w.page||0) > 0){
       goTo(w.page);
@@ -3262,70 +3787,6 @@ function markWalkPushed(){
     w.status = 'pushed';
     localStorage.setItem(WALK_PREFIX+CURRENT_WALK_ID, JSON.stringify(w));
   }catch(e){}
-  // Show the Send to Field card
-  var stf = document.getElementById('send-to-field-card');
-  if(stf) stf.style.display = 'block';
-  // Pre-fill start date to today
-  var sd = document.getElementById('field-start-date');
-  if(sd && !sd.value){
-    var today = new Date();
-    sd.value = today.toISOString().split('T')[0];
-  }
-}
-
-// ── SEND TO FIELD ──
-var _pushedJobId = null; // set during pushToJT, used by sendToField
-
-async function sendToField(){
-  var name    = (document.getElementById('field-lead-name').value||'').trim();
-  var contact = (document.getElementById('field-lead-contact').value||'').trim();
-  var date    = (document.getElementById('field-start-date').value||'').trim();
-  var logEl   = document.getElementById('send-field-log');
-  var btn     = document.getElementById('send-field-btn');
-
-  if(!name){ logEl.style.color='#c0392b'; logEl.textContent='Enter the field lead name.'; return; }
-  if(!contact){ logEl.style.color='#c0392b'; logEl.textContent='Enter an email or phone number.'; return; }
-  if(!_pushedJobId){ logEl.style.color='#c0392b'; logEl.textContent='No job found — push to JobTread first.'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  logEl.style.color = '#888';
-  logEl.textContent = 'Creating assignment in JobTread...';
-
-  try {
-    // Create a scheduled task on the job assigned to the field lead name
-    var taskName = 'Field Crew Install — '+(document.getElementById('f-addr').value||'').trim().split(',')[0];
-    var taskResp = await jtQ({createTask:{'$':{
-      targetType:'job',
-      targetId: _pushedJobId,
-      name: taskName,
-      isToDo: false,
-      startDate: date||undefined,
-      description: 'Field Lead: '+name+'\nContact: '+contact+'\n\nReview the Field Crew Work Order PDF in the Files tab before starting. Check off tasks and upload completion photos as work is completed.'
-    },createdTask:{id:{},name:{}}}});
-    var task = gc(taskResp,'createTask');
-
-    // Post a pinned comment with the field lead info
-    var addr = (document.getElementById('f-addr').value||'').trim();
-    var msg = '\uD83D\uDD27 SENT TO FIELD\n'
-      +'Field Lead: '+name+'\n'
-      +'Contact: '+contact+'\n'
-      +(date?'Scheduled Start: '+date+'\n':'')
-      +'\nField Crew Work Order PDF is in the Files tab. Tasks assigned in schedule.';
-    await jtQ({createComment:{'$':{
-      targetType:'job', targetId:_pushedJobId,
-      message:msg, isPinned:true, isVisibleToInternalRoles:true
-    },createdComment:{id:{}}}});
-
-    btn.textContent = 'Sent ✓';
-    logEl.style.color = '#2e7d32';
-    logEl.textContent = '✅ Assignment created in JobTread. Field Crew Work Order PDF is in the job\'s Files tab.';
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Send to Field Crew';
-    logEl.style.color = '#c0392b';
-    logEl.textContent = 'Error: '+e.message;
-  }
 }
 
 // ── WALK DRAWER UI ──
@@ -3378,6 +3839,7 @@ function renderWalkDrawer(){
 document.addEventListener('DOMContentLoaded',function(){
   initHWToggles();
   bldThermGrid();
+  renderBrandGrid();
   document.addEventListener('touchstart',function(){},{passive:true});
   CURRENT_WALK_ID='w'+Date.now();
   // Hook form fields to FORM_CACHE
