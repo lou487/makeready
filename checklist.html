@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>LMC Field Checklist</title>
+<style>
+:root{
+  --red:#B32025;--red2:#8a1a1d;--bg:#f2f0ec;--card:#fff;
+  --border:#e0ddd8;--text:#1a1a1a;--muted:#888;--green:#2d6a2d;
+  --r:10px;--sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;padding-bottom:100px;}
+
+.hdr{background:var(--red);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.hdr-title{font-size:17px;font-weight:800;}
+.hdr-sub{font-size:11px;opacity:.75;margin-top:1px;}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;}
+.progress-bar{height:4px;background:rgba(255,255,255,.3);margin-top:8px;border-radius:2px;}
+.progress-fill{height:4px;background:#fff;border-radius:2px;transition:width .3s;}
+
+/* Setup screen */
+.setup{padding:16px;}
+.setup-card{background:var(--card);border-radius:var(--r);padding:20px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.setup-card h3{font-size:14px;font-weight:700;color:var(--red);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;}
+.field-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.field-input{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:15px;font-family:var(--sans);background:#fff;color:var(--text);margin-bottom:12px;}
+.field-input:focus{outline:none;border-color:var(--red);}
+.btn{display:block;width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;font-family:var(--sans);cursor:pointer;text-align:center;}
+.btn:active{background:var(--red2);}
+.btn.outline{background:#fff;color:var(--red);border:2px solid var(--red);}
+.btn.green{background:var(--green);}
+.btn.disabled{background:#ccc;pointer-events:none;}
+
+/* Checklist screen */
+.section-header{padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.task-item{background:var(--card);margin:4px 12px;border-radius:var(--r);border:2px solid var(--border);display:flex;align-items:stretch;overflow:hidden;transition:border-color .15s,opacity .2s;}
+.task-item.done{border-color:#a5d6a7;opacity:.7;}
+.task-item.done .task-content{text-decoration:line-through;color:var(--muted);}
+.task-check{width:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#f8f8f8;border-right:2px solid var(--border);font-size:22px;cursor:pointer;transition:background .15s;}
+.task-item.done .task-check{background:#e8f5e9;border-color:#a5d6a7;}
+.task-check-box{width:26px;height:26px;border:2px solid #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.task-item.done .task-check-box{background:var(--green);border-color:var(--green);}
+.task-check-icon{display:none;color:#fff;font-size:16px;font-weight:900;}
+.task-item.done .task-check-icon{display:block;}
+.task-main{flex:1;padding:11px 12px;cursor:pointer;}
+.task-name{font-size:14px;font-weight:600;line-height:1.35;}
+.task-detail{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.task-qty{display:inline-block;background:var(--red);color:#fff;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;margin-right:5px;}
+.task-note-btn{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--muted);border-left:1px solid var(--border);}
+.task-note-btn.has-note{color:var(--red);}
+
+/* Note modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-height:70vh;overflow-y:auto;}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:12px;}
+.modal textarea{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--sans);min-height:100px;resize:vertical;}
+.modal textarea:focus{outline:none;border-color:var(--red);}
+.modal-btns{display:flex;gap:8px;margin-top:12px;}
+.modal-btns .btn{flex:1;}
+
+/* Sync bar */
+.sync-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:center;z-index:100;}
+.sync-status{flex:1;font-size:12px;color:var(--muted);line-height:1.3;}
+.sync-status.synced{color:var(--green);}
+.sync-status.syncing{color:var(--red);}
+.sync-status.error{color:#c62828;}
+
+/* Complete screen */
+.complete{padding:20px;text-align:center;}
+.complete-icon{font-size:64px;margin:20px 0 8px;}
+.complete h2{font-size:22px;font-weight:800;color:var(--green);}
+.complete p{color:var(--muted);margin:8px 0 20px;font-size:14px;}
+</style>
+</head>
+<body>
+
+<div id="app-setup">
+  <div class="hdr">
+    <div class="hdr-title">🔧 LMC Field Checklist</div>
+    <div class="hdr-sub">Load a job to begin</div>
+  </div>
+  <div class="setup">
+    <div class="setup-card">
+      <h3>Job Setup</h3>
+      <div class="field-label">Job ID (from JobTread)</div>
+      <input class="field-input" id="inp-jobid" placeholder="e.g. 22PWKMEWLALV" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <div class="field-label">Grant Key</div>
+      <input class="field-input" id="inp-gk" value="22TN7BjW2xxVRX5wKXnkeRKu9TUwacQyKw" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <div class="field-label">Tech Name</div>
+      <input class="field-input" id="inp-tech" placeholder="Your name">
+      <button class="btn" onclick="loadJob()">Load Job Checklist</button>
+      <div id="setup-err" style="color:#c62828;font-size:13px;margin-top:10px;display:none;"></div>
+    </div>
+    <div class="setup-card" style="background:#fff8e1;border:1px solid #ffe082;">
+      <h3 style="color:#f57f17;">💡 How it works</h3>
+      <p style="font-size:13px;color:#555;line-height:1.6;">
+        1. Enter the JobTread Job ID from the address bar or from the PM.<br>
+        2. Your task list loads from the job's budget.<br>
+        3. Check off items as you complete them.<br>
+        4. Tap ✉️ to sync progress to JobTread — PM sees it instantly as a Daily Log.<br>
+        5. Add notes on any task using the 📝 button.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="app-checklist" style="display:none;">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div>
+        <div class="hdr-title" id="cl-title">Loading...</div>
+        <div class="hdr-sub" id="cl-sub"></div>
+      </div>
+      <div style="text-align:right;font-size:12px;opacity:.85;" id="cl-count">0 / 0</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="cl-prog" style="width:0%"></div></div>
+  </div>
+  <div id="cl-list"></div>
+</div>
+
+<div id="app-complete" style="display:none;" class="complete">
+  <div class="hdr">
+    <div class="hdr-title">🔧 LMC Field Checklist</div>
+    <div class="hdr-sub" id="comp-sub">Job complete</div>
+  </div>
+  <div class="complete-icon">✅</div>
+  <h2>All tasks complete!</h2>
+  <p id="comp-summary">Syncing to JobTread...</p>
+  <button class="btn" onclick="syncNow(true)" style="margin-bottom:10px;">Sync Final Report to JT</button>
+  <button class="btn outline" onclick="location.reload()">Start New Job</button>
+</div>
+
+<!-- Note modal -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal">
+    <h3 id="note-modal-title">Add Note</h3>
+    <textarea id="note-text" placeholder="Enter note for this task..."></textarea>
+    <div class="modal-btns">
+      <button class="btn outline" onclick="closeNoteModal()">Cancel</button>
+      <button class="btn" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sync bar -->
+<div class="sync-bar" id="sync-bar" style="display:none;">
+  <div class="sync-status" id="sync-status">Not synced yet</div>
+  <button class="btn" id="sync-btn" style="width:auto;padding:10px 18px;font-size:14px;" onclick="syncNow(false)">📤 Sync to JT</button>
+</div>
+
+<script>
+var JT = 'https://api.jobtread.com/pave';
+var GK, JOB_ID, JOB_NAME, JOB_ADDR, TECH_NAME;
+var tasks = [];      // [{group, name, detail, qty, done, note, id}]
+var noteTaskIdx = null;
+var lastSyncedHash = null;
+
+// ── SETUP ──
+async function loadJob() {
+  var jobId = document.getElementById('inp-jobid').value.trim();
+  var gk    = document.getElementById('inp-gk').value.trim();
+  var tech  = document.getElementById('inp-tech').value.trim();
+  var errEl = document.getElementById('setup-err');
+  errEl.style.display = 'none';
+
+  if (!jobId) { errEl.textContent = 'Please enter a Job ID.'; errEl.style.display='block'; return; }
+  if (!tech)  { errEl.textContent = 'Please enter your name.'; errEl.style.display='block'; return; }
+
+  GK = gk; JOB_ID = jobId; TECH_NAME = tech;
+
+  var loadBtn = document.querySelector('#app-setup .btn');
+  loadBtn.textContent = 'Loading...'; loadBtn.classList.add('disabled');
+
+  try {
+    // Fetch job info + budget items
+    var resp = await jtQ({
+      job: {
+        '$': {id: JOB_ID},
+        name: {}, 
+        location: {name: {}, address: {}},
+        costGroups: {'$': {size: 100}, nodes: {id:{}, name:{}, parentCostGroup:{id:{}}}},
+        costItems:  {'$': {size: 100}, nodes: {id:{}, name:{}, description:{}, quantity:{}, costGroup:{id:{}}}}
+      }
+    });
+
+    var job = resp.job;
+    if (!job) throw new Error('Job not found. Check the Job ID.');
+
+    JOB_NAME = job.name || jobId;
+    JOB_ADDR = (job.location && (job.location.address || job.location.name)) || JOB_NAME;
+
+    // Build task list from budget items, grouped by cost group
+    var groupMap = {};
+    var groups = (job.costGroups && job.costGroups.nodes) || [];
+    groups.forEach(function(g){ groupMap[g.id] = g; });
+
+    var items = (job.costItems && job.costItems.nodes) || [];
+    tasks = [];
+    items.forEach(function(item){
+      var gid = item.costGroup && item.costGroup.id;
+      var gname = (gid && groupMap[gid]) ? groupMap[gid].name : 'General';
+      // Skip items with no useful name
+      if (!item.name || item.name.length < 2) return;
+      tasks.push({
+        id: item.id,
+        group: gname,
+        name: item.name,
+        detail: item.description || '',
+        qty: item.quantity || 1,
+        done: false,
+        note: ''
+      });
+    });
+
+    if (tasks.length === 0) throw new Error('No budget items found on this job. Make sure the walk has been pushed.');
+
+    // Load saved state from localStorage
+    loadLocalState();
+
+    showChecklist();
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+    loadBtn.textContent = 'Load Job Checklist';
+    loadBtn.classList.remove('disabled');
+  }
+}
+
+function loadLocalState() {
+  try {
+    var saved = localStorage.getItem('lmc_cl_' + JOB_ID);
+    if (!saved) return;
+    var state = JSON.parse(saved);
+    tasks.forEach(function(t){
+      var match = state[t.id];
+      if (match) { t.done = !!match.done; t.note = match.note || ''; }
+    });
+  } catch(e) {}
+}
+
+function saveLocalState() {
+  var state = {};
+  tasks.forEach(function(t){ state[t.id] = {done: t.done, note: t.note}; });
+  try { localStorage.setItem('lmc_cl_' + JOB_ID, JSON.stringify(state)); } catch(e) {}
+}
+
+// ── RENDER ──
+function showChecklist() {
+  document.getElementById('app-setup').style.display = 'none';
+  document.getElementById('app-checklist').style.display = 'block';
+  document.getElementById('sync-bar').style.display = 'flex';
+  document.getElementById('cl-title').textContent = JOB_ADDR.split(',')[0];
+  document.getElementById('cl-sub').textContent = JOB_NAME + ' · ' + TECH_NAME;
+  renderTasks();
+}
+
+function renderTasks() {
+  var done  = tasks.filter(function(t){return t.done;}).length;
+  var total = tasks.length;
+  var pct   = total ? Math.round(done/total*100) : 0;
+
+  document.getElementById('cl-count').textContent = done + ' / ' + total + ' (' + pct + '%)';
+  document.getElementById('cl-prog').style.width = pct + '%';
+
+  // Group tasks
+  var byGroup = {};
+  var groupOrder = [];
+  tasks.forEach(function(t, idx){
+    if (!byGroup[t.group]) { byGroup[t.group] = []; groupOrder.push(t.group); }
+    byGroup[t.group].push({task: t, idx: idx});
+  });
+
+  var html = '';
+  groupOrder.forEach(function(g){
+    html += '<div class="section-header">' + g + '</div>';
+    byGroup[g].forEach(function(item){
+      var t = item.task, idx = item.idx;
+      var doneClass = t.done ? ' done' : '';
+      html += '<div class="task-item' + doneClass + '" id="ti-' + idx + '">';
+      html += '<div class="task-check" onclick="toggleTask(' + idx + ')">';
+      html += '<div class="task-check-box"><span class="task-check-icon">✓</span></div>';
+      html += '</div>';
+      html += '<div class="task-main" onclick="toggleTask(' + idx + ')">';
+      html += '<div class="task-name"><span class="task-qty">×' + t.qty + '</span>' + escHtml(t.name) + '</div>';
+      if (t.detail) html += '<div class="task-detail">' + escHtml(t.detail) + '</div>';
+      if (t.note)   html += '<div class="task-detail" style="color:#B32025;font-style:italic;">📝 ' + escHtml(t.note) + '</div>';
+      html += '</div>';
+      html += '<div class="task-note-btn ' + (t.note?'has-note':'') + '" onclick="openNoteModal(' + idx + ')">📝</div>';
+      html += '</div>';
+    });
+  });
+
+  document.getElementById('cl-list').innerHTML = html;
+
+  // Update sync status
+  var allDone = (done === total && total > 0);
+  document.getElementById('sync-status').textContent = done + '/' + total + ' tasks complete' + (allDone ? ' — ready to submit!' : '');
+
+  if (allDone) {
+    document.getElementById('app-checklist').style.display = 'none';
+    document.getElementById('app-complete').style.display = 'block';
+    document.getElementById('comp-sub').textContent = JOB_NAME;
+    document.getElementById('comp-summary').textContent = done + ' tasks completed by ' + TECH_NAME;
+  }
+}
+
+function toggleTask(idx) {
+  tasks[idx].done = !tasks[idx].done;
+  saveLocalState();
+  renderTasks();
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── NOTES ──
+function openNoteModal(idx) {
+  noteTaskIdx = idx;
+  document.getElementById('note-modal-title').textContent = '📝 ' + tasks[idx].name;
+  document.getElementById('note-text').value = tasks[idx].note || '';
+  document.getElementById('note-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('note-text').focus(); }, 100);
+}
+function closeNoteModal() {
+  noteTaskIdx = null;
+  document.getElementById('note-modal').classList.remove('open');
+}
+function saveNote() {
+  if (noteTaskIdx !== null) {
+    tasks[noteTaskIdx].note = document.getElementById('note-text').value.trim();
+    saveLocalState();
+    renderTasks();
+  }
+  closeNoteModal();
+}
+
+// ── SYNC TO JT ──
+async function syncNow(isFinal) {
+  var btn = document.getElementById('sync-btn');
+  var statusEl = document.getElementById('sync-status');
+  if (btn) { btn.textContent = 'Syncing...'; btn.classList.add('disabled'); }
+  statusEl.className = 'sync-status syncing';
+  statusEl.textContent = 'Syncing to JobTread...';
+
+  try {
+    var done  = tasks.filter(function(t){return t.done;}).length;
+    var total = tasks.length;
+    var pct   = total ? Math.round(done/total*100) : 0;
+    var today = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    var now   = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+    // Build daily log message
+    var lines = [];
+    lines.push('📋 FIELD CHECKLIST UPDATE — ' + (isFinal ? 'FINAL SIGN-OFF' : 'PROGRESS SYNC'));
+    lines.push('Tech: ' + TECH_NAME + '  |  ' + today + ' ' + now);
+    lines.push('Progress: ' + done + '/' + total + ' tasks (' + pct + '%)');
+    lines.push('');
+
+    // Group by completion status
+    var doneItems = tasks.filter(function(t){return t.done;});
+    var pendItems = tasks.filter(function(t){return !t.done;});
+    var noteItems = tasks.filter(function(t){return t.note;});
+
+    if (doneItems.length) {
+      lines.push('✅ COMPLETED (' + doneItems.length + '):');
+      doneItems.forEach(function(t){
+        lines.push('  ✓ [×'+t.qty+'] ' + t.name + (t.note ? ' — NOTE: '+t.note : ''));
+      });
+      lines.push('');
+    }
+    if (pendItems.length) {
+      lines.push('⏳ REMAINING (' + pendItems.length + '):');
+      pendItems.forEach(function(t){
+        lines.push('  ○ [×'+t.qty+'] ' + t.name + (t.note ? ' — NOTE: '+t.note : ''));
+      });
+      lines.push('');
+    }
+    if (isFinal) {
+      lines.push('— Submitted by ' + TECH_NAME + ' · LMC Contracting');
+    }
+
+    var message = lines.join('\n');
+
+    // Post daily log to JT
+    var today_iso = new Date().toISOString().split('T')[0];
+    var dlResp = await jtQ({createDailyLog:{
+      '$':{jobId: JOB_ID, date: today_iso, notes: message},
+      createdDailyLog:{id:{}, date:{}}
+    }});
+    var dl = dlResp && dlResp.createDailyLog && dlResp.createDailyLog.id
+           ? dlResp.createDailyLog
+           : (dlResp && dlResp.createdDailyLog);
+
+    // Also post as a pinned comment so PM sees it at the top
+    await jtQ({createComment:{
+      '$':{
+        targetType:'job',
+        targetId: JOB_ID,
+        message: '🔧 CHECKLIST ' + (isFinal?'COMPLETE ✅':'UPDATE') + ' — ' + done+'/'+total + ' (' + pct + '%) — ' + TECH_NAME + ' ' + now,
+        isPinned: isFinal,
+        isVisibleToInternalRoles: true
+      },
+      createdComment:{id:{}}
+    }});
+
+    lastSyncedHash = JSON.stringify(tasks.map(function(t){return {d:t.done,n:t.note};}));
+    statusEl.className = 'sync-status synced';
+    statusEl.textContent = '✅ Synced ' + now + ' — PM notified';
+    if (btn) { btn.textContent = '📤 Sync to JT'; btn.classList.remove('disabled'); }
+
+    if (isFinal) {
+      document.getElementById('comp-summary').textContent = '✅ Final report synced to JobTread at ' + now + '. PM has been notified.';
+    }
+
+  } catch(e) {
+    statusEl.className = 'sync-status error';
+    statusEl.textContent = 'Sync failed: ' + e.message;
+    if (btn) { btn.textContent = '📤 Sync to JT'; btn.classList.remove('disabled'); }
+  }
+}
+
+// ── JT API ──
+async function jtQ(q) {
+  var r = await fetch(JT, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({query: Object.assign({'$':{grantKey: GK}}, q)})
+  });
+  var text = await r.text();
+  var j; try { j = JSON.parse(text); } catch(e) { throw new Error('Bad JSON: ' + text.substring(0,80)); }
+  if (j.errors) throw new Error(j.errors[0].message || 'JT error');
+  return j;
+}
+
+// Close modal on overlay tap
+document.getElementById('note-modal').addEventListener('click', function(e){
+  if (e.target === this) closeNoteModal();
+});
+
+// Auto-sync every 5 minutes if changes exist
+setInterval(function(){
+  if (!JOB_ID || !tasks.length) return;
+  var currentHash = JSON.stringify(tasks.map(function(t){return {d:t.done,n:t.note};}));
+  if (currentHash !== lastSyncedHash) syncNow(false);
+}, 5 * 60 * 1000);
+</script>
+</body>
+</html>
