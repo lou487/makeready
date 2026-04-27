@@ -278,6 +278,7 @@ textarea{resize:none;min-height:56px;}
   <button class="tab" onclick="goTo(2)"><span>🚶</span>Walk</button>
   <button class="tab" onclick="goTo(3)"><span>👁</span>Review</button>
   <button class="tab" onclick="goTo(4)"><span>✍️</span>Push</button>
+  <button class="tab" onclick="goTo(5)"><span>🔧</span>Field</button>
 </div>
 
 <!-- PAGE 1 CLIENT -->
@@ -466,6 +467,20 @@ textarea{resize:none;min-height:56px;}
 </div>
 
 <button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
+
+<!-- PAGE 6 FIELD CHECKLIST -->
+<div class="pg" id="pg5">
+  <div class="card" id="field-search-card">
+    <div class="ctitle"><span class="ctitle-icon">🔧</span>Field Crew Checklist</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Search for a job, then check off tasks as you complete them. Progress syncs to JobTread.</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="field-search-input" type="text" placeholder="Address or job name..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
+      <button onclick="fieldSearch()" style="padding:10px 16px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Search</button>
+    </div>
+    <div id="field-search-results"></div>
+  </div>
+  <div id="field-checklist-area"></div>
+</div>
 <div class="bnav">
   <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
   <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
@@ -1136,16 +1151,18 @@ function rebuildRegCards(rid,regType){
 
 // ═══════════ NAVIGATION ═══════════
 function goTo(n){
-  if(n<0||n>4)return;
+  if(n<0||n>5)return;
   if(n===2)bldWalk();
   if(n===3)bldReview();
   if(n===4)setTimeout(initSig,150);
+  if(n===5)initFieldTab();
   document.querySelectorAll('.pg').forEach(function(p,i){p.classList.toggle('on',i===n);});
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
   CP=n;
   document.getElementById('btn-back').style.display=n>0?'block':'none';
+  document.getElementById('btn-next').style.display=n===5?'none':'block';
   document.getElementById('btn-next').textContent=n===3?'Sign & Push →':'Next →';
-  document.getElementById('hdr-step').textContent=(n+1)+' / 5';
+  document.getElementById('hdr-step').textContent=(n+1)+' / 6';
   window.scrollTo(0,0);
 }
 
@@ -1700,7 +1717,7 @@ async function generateWalkReport(){
     hwChecked.push('Cold Air Return — '+carAct+(carLoc?' ('+carLoc+')':''));
   }
 
-  // Build HTML — single-column layout optimised for html2canvas → PDF (no CSS grid, no flex)
+  // Build HTML — PDF-safe layout: tables only, no flex/grid, no floats, fixed 1050px width
   var RED='#c0392b';
   var h='<!DOCTYPE html><html><head><meta charset="utf-8">';
   h+='<style>';
@@ -1715,32 +1732,26 @@ async function generateWalkReport(){
   h+='.meta-val{font-size:13px;font-weight:700;color:#1a1a1a;}';
   h+='.page-body{padding:20px 28px;}';
   h+='.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:'+RED+';border-bottom:2px solid '+RED+';padding-bottom:5px;margin:18px 0 10px;}';
-  h+='.hw-wrap{padding:4px 0 8px;}';
-  h+='.hw-tag{display:inline-block;background:#f0f0f0;border:1px solid #ddd;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:500;margin:2px 3px 2px 0;}';
-  h+='.room-card{border:2px solid #d0d0d0;border-radius:8px;overflow:hidden;margin-bottom:16px;}';
+  h+='.hw-table{border-collapse:collapse;margin-bottom:8px;}';
+  h+='.hw-tag{background:#f0f0f0;border:1px solid #ddd;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:500;margin:3px 4px 3px 0;display:inline-block;}';
+  h+='.room-card{border:2px solid #d0d0d0;border-radius:8px;overflow:hidden;margin-bottom:14px;page-break-inside:avoid;}';
   h+='.room-header{background:'+RED+';color:#fff;padding:9px 14px;}';
   h+='.room-header-text{font-size:15px;font-weight:700;}';
   h+='.room-rows{width:100%;border-collapse:collapse;}';
   h+='.room-rows td{padding:7px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}';
   h+='.room-rows tr:last-child td{border-bottom:none;}';
-  h+='.row-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#999;width:130px;padding-top:9px;}';
-  h+='.row-val{font-size:12px;color:#1a1a1a;line-height:1.5;}';
-  h+='.badge{display:inline-block;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:600;margin:1px 3px 1px 0;}';
-  h+='.badge.red{background:#fff5f5;color:'+RED+';border-color:#ffcdd2;}';
-  h+='.item-line{margin-bottom:3px;}';
+  h+='.row-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#999;width:130px;white-space:nowrap;}';
+  h+='.row-val{font-size:12px;color:#1a1a1a;line-height:1.6;}';
+  h+='.item-line{padding:1px 0;}';
+  h+='.item-qty{background:'+RED+';color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin-right:5px;}';
   h+='.item-name{font-size:12px;font-weight:600;}';
-  h+='.item-qty{display:inline-block;background:'+RED+';color:#fff;border-radius:3px;padding:0 5px;font-size:10px;font-weight:700;margin-right:4px;}';
-  h+='.elec-row{padding:2px 0;border-bottom:1px solid #f8f8f8;font-size:12px;}';
-  h+='.elec-qty{display:inline-block;background:#fff5f5;color:'+RED+';border:1px solid #ffcdd2;border-radius:3px;padding:0 6px;font-weight:700;font-size:11px;margin-right:5px;}';
-  h+='.notes-row{background:#fffdf0;}';
+  h+='.badge{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;margin:2px 3px 2px 0;display:inline-block;}';
+  h+='.badge-red{background:#fff5f5;color:'+RED+';border:1px solid #ffcdd2;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;margin:2px 3px 2px 0;display:inline-block;}';
+  h+='.notes-row td{background:#fffdf0;}';
   h+='.notes-text{font-size:12px;color:#555;font-style:italic;line-height:1.5;}';
-  h+='.photo-wrap{padding:4px 0;}';
-  h+='.photo-thumb{width:110px;height:82px;object-fit:cover;border-radius:5px;border:2px solid #ddd;margin:2px 4px 2px 0;display:inline-block;vertical-align:top;}';
-  h+='.footer-bar{margin-top:24px;padding:14px 28px;border-top:2px solid #e0e0e0;overflow:hidden;}';
-  h+='.footer-left{float:left;font-size:11px;color:#888;}';
-  h+='.footer-right{float:right;font-size:11px;color:#888;text-align:right;}';
-  h+='.sig-line{width:180px;border-bottom:1px solid #999;margin:28px auto 4px;display:block;}';
-  h+='.sig-label{text-align:center;font-size:10px;color:#888;}';
+  h+='.photo-thumb{width:110px;height:82px;object-fit:cover;border-radius:5px;border:2px solid #ddd;margin:2px 4px 2px 0;}';
+  h+='.footer-table{width:100%;border-collapse:collapse;margin-top:24px;border-top:2px solid #e0e0e0;}';
+  h+='.footer-table td{padding:12px 28px;font-size:11px;color:#888;vertical-align:middle;}';
   h+='</style></head><body>';
 
   // Header
@@ -1763,7 +1774,7 @@ async function generateWalkReport(){
   // House-wide section
   if(hwChecked.length>0){
     h+='<div class="section-title">🏡 House-Wide Items</div>';
-    h+='<div class="hw-wrap">';
+    h+='<div style="padding:4px 0 8px;">';
     hwChecked.forEach(function(item){h+='<span class="hw-tag">'+item+'</span>';});
     h+='</div>';
   }
@@ -1885,11 +1896,11 @@ async function generateWalkReport(){
     h+='</table></div>';
   });
 
-  // Footer
-  h+='<div class="footer-bar">';
-  h+='<div class="footer-left"><strong>LMC Contracting</strong> \u00b7 Pre-Listing Market Prep \u00b7 Lic #603383</div>';
-  h+='<div class="footer-right">'+today+'<br>'+addr.split(',')[0]+'</div>';
-  h+='</div>';
+  // Footer — table layout (no floats for PDF)
+  h+='<table class="footer-table"><tr>';
+  h+='<td style="text-align:left;"><strong>LMC Contracting</strong> \u00b7 Pre-Listing Market Prep \u00b7 Lic #603383</td>';
+  h+='<td style="text-align:right;">'+today+'<br>'+addr.split(',')[0]+'</td>';
+  h+='</tr></table>';
 
   h+='</div>';
 
@@ -1912,71 +1923,70 @@ async function generateFieldCrewDoc(){
   var today=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
   var RED='#c0392b';
-  var h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Field Crew Work Order — '+addr+'</title>';
+  var DARK='#2c3e50';
+  var h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Field Crew Work Order \u2014 '+addr+'</title>';
   h+='<style>';
   h+='*{box-sizing:border-box;margin:0;padding:0;}';
-  h+='body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;}';
-  h+='.page{max-width:850px;margin:0 auto;padding:24px;}';
-  h+='.header{background:'+RED+';color:#fff;padding:20px 24px;border-radius:8px 8px 0 0;}';
-  h+='.header h1{font-size:22px;font-weight:700;}';
-  h+='.header .sub{font-size:13px;opacity:0.9;margin-top:4px;}';
-  h+='.access-bar{background:#fffde7;border-left:4px solid #fbc02d;padding:10px 16px;margin:12px 0;font-size:13px;}';
-  h+='.access-bar strong{color:#f57f17;}';
-  h+='.meta{background:#f8f8f8;padding:12px 16px;border-radius:6px;margin-bottom:16px;}';
-  h+='.meta-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;}';
-  h+='.meta-label{font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;font-size:11px;}';
-  h+='.meta-val{font-weight:600;color:#1a1a1a;}';
-  h+='.section-title{font-size:14px;font-weight:700;color:'+RED+';border-bottom:2px solid '+RED+';padding-bottom:6px;margin:20px 0 12px;text-transform:uppercase;letter-spacing:1px;}';
-  h+='.house-wide{background:#fef9e7;border:1px solid #f4d03f;border-radius:6px;padding:12px 16px;margin-bottom:16px;}';
-  h+='.hw-list{list-style:none;}';
-  h+='.hw-list li{padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);display:flex;align-items:start;gap:8px;font-size:13px;}';
-  h+='.hw-check{display:inline-block;width:16px;height:16px;border:2px solid '+RED+';border-radius:3px;flex:0 0 16px;margin-top:2px;}';
-  h+='.room-card{border:2px solid #ddd;border-radius:8px;margin-bottom:16px;page-break-inside:avoid;break-inside:avoid;}';
-  h+='.room-header{background:#2c3e50;color:#fff;padding:10px 16px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:10px;}';
-  h+='.room-icon{font-size:20px;}';
-  h+='.room-name{font-size:16px;font-weight:700;flex:1;}';
-  h+='.room-tag{background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;}';
-  h+='.room-body{padding:14px 16px;}';
-  h+='.task-list{list-style:none;}';
-  h+='.task{padding:6px 0;border-bottom:1px solid #f0f0f0;display:flex;align-items:start;gap:10px;font-size:13px;}';
-  h+='.task:last-child{border-bottom:none;}';
-  h+='.task-check{display:inline-block;width:18px;height:18px;border:2px solid '+RED+';border-radius:3px;flex:0 0 18px;margin-top:1px;}';
-  h+='.task-content{flex:1;}';
-  h+='.task-name{font-weight:600;color:#1a1a1a;}';
-  h+='.task-detail{font-size:11px;color:#666;margin-top:1px;}';
-  h+='.task-qty{display:inline-block;background:#fff5f5;color:'+RED+';border:1px solid #ffcdd2;padding:1px 8px;border-radius:4px;font-weight:700;margin-right:6px;}';
-  h+='.notes-block{background:#fff8e1;border-left:3px solid #f9a825;padding:8px 12px;margin-top:10px;border-radius:0 4px 4px 0;font-size:12px;color:#5d4037;font-style:italic;}';
-  h+='.warn-block{background:#fff5f5;border-left:3px solid '+RED+';padding:8px 12px;margin-top:10px;border-radius:0 4px 4px 0;font-size:12px;color:#5d2828;}';
-  h+='.warn-block strong{color:'+RED+';}';
-  h+='.footer{margin-top:24px;padding-top:16px;border-top:2px solid #ddd;font-size:11px;color:#888;display:flex;justify-content:space-between;}';
-  h+='.signoff{margin-top:24px;padding:16px;border:2px dashed #999;border-radius:6px;}';
-  h+='.signoff h3{font-size:13px;color:#333;margin-bottom:10px;}';
-  h+='.sig-row{display:flex;justify-content:space-between;align-items:end;margin-top:24px;}';
-  h+='.sig-block{flex:1;margin-right:20px;}';
-  h+='.sig-line{border-bottom:1.5px solid #333;margin-bottom:4px;height:32px;}';
-  h+='.sig-label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.5px;}';
-  h+='@page{size:letter;margin:0.5in;}';
-  h+='@media print{.room-card{page-break-inside:avoid;}}';
-  h+='</style></head><body><div class="page">';
+  h+='body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;width:1050px;}';
+  h+='.header{background:'+RED+';color:#fff;padding:20px 28px;}';
+  h+='.header h1{font-size:21px;font-weight:700;}';
+  h+='.header-sub{font-size:12px;opacity:0.9;margin-top:3px;}';
+  h+='.access-bar{background:#fffde7;border-left:5px solid #f9a825;padding:10px 18px;margin:0;font-size:13px;}';
+  h+='.meta-table{width:100%;border-collapse:collapse;background:#f8f8f8;border-bottom:2px solid #e0e0e0;}';
+  h+='.meta-table td{padding:8px 18px;font-size:12px;width:25%;border-right:1px solid #e8e8e8;vertical-align:top;}';
+  h+='.meta-table td:last-child{border-right:none;}';
+  h+='.meta-label{font-size:9px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;display:block;margin-bottom:2px;}';
+  h+='.meta-val{font-size:13px;font-weight:700;color:#1a1a1a;}';
+  h+='.page-body{padding:16px 28px;}';
+  h+='.section-title{font-size:11px;font-weight:700;color:'+RED+';border-bottom:2px solid '+RED+';padding-bottom:5px;margin:18px 0 10px;text-transform:uppercase;letter-spacing:1px;}';
+  h+='.hw-table{width:100%;border-collapse:collapse;background:#fef9e7;border:1px solid #f4d03f;border-radius:4px;margin-bottom:14px;}';
+  h+='.hw-table td{padding:8px 14px;border-bottom:1px solid rgba(0,0,0,0.06);vertical-align:middle;}';
+  h+='.hw-table tr:last-child td{border-bottom:none;}';
+  h+='.chk-cell{width:26px;padding-right:0;}';
+  h+='.chk-box{width:16px;height:16px;border:2px solid '+RED+';border-radius:3px;display:inline-block;}';
+  h+='.task-detail{font-size:11px;color:#777;margin-top:2px;}';
+  h+='.room-card{border:2px solid #ddd;border-radius:6px;margin-bottom:14px;page-break-inside:avoid;}';
+  h+='.room-header-table{width:100%;border-collapse:collapse;background:'+DARK+';}';
+  h+='.room-header-table td{padding:9px 14px;color:#fff;vertical-align:middle;}';
+  h+='.room-icon-cell{width:32px;font-size:18px;}';
+  h+='.room-name-cell{font-size:15px;font-weight:700;}';
+  h+='.room-count-cell{text-align:right;font-size:11px;opacity:0.8;}';
+  h+='.task-table{width:100%;border-collapse:collapse;}';
+  h+='.task-table td{padding:8px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}';
+  h+='.task-table tr:last-child td{border-bottom:none;}';
+  h+='.task-qty{background:#fff5f5;color:'+RED+';border:1px solid #ffcdd2;padding:1px 7px;border-radius:3px;font-weight:700;font-size:11px;margin-right:6px;white-space:nowrap;}';
+  h+='.task-name{font-weight:600;font-size:13px;color:#1a1a1a;}';
+  h+='.notes-bar{background:#fff8e1;border-left:3px solid #f9a825;padding:8px 14px;font-size:12px;color:#5d4037;font-style:italic;margin-top:4px;}';
+  h+='.warn-bar{background:#fff5f5;border-left:3px solid '+RED+';padding:8px 14px;font-size:12px;color:#5d2828;margin-bottom:10px;}';
+  h+='.signoff-table{width:100%;border-collapse:collapse;border:2px dashed #aaa;border-radius:4px;margin-top:20px;}';
+  h+='.signoff-table td{padding:16px 18px;vertical-align:bottom;border-right:1px dashed #ccc;}';
+  h+='.signoff-table td:last-child{border-right:none;}';
+  h+='.sig-line{border-bottom:1.5px solid #333;height:36px;margin-bottom:4px;}';
+  h+='.sig-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.4px;}';
+  h+='.footer-table{width:100%;border-collapse:collapse;margin-top:18px;border-top:2px solid #e0e0e0;}';
+  h+='.footer-table td{padding:10px 28px;font-size:11px;color:#888;}';
+  h+='</style></head><body>';
 
   // Header
-  h+='<div class="header"><h1>🔧 Field Crew Work Order</h1>';
-  h+='<div class="sub">'+addr+' · Finish: '+finName+' · '+today+'</div></div>';
+  h+='<div class="header"><h1>\ud83d\udd27 Field Crew Work Order</h1>';
+  h+='<div class="header-sub">'+addr+' &middot; Finish: '+finName+' &middot; '+today+'</div></div>';
 
-  // Access notice
+  // Access bar
   if(access){
-    h+='<div class="access-bar"><strong>⚠ Property Access:</strong> '+access+' · Status: '+occ+'</div>';
+    h+='<div class="access-bar"><strong>\u26a0 Property Access:</strong> '+access+' &middot; Status: '+occ+'</div>';
   } else {
-    h+='<div class="access-bar"><strong>Property Status:</strong> '+occ+' — Confirm access procedure with PM before arrival.</div>';
+    h+='<div class="access-bar"><strong>Property Status:</strong> '+occ+' \u2014 Confirm access procedure with PM before arrival.</div>';
   }
 
-  // Meta
-  h+='<div class="meta">';
-  h+='<div class="meta-row"><span class="meta-label">Property</span><span class="meta-val">'+addr+'</span></div>';
-  h+='<div class="meta-row"><span class="meta-label">Seller</span><span class="meta-val">'+seller+'</span></div>';
-  h+='<div class="meta-row"><span class="meta-label">Finish Standard</span><span class="meta-val">'+finName+'</span></div>';
-  h+='<div class="meta-row"><span class="meta-label">Total Rooms</span><span class="meta-val">'+S.rooms.length+'</span></div>';
-  h+='</div>';
+  // Meta table (no flex)
+  h+='<table class="meta-table"><tr>';
+  h+='<td><span class="meta-label">Property</span><span class="meta-val">'+addr+'</span></td>';
+  h+='<td><span class="meta-label">Seller</span><span class="meta-val">'+seller+'</span></td>';
+  h+='<td><span class="meta-label">Finish Standard</span><span class="meta-val">'+finName+'</span></td>';
+  h+='<td><span class="meta-label">Total Rooms</span><span class="meta-val">'+S.rooms.length+'</span></td>';
+  h+='</tr></table>';
+
+  h+='<div class="page-body">';
 
   // House-wide tasks
   var hwTasks=[];
@@ -1995,16 +2005,17 @@ async function generateFieldCrewDoc(){
 
   if(hwTasks.length>0){
     h+='<div class="section-title">House-Wide Tasks</div>';
-    h+='<div class="house-wide"><ul class="hw-list">';
+    h+='<table class="hw-table">';
     hwTasks.forEach(function(t){
-      h+='<li><span class="hw-check"></span><div><strong>'+t.label+'</strong>'+(t.detail?'<div class="task-detail">'+t.detail+'</div>':'')+'</div></li>';
+      h+='<tr><td class="chk-cell"><span class="chk-box"></span></td>';
+      h+='<td><strong>'+t.label+'</strong>'+(t.detail?'<div class="task-detail">'+t.detail+'</div>':'')+'</td></tr>';
     });
-    h+='</ul></div>';
+    h+='</table>';
   }
 
   // Walk notes
   if(walknotes){
-    h+='<div class="warn-block"><strong>WALK NOTES (read first):</strong> '+walknotes+'</div>';
+    h+='<div class="warn-bar"><strong>WALK NOTES (read first):</strong> '+walknotes+'</div>';
   }
 
   // Per-room tasks
@@ -2083,49 +2094,46 @@ async function generateFieldCrewDoc(){
       if(tasks.length===0&&!d.notes)return;
       
       h+='<div class="room-card">';
-      h+='<div class="room-header"><span class="room-icon">'+(r.icon||'🏠')+'</span><span class="room-name">'+r.name+'</span>';
-      h+='<span class="room-tag">'+tasks.length+' task'+(tasks.length!==1?'s':'')+'</span></div>';
-      h+='<div class="room-body">';
+      // Room header — table layout
+      h+='<table class="room-header-table"><tr>';
+      h+='<td class="room-icon-cell">'+(r.icon||'\ud83c\udfe0')+'</td>';
+      h+='<td class="room-name-cell">'+r.name+'</td>';
+      h+='<td class="room-count-cell">'+tasks.length+' task'+(tasks.length!==1?'s':'')+'</td>';
+      h+='</tr></table>';
       
       if(tasks.length>0){
-        h+='<ul class="task-list">';
+        h+='<table class="task-table">';
         tasks.forEach(function(t){
-          h+='<li class="task"><span class="task-check"></span>';
-          h+='<div class="task-content">';
-          h+='<span class="task-qty">'+(t.qty||1)+'×</span>';
+          h+='<tr><td class="chk-cell"><span class="chk-box"></span></td>';
+          h+='<td><span class="task-qty">'+(t.qty||1)+'\xd7</span>';
           h+='<span class="task-name">'+t.name+'</span>';
           if(t.detail)h+='<div class="task-detail">'+t.detail+'</div>';
-          h+='</div></li>';
+          h+='</td></tr>';
         });
-        h+='</ul>';
+        h+='</table>';
       }
       
       // Room notes
       if(d.notes&&d.notes.trim()){
-        h+='<div class="notes-block"><strong>Notes:</strong> '+d.notes+'</div>';
+        h+='<div class="notes-bar"><strong>Notes:</strong> '+d.notes+'</div>';
       }
       
-      h+='</div></div>';
+      h+='</div>';
     });
   }
 
-  // Sign-off block
-  h+='<div class="signoff"><h3>Crew Sign-Off</h3>';
-  h+='<div class="sig-row">';
-  h+='<div class="sig-block"><div class="sig-line"></div><div class="sig-label">Lead Tech Signature</div></div>';
-  h+='<div class="sig-block"><div class="sig-line"></div><div class="sig-label">Date Completed</div></div>';
-  h+='</div>';
-  h+='<div class="sig-row" style="margin-top:8px;">';
-  h+='<div class="sig-block"><div class="sig-line"></div><div class="sig-label">PM Verification</div></div>';
-  h+='<div class="sig-block"><div class="sig-line"></div><div class="sig-label">Notes / Punch Items</div></div>';
-  h+='</div>';
-  h+='</div>';
+  // Sign-off block — table layout
+  h+='<table class="signoff-table"><tr>';
+  h+='<td><div class="sig-line"></div><div class="sig-label">Lead Tech Signature</div></td>';
+  h+='<td><div class="sig-line"></div><div class="sig-label">Date Completed</div></td>';
+  h+='<td><div class="sig-line"></div><div class="sig-label">PM Verification</div></td>';
+  h+='</tr></table>';
 
   // Footer
-  h+='<div class="footer">';
-  h+='<div>LMC Contracting · License #603383</div>';
-  h+='<div>'+addr.split(",")[0]+' · Generated '+today+'</div>';
-  h+='</div>';
+  h+='<table class="footer-table"><tr>';
+  h+='<td style="text-align:left;">LMC Contracting &middot; License #603383</td>';
+  h+='<td style="text-align:right;">'+addr.split(',')[0]+' &middot; Generated '+today+'</td>';
+  h+='</tr></table>';
 
   h+='</div></body></html>';
   return h;
@@ -2969,6 +2977,264 @@ async function pushToJT(){
     jl('Error: '+e.message,'err');
     btn.disabled=false;btn.textContent='Retry';
   }
+}
+
+// ═══════════ FIELD CHECKLIST ═══════════
+// Lets field tech load any MP job from JT, check off tasks, syncs to JT to-dos
+// PM can see real-time progress in JobTread
+
+var FC = {
+  jobId: null,
+  jobName: null,
+  tasks: [],       // [{id, roomName, roomIcon, taskName, detail, qty, done, jtTaskId}]
+  parentTaskId: null  // JT parent to-do group ID for this job
+};
+
+function initFieldTab(){
+  // On first open, pre-fill search with current walk address if available
+  var addr = (document.getElementById('f-addr').value||'').trim().split(',')[0];
+  var inp = document.getElementById('field-search-input');
+  if(addr && !inp.value) inp.value = addr;
+  renderFieldState();
+}
+
+async function fieldSearch(){
+  var term = (document.getElementById('field-search-input').value||'').trim();
+  if(!term){ showFieldMsg('Enter an address or job name to search.','warn'); return; }
+  var res = document.getElementById('field-search-results');
+  res.innerHTML = '<div style="color:#888;font-size:13px;padding:8px 0;">Searching JobTread...</div>';
+
+  try {
+    var resp = await jtQ({jobs:{'$':{organizationId:ORG, where:['name','like','%'+term+'%'], size:10, orderBy:'updatedAt', orderByDirection:'desc'},
+      nodes:{id:{},name:{},number:{},location:{address:{},account:{name:{},primaryContact:{name:{}}}}}}});
+    var jobs = (resp && resp.jobs && resp.jobs.nodes) || [];
+    if(!jobs.length){ res.innerHTML='<div style="color:#888;font-size:13px;padding:8px 0;">No jobs found matching "'+term+'"</div>'; return; }
+    
+    res.innerHTML = jobs.map(function(j){
+      var loc = (j.location&&j.location.address)||j.name;
+      var seller = (j.location&&j.location.account&&(j.location.account.primaryContact&&j.location.account.primaryContact.name||j.location.account.name))||'';
+      return '<div onclick="selectFieldJob(\''+j.id+'\',\''+j.name.replace(/'/g,"\\'")+'\')" style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin:6px 0;cursor:pointer;background:#fff;">'
+        +'<div style="font-weight:700;font-size:14px;">'+j.name+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);">#'+j.number+(seller?' · '+seller:'')+'</div>'
+        +'</div>';
+    }).join('');
+  } catch(e){
+    res.innerHTML='<div style="color:var(--red);font-size:13px;padding:8px 0;">Error: '+e.message+'</div>';
+  }
+}
+
+async function selectFieldJob(jobId, jobName){
+  FC.jobId = jobId;
+  FC.jobName = jobName;
+  FC.tasks = [];
+  FC.parentTaskId = null;
+  document.getElementById('field-search-results').innerHTML='';
+  showFieldMsg('Loading tasks for '+jobName+'...','info');
+
+  try {
+    // 1. Load budget groups + items to rebuild task list
+    var treeResp = await jtQ({job:{'$':{id:jobId},
+      costGroups:{'$':{size:100},nodes:{id:{},name:{},parentCostGroup:{id:{}}}},
+      costItems:{'$':{size:200},nodes:{id:{},name:{},quantity:{},costGroup:{id:{}}}}}});
+    var groups = ((treeResp.job||{}).costGroups||{}).nodes || [];
+    var items  = ((treeResp.job||{}).costItems||{}).nodes || [];
+
+    // 2. Load existing to-do tasks for this job to check what's already done
+    var taskResp = await jtQ({job:{'$':{id:jobId},
+      tasks:{'$':{size:200, where:['isToDo',true]},
+        nodes:{id:{},name:{},progress:{},parentTask:{id:{}}}}}});
+    var existingTasks = ((taskResp.job||{}).tasks||{}).nodes || [];
+
+    // Find our checklist parent task group (named "Field Checklist")
+    var parentTask = existingTasks.find(function(t){ return t.name==='Field Checklist' && !t.parentTask; });
+    FC.parentTaskId = parentTask ? parentTask.id : null;
+
+    // Build a map of existing task completion by name
+    var doneMap = {};
+    existingTasks.forEach(function(t){
+      if(t.parentTask) doneMap[t.name] = (t.progress||0) >= 100;
+    });
+
+    // 3. Build task list from budget items — group by parent cost group name
+    var groupMap = {};
+    groups.forEach(function(g){ groupMap[g.id] = g; });
+
+    // Identify top-level room groups (no parent)
+    var roomGroups = groups.filter(function(g){ return !g.parentCostGroup; });
+    var roomGroupIds = roomGroups.map(function(g){ return g.id; });
+
+    // Assign items to their room group
+    items.forEach(function(item){
+      var gid = (item.costGroup&&item.costGroup.id)||null;
+      // Walk up to find room group
+      var cur = gid;
+      var roomGid = null;
+      for(var safety=0;safety<5;safety++){
+        var g = groupMap[cur];
+        if(!g) break;
+        if(roomGroupIds.indexOf(cur) >= 0){ roomGid = cur; break; }
+        cur = (g.parentCostGroup&&g.parentCostGroup.id)||null;
+        if(!cur) break;
+      }
+      var roomName = roomGid ? groupMap[roomGid].name : 'General';
+      var taskName = item.name + (item.quantity>1?' ×'+item.quantity:'');
+      FC.tasks.push({
+        id: item.id,
+        roomName: roomName,
+        taskName: taskName,
+        qty: item.quantity||1,
+        done: !!doneMap[taskName],
+        jtTaskId: null  // will be created on first check
+      });
+    });
+
+    // 4. Load house-wide tasks from pinned comments  
+    renderFieldState();
+    showFieldMsg('','');
+  } catch(e){
+    showFieldMsg('Error loading job: '+e.message,'err');
+  }
+}
+
+function renderFieldState(){
+  var area = document.getElementById('field-checklist-area');
+  if(!FC.jobId || !FC.tasks.length){
+    area.innerHTML = '';
+    return;
+  }
+
+  var done = FC.tasks.filter(function(t){return t.done;}).length;
+  var total = FC.tasks.length;
+  var pct = total ? Math.round((done/total)*100) : 0;
+  var RED = '#B32025';
+
+  // Group by room
+  var rooms = {};
+  var roomOrder = [];
+  FC.tasks.forEach(function(t){
+    if(!rooms[t.roomName]){ rooms[t.roomName]=[]; roomOrder.push(t.roomName); }
+    rooms[t.roomName].push(t);
+  });
+
+  var html = '<div class="card" style="padding:16px 18px;">';
+  html += '<div style="font-weight:700;font-size:16px;color:#1a1a1a;margin-bottom:2px;">'+FC.jobName+'</div>';
+  html += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+done+' of '+total+' tasks complete</div>';
+  
+  // Progress bar
+  html += '<div style="background:#eee;border-radius:20px;height:10px;overflow:hidden;margin-bottom:6px;">';
+  html += '<div style="background:'+RED+';height:100%;width:'+pct+'%;border-radius:20px;transition:width .3s;"></div>';
+  html += '</div>';
+  html += '<div style="font-size:12px;color:'+(pct===100?'#2e7d32':RED)+';font-weight:700;margin-bottom:14px;">'+pct+'% Complete'+(pct===100?' ✅':'')+'</div>';
+
+  if(pct===100){
+    html += '<button onclick="uploadChecklistToJT()" style="width:100%;padding:12px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">📤 Upload Completion to JobTread</button>';
+  }
+
+  roomOrder.forEach(function(roomName){
+    var roomTasks = rooms[roomName];
+    var roomDone = roomTasks.filter(function(t){return t.done;}).length;
+    var allDone = roomDone === roomTasks.length;
+
+    html += '<div style="border:2px solid '+(allDone?'#a5d6a7':'#e0e0e0')+';border-radius:8px;margin-bottom:10px;overflow:hidden;">';
+    html += '<div style="background:'+(allDone?'#e8f5e9':'#2c3e50')+';padding:9px 14px;display:table;width:100%;box-sizing:border-box;">';
+    html += '<span style="display:table-cell;font-weight:700;font-size:14px;color:'+(allDone?'#2e7d32':'#fff')+';vertical-align:middle;">'+roomName+'</span>';
+    html += '<span style="display:table-cell;text-align:right;font-size:12px;color:'+(allDone?'#2e7d32':'rgba(255,255,255,0.7)')+';vertical-align:middle;">'+roomDone+'/'+roomTasks.length+'</span>';
+    html += '</div>';
+
+    roomTasks.forEach(function(t, idx){
+      var tid = 'fc_'+t.id;
+      html += '<div onclick="toggleFieldTask(\''+t.id+'\')" style="padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;background:'+(t.done?'#f9fef9':'#fff')+';display:table;width:100%;box-sizing:border-box;">';
+      html += '<span style="display:table-cell;width:32px;vertical-align:middle;">';
+      html += '<span style="display:inline-block;width:22px;height:22px;border:2px solid '+(t.done?'#2e7d32':RED)+';border-radius:4px;background:'+(t.done?'#2e7d32':'transparent')+';text-align:center;line-height:18px;font-size:14px;color:#fff;">'+(t.done?'✓':'')+'</span>';
+      html += '</span>';
+      html += '<span style="display:table-cell;vertical-align:middle;font-size:13px;font-weight:600;color:'+(t.done?'#2e7d32':'#1a1a1a')+';'+(t.done?'text-decoration:line-through;':'')+'">'+t.taskName+'</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div id="field-status-msg" style="margin-top:6px;font-size:13px;min-height:20px;"></div>';
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+async function toggleFieldTask(taskId){
+  var task = FC.tasks.find(function(t){ return t.id===taskId; });
+  if(!task) return;
+  task.done = !task.done;
+  renderFieldState();
+
+  // Sync to JT — create or update to-do task
+  try {
+    // Ensure parent "Field Checklist" group exists
+    if(!FC.parentTaskId){
+      var pResp = await jtQ({createTask:{'$':{
+        targetType:'job', targetId:FC.jobId,
+        name:'Field Checklist', isToDo:true
+      },createdTask:{id:{}}}});
+      FC.parentTaskId = gc(pResp,'createTask').id;
+    }
+
+    if(!task.jtTaskId){
+      // Find existing JT task by name
+      var taskResp = await jtQ({job:{'$':{id:FC.jobId},
+        tasks:{'$':{size:200, where:['isToDo',true]},
+          nodes:{id:{},name:{},progress:{},parentTask:{id:{}}}}}});
+      var allJTTasks = ((taskResp.job||{}).tasks||{}).nodes||[];
+      var match = allJTTasks.find(function(t){
+        return t.name===task.taskName && t.parentTask && t.parentTask.id===FC.parentTaskId;
+      });
+      if(match) task.jtTaskId = match.id;
+    }
+
+    if(task.jtTaskId){
+      // Update existing task progress
+      await jtQ({updateTask:{'$':{id:task.jtTaskId, progress:task.done?100:0},updatedTask:{id:{}}}});
+    } else {
+      // Create new to-do task under parent
+      var cResp = await jtQ({createTask:{'$':{
+        targetType:'job', targetId:FC.jobId,
+        parentTaskId: FC.parentTaskId,
+        name:task.taskName, isToDo:true,
+        progress:task.done?100:0
+      },createdTask:{id:{}}}});
+      task.jtTaskId = gc(cResp,'createTask').id;
+    }
+    showFieldStatusMsg(task.done?'✓ Synced to JobTread':'↩ Updated in JobTread','ok');
+  } catch(e){
+    showFieldStatusMsg('Sync error: '+e.message,'err');
+  }
+}
+
+async function uploadChecklistToJT(){
+  // Post a pinned completion comment to the job
+  var done = FC.tasks.filter(function(t){return t.done;}).length;
+  var total = FC.tasks.length;
+  var today = new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  var msg = '\u2705 FIELD CHECKLIST COMPLETE\n'+today+'\n\n'+done+'/'+total+' tasks completed.\n\nAll items checked off in LMC Make Ready Field tab.';
+  try {
+    await jtQ({createComment:{'$':{targetType:'job',targetId:FC.jobId,message:msg,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
+    showFieldStatusMsg('✅ Completion comment posted to JobTread!','ok');
+  } catch(e){
+    showFieldStatusMsg('Error: '+e.message,'err');
+  }
+}
+
+function showFieldMsg(msg, type){
+  var el = document.getElementById('field-search-results');
+  if(!el) return;
+  if(!msg){ el.innerHTML=''; return; }
+  var col = type==='err'?'#c0392b':type==='warn'?'#e67e22':'#555';
+  el.innerHTML='<div style="font-size:13px;color:'+col+';padding:8px 0;">'+msg+'</div>';
+}
+
+function showFieldStatusMsg(msg, type){
+  var el = document.getElementById('field-status-msg');
+  if(!el) return;
+  var col = type==='ok'?'#2e7d32':'#c0392b';
+  el.style.color = col;
+  el.textContent = msg;
+  setTimeout(function(){ if(el) el.textContent=''; }, 3000);
 }
 
 // ═══════════ INIT ═══════════
