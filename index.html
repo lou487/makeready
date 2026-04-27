@@ -510,9 +510,9 @@ textarea{resize:none;min-height:56px;}
 <button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
 
 
-<button id="gmic""gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
+<button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
 
-/div>
+</div>
 <div class="bnav">
   <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
   <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
@@ -3174,6 +3174,15 @@ async function pushToJT(){
       var doc=gc(docResp,'createDocument');
       if(doc&&doc.id){
         jl('\u2705 Proposal draft created: $'+(doc.price||0).toFixed(2)+' \u2014 review in JobTread Documents tab','ok');
+        // Auto-send proposal to seller
+        try{
+          var recipResp=await jtQ({createDocumentRecipient:{'$':{documentId:doc.id,assignee:{name:seller||'Seller',emailAddress:email||''}},createdDocumentRecipient:{id:{}}}});
+          var recipId=gc(recipResp,'createDocumentRecipient').id;
+          if(recipId){
+            await jtQ({sendDocument:{'$':{documentRecipientId:recipId}}});
+            jl('\u2705 Proposal emailed to '+(email||seller),'ok');
+          }
+        }catch(_se){ jl('\u26a0 Could not send proposal email: '+_se.message,'err'); }
       }else{
         jl('\u26a0 Proposal: createDocument returned no document','err');
       }
@@ -3278,6 +3287,17 @@ async function pushToJT(){
         var poDoc = gc(poDocResp,'createDocument');
         if(poDoc&&poDoc.id){
           jl('\u2705 PO created: $'+(poDoc.price||0).toFixed(2)+' to Home Depot — review in Documents tab','ok');
+          // Auto-send PO to agent email (as internal review copy) — agent email is already set
+          try{
+            if(aem){
+              var poRecipResp=await jtQ({createDocumentRecipient:{'$':{documentId:poDoc.id,assignee:{name:agent||'LMC Contracting',emailAddress:aem}},createdDocumentRecipient:{id:{}}}});
+              var poRecipId=gc(poRecipResp,'createDocumentRecipient').id;
+              if(poRecipId){
+                await jtQ({sendDocument:{'$':{documentRecipientId:poRecipId}}});
+                jl('\u2705 PO emailed to '+aem,'ok');
+              }
+            }
+          }catch(_pse){ jl('\u26a0 Could not send PO email: '+_pse.message,'err'); }
         } else {
           jl('\u26a0 PO: createDocument returned no document','err');
         }
@@ -3296,6 +3316,41 @@ async function pushToJT(){
   }
 }
 
+
+// ── SEND TO FIELD ──
+async function sendToField(){
+  var name    = (document.getElementById('field-lead-name').value||'').trim();
+  var contact = (document.getElementById('field-lead-contact').value||'').trim();
+  var date    = (document.getElementById('field-start-date').value||'').trim();
+  var logEl   = document.getElementById('send-field-log');
+  var btn     = document.getElementById('send-field-btn');
+  if(!name){ logEl.style.color='#c0392b'; logEl.textContent='Enter the field lead name.'; return; }
+  if(!contact){ logEl.style.color='#c0392b'; logEl.textContent='Enter an email or phone number.'; return; }
+  if(!_pushedJobId){ logEl.style.color='#c0392b'; logEl.textContent='No job found — push to JobTread first.'; return; }
+  btn.disabled = true; btn.textContent = 'Sending...';
+  logEl.style.color = '#888'; logEl.textContent = 'Creating assignment in JobTread...';
+  try {
+    var addr = (document.getElementById('f-addr').value||'').trim().split(',')[0];
+    var taskName = 'Field Crew Install \u2014 ' + addr;
+    await jtQ({createTask:{'$':{
+      targetType:'job', targetId:_pushedJobId,
+      name:taskName, isToDo:false,
+      startDate:date||undefined,
+      description:'Field Lead: '+name+'\nContact: '+contact+'\n\nReview the Field Crew Work Order PDF in the Files tab before starting.'
+    },createdTask:{id:{},name:{}}}});
+    var msg = '\uD83D\uDD27 SENT TO FIELD\nField Lead: '+name+'\nContact: '+contact+(date?'\nScheduled Start: '+date:'')+'\n\nField Crew Work Order PDF is in the Files tab. Tasks assigned in schedule.';
+    await jtQ({createComment:{'$':{
+      targetType:'job', targetId:_pushedJobId,
+      message:msg, isPinned:true, isVisibleToInternalRoles:true
+    },createdComment:{id:{}}}});
+    btn.textContent = 'Sent \u2713';
+    logEl.style.color = '#2e7d32';
+    logEl.textContent = '\u2705 Assignment created in JobTread. Field Crew Work Order PDF is in the job\'s Files tab.';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Send to Field Crew';
+    logEl.style.color = '#c0392b'; logEl.textContent = 'Error: '+e.message;
+  }
+}
 
 // ═══════════ INIT ═══════════
 // ═══════════ PHOTOS ═══════════
@@ -3594,6 +3649,15 @@ function markWalkPushed(){
     w.status = 'pushed';
     localStorage.setItem(WALK_PREFIX+CURRENT_WALK_ID, JSON.stringify(w));
   }catch(e){}
+  // Show the Send to Field card
+  var stf = document.getElementById('send-to-field-card');
+  if(stf) stf.style.display = 'block';
+  // Pre-fill start date to today
+  var sd = document.getElementById('field-start-date');
+  if(sd && !sd.value){
+    var today = new Date();
+    sd.value = today.toISOString().split('T')[0];
+  }
 }
 
 // ── WALK DRAWER UI ──
