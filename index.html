@@ -248,6 +248,7 @@ textarea{resize:none;min-height:56px;}
 .selbox-add-btn{background:none;color:var(--red);border:1px dashed var(--red);border-radius:4px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;line-height:1.3;}
 .selbox-add-btn:active{background:#fff5f5;}
 .selbox-done-btn{background:#666;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;line-height:1.3;}
+.selbox-pending .selbox-hdr{border-left:3px solid #e67e22;background:#fff8f0;}
 .selbox-options{display:none;padding:6px 10px 8px;border-top:1px solid var(--border);background:#fafaf8;}
 .selbox.open .selbox-options{display:block;}
 .selbox-filter{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;}
@@ -278,7 +279,6 @@ textarea{resize:none;min-height:56px;}
   <button class="tab" onclick="goTo(2)"><span>🚶</span>Walk</button>
   <button class="tab" onclick="goTo(3)"><span>👁</span>Review</button>
   <button class="tab" onclick="goTo(4)"><span>✍️</span>Push</button>
-  <button class="tab" onclick="goTo(5)"><span>🔧</span>Field</button>
 </div>
 
 <!-- PAGE 1 CLIENT -->
@@ -487,23 +487,32 @@ textarea{resize:none;min-height:56px;}
     <button class="btn btn-red" id="jt-btn" onclick="pushToJT()">Push to JobTread</button>
     <div id="jt-log"></div>
   </div>
+  <div class="card" id="send-to-field-card" style="display:none;">
+    <div class="ctitle"><span class="ctitle-icon">🔧</span>Send to Field</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Send the field crew their work order via JobTread. They'll get a link to view tasks, check off work, and upload photos — no app needed.</p>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Field Lead Name</label>
+      <input id="field-lead-name" type="text" placeholder="e.g. Mike Torres" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Email or Phone</label>
+      <input id="field-lead-contact" type="text" placeholder="email@example.com or (707) 555-0000" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;">Scheduled Start Date</label>
+      <input id="field-start-date" type="date" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
+    </div>
+    <button class="btn btn-red" id="send-field-btn" onclick="sendToField()">Send to Field Crew</button>
+    <div id="send-field-log" style="margin-top:8px;font-size:12px;min-height:18px;"></div>
+  </div>
 </div>
 
 <button id="gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
 
-<!-- PAGE 6 FIELD CHECKLIST -->
-<div class="pg" id="pg5">
-  <div class="card" id="field-search-card">
-    <div class="ctitle"><span class="ctitle-icon">🔧</span>Field Crew Checklist</div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Search for a job, then check off tasks as you complete them. Progress syncs to JobTread.</p>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input id="field-search-input" type="text" placeholder="Address or job name..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:#fff;">
-      <button onclick="fieldSearch()" style="padding:10px 16px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Search</button>
-    </div>
-    <div id="field-search-results"></div>
-  </div>
-  <div id="field-checklist-area"></div>
-</div>
+
+<button id="gmic""gmic" onclick="togMic()" style="position:fixed;bottom:76px;right:12px;z-index:300;width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:var(--red);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(179,32,37,.4);display:none;align-items:center;justify-content:center;line-height:1;">🎤</button>
+
+/div>
 <div class="bnav">
   <button class="bbtn bb-back" id="btn-back" onclick="goTo(CP-1)" style="display:none;">← Back</button>
   <button class="bbtn bb-next" id="btn-next" onclick="goTo(CP+1)">Next →</button>
@@ -512,6 +521,7 @@ textarea{resize:none;min-height:56px;}
 <script>
 // ═══════════ STATE ═══════════
 var CP=0;
+var _pushedJobId = null; // set during pushToJT
 var S={finish:0,hwStyle:'knob',hwBrand:'cove',rooms:[],signed:false,thermostatId:null};
 var sigC,sigX,drawing=false,lx=0,ly=0;
 
@@ -660,12 +670,6 @@ if(typeof FLUSH!=='undefined'){
     if(FLUSH[i])FLUSH[i].forEach(function(o){FLUSH_ALL.push({id:o.id,name:o.name,price:o.price,fin:f});});
   });
 }
-var VANITY_ALL=[];
-if(typeof VANITY!=='undefined'){
-  ['BN','MB','ORB'].forEach(function(f,i){
-    if(VANITY[i])VANITY[i].forEach(function(o){VANITY_ALL.push({id:o.id,name:o.name,price:o.price,fin:f});});
-  });
-}
 
 // Door stops — wired to real catalog items (Hillman Oil-Rubbed Bronze)
 var HINGE_STOP_SOLID=[
@@ -708,6 +712,12 @@ var BULBS=[
   {id:'22PVQ4VkSQXW',name:'Feit Globe G25 Clear 3-Pack',price:23.54},
   {id:'22PVQ4kMJSmf',name:'Feit Globe G25 Frosted 3-Pack',price:23.54}
 ];
+
+// Build VANITY_ALL flat array with fin tags (must be after VANITY is defined)
+var VANITY_ALL=[];
+['BN','MB','ORB'].forEach(function(f,i){
+  if(VANITY[i])VANITY[i].forEach(function(o){VANITY_ALL.push({id:o.id,name:o.name,price:o.price,fin:f});});
+});
 
 // ── SMOKE/CO DETECTORS ──
 var SMOKE=[
@@ -920,11 +930,11 @@ function selBox(rid,key,label,icon,options){
     else if(fins[houseFinShort]) defaultFin = houseFinShort;
   }
   var fin=(window.__selboxFilter&&window.__selboxFilter[openKey]!==undefined) ? window.__selboxFilter[openKey] : defaultFin;
-  var html='<div class="selbox'+(isOpen?' open':'')+'" id="sb-'+rid+'-'+key+'">';
+  var html='<div class="selbox'+(isOpen?' open selbox-pending':'')+'" id="sb-'+rid+'-'+key+'">';
   html+='<div class="selbox-hdr" onclick="selboxToggle(\''+rid+'\',\''+key+'\')">';
   html+='<span class="selbox-hdr-icon">'+(icon||'📦')+'</span>';
   html+='<span class="selbox-hdr-lbl">'+label+'</span>';
-  html+='<span class="selbox-hdr-sum">'+summary+'</span>';
+  html+='<span class="selbox-hdr-sum">'+(isOpen?'<span style="color:#e67e22;font-weight:700;">⚠ Tap Done when finished</span>':summary)+'</span>';
   html+='<span class="selbox-hdr-arrow">▶</span>';
   html+='</div>';
   // Selected items list
@@ -1363,18 +1373,17 @@ function rebuildRegCards(rid,regType){
 
 // ═══════════ NAVIGATION ═══════════
 function goTo(n){
-  if(n<0||n>5)return;
+  if(n<0||n>4)return;
   if(n===2)bldWalk();
   if(n===3)bldReview();
   if(n===4)setTimeout(initSig,150);
-  if(n===5)initFieldTab();
   document.querySelectorAll('.pg').forEach(function(p,i){p.classList.toggle('on',i===n);});
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
   CP=n;
   document.getElementById('btn-back').style.display=n>0?'block':'none';
-  document.getElementById('btn-next').style.display=n===5?'none':'block';
+  document.getElementById('btn-next').style.display='block';
   document.getElementById('btn-next').textContent=n===3?'Sign & Push →':'Next →';
-  document.getElementById('hdr-step').textContent=(n+1)+' / 6';
+  document.getElementById('hdr-step').textContent=(n+1)+' / 5';
   window.scrollTo(0,0);
 }
 
@@ -1530,7 +1539,8 @@ function bldRoomBody(r){
   });
   s+='</div>';
 
-  // DOOR HARDWARE — pre-selected by house finish+style+brand, just count doors
+  // DOOR HARDWARE — interior only (not garage)
+  if(r.type!=='garage'){
   s+='<div class="sh">🚪 Door Hardware</div>';
 
   var hwPass = getHWPassage();
@@ -1576,35 +1586,50 @@ function bldRoomBody(r){
     +'<button onclick="hwQtyAdj(\''+r.id+'\',\'hinge\',1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:18px;cursor:pointer;line-height:1;">+</button>'
     +'</div></div></div>';
 
+  } // end !garage interior door HW
+
   // Door stops — keep as selBox (finish-neutral, mixed styles OK)
   s+='<div class="sh" style="margin-top:4px;">🛑 Door Stops</div>';
   s+='<div class="a-info" style="font-size:10px;">Can mix solid wall mount and hinge pin per room.</div>';
   s+=selBox(r.id,'hingeStopSolid','Door Stop — Solid Mount','🛑',HINGE_STOP_SOLID);
   s+=selBox(r.id,'hingeStopPin','Door Stop — Hinge Pin Mount','📎',HINGE_STOP_PIN);
 
-  // Entry hardware — entryway rooms only, full selector filtered by finish
-  if(r.type==='entryway'||r.type==='garage'){
+  // Entry hardware + exterior hinge — entryway only
+  if(r.type==='entryway'){
     s+='<div class="sh" style="margin-top:4px;">🗝️ Entry / Exterior Hardware</div>';
     var entryItems = DOOR_ENTRY.filter(function(x){ return !x.fin || x.fin===finNames[S.finish]; });
     s+=selBox(r.id,'entry','Entry Lockset','🗝️',entryItems.length ? entryItems : DOOR_ENTRY);
+    var extHingeItems = DOOR_HINGE.filter(function(x){ return !x.fin || x.fin===finNames[S.finish]; });
+    s+=selBox(r.id,'hinge','Exterior Door Hinges (3-pack)','🔩',extHingeItems.length ? extHingeItems : DOOR_HINGE);
   }
 
-  // LIGHTING
-  s+='<div class="sh">💡 Lighting</div>';
-  s+=selBox(r.id,'flush','Ceiling Fixture (Flush Mount)','💡',FLUSH_ALL);
-  s+=qRow(r.id,'can6Qty','6" Recessed Can Retrofit','5/6" — most common');
-  s+=qRow(r.id,'can4Qty','4" Recessed Can Retrofit','smaller can size');
-  if(r.type==='kitchen'||r.type==='living'||r.type==='dining'){
-    s+=selBox(r.id,'deco','Decorative Fixture (chandelier/pendant)','✨',DECO);
+  // GARAGE — only exterior hardware, no interior items
+  if(r.type==='garage'){
+    s+='<div class="sh" style="margin-top:4px;">🚗 Garage / Exterior Hardware</div>';
+    var garageEntryItems = DOOR_ENTRY.filter(function(x){ return !x.fin || x.fin===finNames[S.finish]; });
+    s+=selBox(r.id,'entry','Entry Lockset (Man Door)','🗝️',garageEntryItems.length ? garageEntryItems : DOOR_ENTRY);
+    var garageHingeItems = DOOR_HINGE.filter(function(x){ return !x.fin || x.fin===finNames[S.finish]; });
+    s+=selBox(r.id,'hinge','Exterior Door Hinges (3-pack)','🔩',garageHingeItems.length ? garageHingeItems : DOOR_HINGE);
   }
 
-  // BULBS
-  s+='<div class="sh">💡 Light Bulbs</div>';
-  s+=selBox(r.id,'bulb','Light Bulbs','💡',BULBS);
+  // LIGHTING — not in garage
+  if(r.type!=='garage'){
+    s+='<div class="sh">💡 Lighting</div>';
+    s+=selBox(r.id,'flush','Ceiling Fixture (Flush Mount)','💡',FLUSH_ALL);
+    s+=qRow(r.id,'can6Qty','6" Recessed Can Retrofit','5/6" — most common');
+    s+=qRow(r.id,'can4Qty','4" Recessed Can Retrofit','smaller can size');
+    if(r.type==='kitchen'||r.type==='living'||r.type==='dining'){
+      s+=selBox(r.id,'deco','Decorative Fixture (chandelier/pendant)','✨',DECO);
+    }
 
-  // REGISTER (combined Floor + Wall/Ceiling — filter inside selBox)
-  s+='<div class="sh">🌬️ Air Register</div>';
-  s+=selBox(r.id,'reg','Air Register','🌬️',REG_ALL);
+    // BULBS
+    s+='<div class="sh">💡 Light Bulbs</div>';
+    s+=selBox(r.id,'bulb','Light Bulbs','💡',BULBS);
+
+    // REGISTER — not in garage
+    s+='<div class="sh">🌬️ Air Register</div>';
+    s+=selBox(r.id,'reg','Air Register','🌬️',REG_ALL);
+  }
 
   // SMOKE / CO (bedrooms and hallways)
   if(r.type==='bedroom'||r.type==='hall'){
@@ -2575,6 +2600,14 @@ function buildPriceMap(){return buildFallbackPriceMap();}
 async function pushToJT(){
   var btn=document.getElementById('jt-btn');
   var log=document.getElementById('jt-log');
+
+  // Warn if any selBox panels are still open
+  var openPanels = document.querySelectorAll('.selbox-pending');
+  if(openPanels.length > 0){
+    var proceed = confirm('⚠️ You have '+openPanels.length+' selection panel'+(openPanels.length>1?'s':'')+' still open (orange border). Tap Done on each panel before pushing to make sure all selections are counted.\n\nPush anyway?');
+    if(!proceed){ return; }
+  }
+
   btn.disabled=true;btn.textContent='Pushing...';
   log.style.display='block';log.innerHTML='';
 
@@ -2658,6 +2691,7 @@ async function pushToJT(){
     var r3=await jtQ({createJob:{'$':{locationId:locId,name:jobName,description:desc,customFieldValues:jcf},createdJob:{id:{},name:{}}}});
     var jobId=gc(r3,'createJob').id;
     if(!jobId)throw new Error('No job ID');
+    _pushedJobId = jobId;
     jl('Job created: '+jobName,'ok');
 
     // 4. CONTACTS
@@ -2942,6 +2976,10 @@ async function pushToJT(){
       if(d.patchMinor>0)addRI('22PViGQepPH8',d.patchMinor,G.drywall,'Minor Drywall Patches');
       if(d.patchMedium>0)addRI('22PViGQepPH8',d.patchMedium,G.drywall,'Medium Drywall Patches');
       if(d.patchBad>0)addRI('22PViGQepPH8',d.patchBad,G.drywall,'Major Drywall Patches');
+      // Paint tiers — T1/T2/T3 per room
+      if(d.paintTier===1){addRI('22PVVUFVW6f2',1,G.paint,'T1 Paint Labor');addRI('22PVVUFVW6f3',1,G.paint,'T1 Paint Materials');}
+      if(d.paintTier===2){addRI('22PVVUHC4TCP',1,G.paint,'T2 Paint Labor');addRI('22PVVUHC4TCQ',1,G.paint,'T2 Paint Materials');}
+      if(d.paintTier===3){addRI('22PVVUHmdhTS',1,G.paint,'T3 Paint Labor');addRI('22PVVUHmdhTT',1,G.paint,'T3 Paint Materials');}
     });
 
     // Push all items WITH costGroupId so they nest into their room group (matches Jackson structure)
@@ -3232,263 +3270,6 @@ async function pushToJT(){
   }
 }
 
-// ═══════════ FIELD CHECKLIST ═══════════
-// Lets field tech load any MP job from JT, check off tasks, syncs to JT to-dos
-// PM can see real-time progress in JobTread
-
-var FC = {
-  jobId: null,
-  jobName: null,
-  tasks: [],       // [{id, roomName, roomIcon, taskName, detail, qty, done, jtTaskId}]
-  parentTaskId: null  // JT parent to-do group ID for this job
-};
-
-function initFieldTab(){
-  // On first open, pre-fill search with current walk address if available
-  var addr = (document.getElementById('f-addr').value||'').trim().split(',')[0];
-  var inp = document.getElementById('field-search-input');
-  if(addr && !inp.value) inp.value = addr;
-  renderFieldState();
-}
-
-async function fieldSearch(){
-  var term = (document.getElementById('field-search-input').value||'').trim();
-  if(!term){ showFieldMsg('Enter an address or job name to search.','warn'); return; }
-  var res = document.getElementById('field-search-results');
-  res.innerHTML = '<div style="color:#888;font-size:13px;padding:8px 0;">Searching JobTread...</div>';
-
-  try {
-    var resp = await jtQ({jobs:{'$':{organizationId:ORG, where:['name','like','%'+term+'%'], size:10, orderBy:'updatedAt', orderByDirection:'desc'},
-      nodes:{id:{},name:{},number:{},location:{address:{},account:{name:{},primaryContact:{name:{}}}}}}});
-    var jobs = (resp && resp.jobs && resp.jobs.nodes) || [];
-    if(!jobs.length){ res.innerHTML='<div style="color:#888;font-size:13px;padding:8px 0;">No jobs found matching "'+term+'"</div>'; return; }
-    
-    res.innerHTML = jobs.map(function(j){
-      var loc = (j.location&&j.location.address)||j.name;
-      var seller = (j.location&&j.location.account&&(j.location.account.primaryContact&&j.location.account.primaryContact.name||j.location.account.name))||'';
-      return '<div onclick="selectFieldJob(\''+j.id+'\',\''+j.name.replace(/'/g,"\\'")+'\')" style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin:6px 0;cursor:pointer;background:#fff;">'
-        +'<div style="font-weight:700;font-size:14px;">'+j.name+'</div>'
-        +'<div style="font-size:12px;color:var(--muted);">#'+j.number+(seller?' · '+seller:'')+'</div>'
-        +'</div>';
-    }).join('');
-  } catch(e){
-    res.innerHTML='<div style="color:var(--red);font-size:13px;padding:8px 0;">Error: '+e.message+'</div>';
-  }
-}
-
-async function selectFieldJob(jobId, jobName){
-  FC.jobId = jobId;
-  FC.jobName = jobName;
-  FC.tasks = [];
-  FC.parentTaskId = null;
-  document.getElementById('field-search-results').innerHTML='';
-  showFieldMsg('Loading tasks for '+jobName+'...','info');
-
-  try {
-    // 1. Load budget groups + items to rebuild task list
-    var treeResp = await jtQ({job:{'$':{id:jobId},
-      costGroups:{'$':{size:100},nodes:{id:{},name:{},parentCostGroup:{id:{}}}},
-      costItems:{'$':{size:200},nodes:{id:{},name:{},quantity:{},costGroup:{id:{}}}}}});
-    var groups = ((treeResp.job||{}).costGroups||{}).nodes || [];
-    var items  = ((treeResp.job||{}).costItems||{}).nodes || [];
-
-    // 2. Load existing to-do tasks for this job to check what's already done
-    var taskResp = await jtQ({job:{'$':{id:jobId},
-      tasks:{'$':{size:200, where:['isToDo',true]},
-        nodes:{id:{},name:{},progress:{},parentTask:{id:{}}}}}});
-    var existingTasks = ((taskResp.job||{}).tasks||{}).nodes || [];
-
-    // Find our checklist parent task group (named "Field Checklist")
-    var parentTask = existingTasks.find(function(t){ return t.name==='Field Checklist' && !t.parentTask; });
-    FC.parentTaskId = parentTask ? parentTask.id : null;
-
-    // Build a map of existing task completion by name
-    var doneMap = {};
-    existingTasks.forEach(function(t){
-      if(t.parentTask) doneMap[t.name] = (t.progress||0) >= 100;
-    });
-
-    // 3. Build task list from budget items — group by parent cost group name
-    var groupMap = {};
-    groups.forEach(function(g){ groupMap[g.id] = g; });
-
-    // Identify top-level room groups (no parent)
-    var roomGroups = groups.filter(function(g){ return !g.parentCostGroup; });
-    var roomGroupIds = roomGroups.map(function(g){ return g.id; });
-
-    // Assign items to their room group
-    items.forEach(function(item){
-      var gid = (item.costGroup&&item.costGroup.id)||null;
-      // Walk up to find room group
-      var cur = gid;
-      var roomGid = null;
-      for(var safety=0;safety<5;safety++){
-        var g = groupMap[cur];
-        if(!g) break;
-        if(roomGroupIds.indexOf(cur) >= 0){ roomGid = cur; break; }
-        cur = (g.parentCostGroup&&g.parentCostGroup.id)||null;
-        if(!cur) break;
-      }
-      var roomName = roomGid ? groupMap[roomGid].name : 'General';
-      var taskName = item.name + (item.quantity>1?' ×'+item.quantity:'');
-      FC.tasks.push({
-        id: item.id,
-        roomName: roomName,
-        taskName: taskName,
-        qty: item.quantity||1,
-        done: !!doneMap[taskName],
-        jtTaskId: null  // will be created on first check
-      });
-    });
-
-    // 4. Load house-wide tasks from pinned comments  
-    renderFieldState();
-    showFieldMsg('','');
-  } catch(e){
-    showFieldMsg('Error loading job: '+e.message,'err');
-  }
-}
-
-function renderFieldState(){
-  var area = document.getElementById('field-checklist-area');
-  if(!FC.jobId || !FC.tasks.length){
-    area.innerHTML = '';
-    return;
-  }
-
-  var done = FC.tasks.filter(function(t){return t.done;}).length;
-  var total = FC.tasks.length;
-  var pct = total ? Math.round((done/total)*100) : 0;
-  var RED = '#B32025';
-
-  // Group by room
-  var rooms = {};
-  var roomOrder = [];
-  FC.tasks.forEach(function(t){
-    if(!rooms[t.roomName]){ rooms[t.roomName]=[]; roomOrder.push(t.roomName); }
-    rooms[t.roomName].push(t);
-  });
-
-  var html = '<div class="card" style="padding:16px 18px;">';
-  html += '<div style="font-weight:700;font-size:16px;color:#1a1a1a;margin-bottom:2px;">'+FC.jobName+'</div>';
-  html += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+done+' of '+total+' tasks complete</div>';
-  
-  // Progress bar
-  html += '<div style="background:#eee;border-radius:20px;height:10px;overflow:hidden;margin-bottom:6px;">';
-  html += '<div style="background:'+RED+';height:100%;width:'+pct+'%;border-radius:20px;transition:width .3s;"></div>';
-  html += '</div>';
-  html += '<div style="font-size:12px;color:'+(pct===100?'#2e7d32':RED)+';font-weight:700;margin-bottom:14px;">'+pct+'% Complete'+(pct===100?' ✅':'')+'</div>';
-
-  if(pct===100){
-    html += '<button onclick="uploadChecklistToJT()" style="width:100%;padding:12px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">📤 Upload Completion to JobTread</button>';
-  }
-
-  roomOrder.forEach(function(roomName){
-    var roomTasks = rooms[roomName];
-    var roomDone = roomTasks.filter(function(t){return t.done;}).length;
-    var allDone = roomDone === roomTasks.length;
-
-    html += '<div style="border:2px solid '+(allDone?'#a5d6a7':'#e0e0e0')+';border-radius:8px;margin-bottom:10px;overflow:hidden;">';
-    html += '<div style="background:'+(allDone?'#e8f5e9':'#2c3e50')+';padding:9px 14px;display:table;width:100%;box-sizing:border-box;">';
-    html += '<span style="display:table-cell;font-weight:700;font-size:14px;color:'+(allDone?'#2e7d32':'#fff')+';vertical-align:middle;">'+roomName+'</span>';
-    html += '<span style="display:table-cell;text-align:right;font-size:12px;color:'+(allDone?'#2e7d32':'rgba(255,255,255,0.7)')+';vertical-align:middle;">'+roomDone+'/'+roomTasks.length+'</span>';
-    html += '</div>';
-
-    roomTasks.forEach(function(t, idx){
-      var tid = 'fc_'+t.id;
-      html += '<div onclick="toggleFieldTask(\''+t.id+'\')" style="padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;background:'+(t.done?'#f9fef9':'#fff')+';display:table;width:100%;box-sizing:border-box;">';
-      html += '<span style="display:table-cell;width:32px;vertical-align:middle;">';
-      html += '<span style="display:inline-block;width:22px;height:22px;border:2px solid '+(t.done?'#2e7d32':RED)+';border-radius:4px;background:'+(t.done?'#2e7d32':'transparent')+';text-align:center;line-height:18px;font-size:14px;color:#fff;">'+(t.done?'✓':'')+'</span>';
-      html += '</span>';
-      html += '<span style="display:table-cell;vertical-align:middle;font-size:13px;font-weight:600;color:'+(t.done?'#2e7d32':'#1a1a1a')+';'+(t.done?'text-decoration:line-through;':'')+'">'+t.taskName+'</span>';
-      html += '</div>';
-    });
-    html += '</div>';
-  });
-
-  html += '<div id="field-status-msg" style="margin-top:6px;font-size:13px;min-height:20px;"></div>';
-  html += '</div>';
-  area.innerHTML = html;
-}
-
-async function toggleFieldTask(taskId){
-  var task = FC.tasks.find(function(t){ return t.id===taskId; });
-  if(!task) return;
-  task.done = !task.done;
-  renderFieldState();
-
-  // Sync to JT — create or update to-do task
-  try {
-    // Ensure parent "Field Checklist" group exists
-    if(!FC.parentTaskId){
-      var pResp = await jtQ({createTask:{'$':{
-        targetType:'job', targetId:FC.jobId,
-        name:'Field Checklist', isToDo:true
-      },createdTask:{id:{}}}});
-      FC.parentTaskId = gc(pResp,'createTask').id;
-    }
-
-    if(!task.jtTaskId){
-      // Find existing JT task by name
-      var taskResp = await jtQ({job:{'$':{id:FC.jobId},
-        tasks:{'$':{size:200, where:['isToDo',true]},
-          nodes:{id:{},name:{},progress:{},parentTask:{id:{}}}}}});
-      var allJTTasks = ((taskResp.job||{}).tasks||{}).nodes||[];
-      var match = allJTTasks.find(function(t){
-        return t.name===task.taskName && t.parentTask && t.parentTask.id===FC.parentTaskId;
-      });
-      if(match) task.jtTaskId = match.id;
-    }
-
-    if(task.jtTaskId){
-      // Update existing task progress
-      await jtQ({updateTask:{'$':{id:task.jtTaskId, progress:task.done?100:0},updatedTask:{id:{}}}});
-    } else {
-      // Create new to-do task under parent
-      var cResp = await jtQ({createTask:{'$':{
-        targetType:'job', targetId:FC.jobId,
-        parentTaskId: FC.parentTaskId,
-        name:task.taskName, isToDo:true,
-        progress:task.done?100:0
-      },createdTask:{id:{}}}});
-      task.jtTaskId = gc(cResp,'createTask').id;
-    }
-    showFieldStatusMsg(task.done?'✓ Synced to JobTread':'↩ Updated in JobTread','ok');
-  } catch(e){
-    showFieldStatusMsg('Sync error: '+e.message,'err');
-  }
-}
-
-async function uploadChecklistToJT(){
-  // Post a pinned completion comment to the job
-  var done = FC.tasks.filter(function(t){return t.done;}).length;
-  var total = FC.tasks.length;
-  var today = new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
-  var msg = '\u2705 FIELD CHECKLIST COMPLETE\n'+today+'\n\n'+done+'/'+total+' tasks completed.\n\nAll items checked off in LMC Make Ready Field tab.';
-  try {
-    await jtQ({createComment:{'$':{targetType:'job',targetId:FC.jobId,message:msg,isPinned:true,isVisibleToInternalRoles:true},createdComment:{id:{}}}});
-    showFieldStatusMsg('✅ Completion comment posted to JobTread!','ok');
-  } catch(e){
-    showFieldStatusMsg('Error: '+e.message,'err');
-  }
-}
-
-function showFieldMsg(msg, type){
-  var el = document.getElementById('field-search-results');
-  if(!el) return;
-  if(!msg){ el.innerHTML=''; return; }
-  var col = type==='err'?'#c0392b':type==='warn'?'#e67e22':'#555';
-  el.innerHTML='<div style="font-size:13px;color:'+col+';padding:8px 0;">'+msg+'</div>';
-}
-
-function showFieldStatusMsg(msg, type){
-  var el = document.getElementById('field-status-msg');
-  if(!el) return;
-  var col = type==='ok'?'#2e7d32':'#c0392b';
-  el.style.color = col;
-  el.textContent = msg;
-  setTimeout(function(){ if(el) el.textContent=''; }, 3000);
-}
 
 // ═══════════ INIT ═══════════
 // ═══════════ PHOTOS ═══════════
