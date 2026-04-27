@@ -1700,256 +1700,197 @@ async function generateWalkReport(){
     hwChecked.push('Cold Air Return — '+carAct+(carLoc?' ('+carLoc+')':''));
   }
 
-  // Build HTML
+  // Build HTML — single-column layout optimised for html2canvas → PDF (no CSS grid, no flex)
   var RED='#c0392b';
   var h='<!DOCTYPE html><html><head><meta charset="utf-8">';
   h+='<style>';
   h+='*{box-sizing:border-box;margin:0;padding:0;}';
-  h+='body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:0;}';
-  h+='.page{max-width:900px;margin:0 auto;padding:32px;}';
-  h+='.header{background:'+RED+';color:#fff;padding:24px 32px;margin-bottom:0;}';
-  h+='.header h1{font-size:22px;font-weight:700;letter-spacing:-0.3px;}';
-  h+='.header p{font-size:13px;opacity:0.85;margin-top:4px;}';
-  h+='.meta{background:#f8f8f8;border-bottom:2px solid #e0e0e0;padding:16px 32px;display:flex;gap:32px;flex-wrap:wrap;}';
-  h+='.meta-item{display:flex;flex-direction:column;gap:2px;}';
-  h+='.meta-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;}';
-  h+='.meta-val{font-size:14px;font-weight:600;color:#1a1a1a;}';
-  h+='.section{margin:24px 32px 0;}';
-  h+='.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:'+RED+';border-bottom:2px solid '+RED+';padding-bottom:6px;margin-bottom:12px;}';
-  h+='.hw-grid{display:flex;flex-wrap:wrap;gap:8px;}';
-  h+='.hw-tag{background:#f0f0f0;border:1px solid #ddd;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;}';
-  h+='.room-card{border:2px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:20px;page-break-inside:avoid;}';
-  h+='.room-header{background:'+RED+';color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;}';
-  h+='.room-icon{font-size:18px;}';
-  h+='.room-name{font-size:16px;font-weight:700;}';
-  h+='.room-body{padding:16px;}';
-  h+='.room-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}';
-  h+='.room-section{padding:8px 12px;border-bottom:1px solid #f0f0f0;}';
-  h+='.room-section:nth-child(odd){border-right:1px solid #f0f0f0;}';
-  h+='.rs-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;margin-bottom:3px;}';
-  h+='.rs-val{font-size:13px;font-weight:600;color:#1a1a1a;}';
-  h+='.rs-desc{font-size:11px;color:#666;margin-top:1px;}';
-  h+='.elec-section{padding:8px 12px;border-top:2px solid #f0f0f0;margin-top:4px;}';
-  h+='.elec-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f8f8f8;font-size:12px;}';
-  h+='.elec-name{color:#444;}';
-  h+='.elec-qty{font-weight:700;color:'+RED+';background:#fff5f5;border-radius:4px;padding:1px 8px;}';
-  h+='.photo-section{padding:12px 12px 8px;border-top:2px solid #f0f0f0;}';
-  h+='.photo-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}';
-  h+='.photo-thumb{width:120px;height:90px;object-fit:cover;border-radius:6px;border:2px solid #ddd;}';
-  h+='.notes-section{padding:8px 12px;border-top:1px solid #f0f0f0;background:#fffef0;}';
-  h+='.notes-text{font-size:12px;color:#555;font-style:italic;}';
-  h+='.full-row{grid-column:1/-1;padding:8px 12px;border-bottom:1px solid #f0f0f0;}';
-  h+='.badge{display:inline-block;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:4px;padding:1px 8px;font-size:11px;font-weight:600;margin-right:4px;}';
+  h+='body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;width:1050px;}';
+  h+='.header{background:'+RED+';color:#fff;padding:20px 28px;}';
+  h+='.header h1{font-size:20px;font-weight:700;}';
+  h+='.header p{font-size:12px;opacity:0.85;margin-top:3px;}';
+  h+='.meta-table{width:100%;border-collapse:collapse;background:#f8f8f8;border-bottom:3px solid #e0e0e0;}';
+  h+='.meta-table td{padding:10px 18px;font-size:13px;vertical-align:top;width:25%;}';
+  h+='.meta-label{font-size:9px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:0.5px;display:block;margin-bottom:2px;}';
+  h+='.meta-val{font-size:13px;font-weight:700;color:#1a1a1a;}';
+  h+='.page-body{padding:20px 28px;}';
+  h+='.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:'+RED+';border-bottom:2px solid '+RED+';padding-bottom:5px;margin:18px 0 10px;}';
+  h+='.hw-wrap{padding:4px 0 8px;}';
+  h+='.hw-tag{display:inline-block;background:#f0f0f0;border:1px solid #ddd;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:500;margin:2px 3px 2px 0;}';
+  h+='.room-card{border:2px solid #d0d0d0;border-radius:8px;overflow:hidden;margin-bottom:16px;}';
+  h+='.room-header{background:'+RED+';color:#fff;padding:9px 14px;}';
+  h+='.room-header-text{font-size:15px;font-weight:700;}';
+  h+='.room-rows{width:100%;border-collapse:collapse;}';
+  h+='.room-rows td{padding:7px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}';
+  h+='.room-rows tr:last-child td{border-bottom:none;}';
+  h+='.row-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#999;width:130px;padding-top:9px;}';
+  h+='.row-val{font-size:12px;color:#1a1a1a;line-height:1.5;}';
+  h+='.badge{display:inline-block;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:600;margin:1px 3px 1px 0;}';
   h+='.badge.red{background:#fff5f5;color:'+RED+';border-color:#ffcdd2;}';
-  h+='.footer{margin-top:32px;padding:16px 32px;border-top:2px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#888;}';
-  h+='.sig-block{text-align:center;}';
-  h+='.sig-line{width:200px;border-bottom:1px solid #999;margin:0 auto 4px;}';
-  h+='@media print{.room-card{page-break-inside:avoid;}.section{margin:16px 32px 0;}}';
+  h+='.item-line{margin-bottom:3px;}';
+  h+='.item-name{font-size:12px;font-weight:600;}';
+  h+='.item-qty{display:inline-block;background:'+RED+';color:#fff;border-radius:3px;padding:0 5px;font-size:10px;font-weight:700;margin-right:4px;}';
+  h+='.elec-row{padding:2px 0;border-bottom:1px solid #f8f8f8;font-size:12px;}';
+  h+='.elec-qty{display:inline-block;background:#fff5f5;color:'+RED+';border:1px solid #ffcdd2;border-radius:3px;padding:0 6px;font-weight:700;font-size:11px;margin-right:5px;}';
+  h+='.notes-row{background:#fffdf0;}';
+  h+='.notes-text{font-size:12px;color:#555;font-style:italic;line-height:1.5;}';
+  h+='.photo-wrap{padding:4px 0;}';
+  h+='.photo-thumb{width:110px;height:82px;object-fit:cover;border-radius:5px;border:2px solid #ddd;margin:2px 4px 2px 0;display:inline-block;vertical-align:top;}';
+  h+='.footer-bar{margin-top:24px;padding:14px 28px;border-top:2px solid #e0e0e0;overflow:hidden;}';
+  h+='.footer-left{float:left;font-size:11px;color:#888;}';
+  h+='.footer-right{float:right;font-size:11px;color:#888;text-align:right;}';
+  h+='.sig-line{width:180px;border-bottom:1px solid #999;margin:28px auto 4px;display:block;}';
+  h+='.sig-label{text-align:center;font-size:10px;color:#888;}';
   h+='</style></head><body>';
 
   // Header
   h+='<div class="header"><h1>🏠 LMC Make Ready — Site Walk Report</h1>';
   h+='<p>Pre-Listing Market Prep Survey · Generated '+today+'</p></div>';
 
-  // Meta bar
-  h+='<div class="meta">';
-  h+='<div class="meta-item"><div class="meta-label">Property</div><div class="meta-val">'+addr+'</div></div>';
-  h+='<div class="meta-item"><div class="meta-label">Seller</div><div class="meta-val">'+seller+'</div></div>';
-  h+='<div class="meta-item"><div class="meta-label">Finish</div><div class="meta-val">'+finName+'</div></div>';
-  if(agent)h+='<div class="meta-item"><div class="meta-label">Referring Agent</div><div class="meta-val">'+agent+(brok?' — '+brok:'')+'</div></div>';
-  h+='<div class="meta-item"><div class="meta-label">Rooms</div><div class="meta-val">'+S.rooms.length+'</div></div>';
-  h+='</div>';
-  h+='<div class="page">';
+  // Meta bar — table layout (no flex)
+  h+='<table class="meta-table"><tr>';
+  h+='<td><span class="meta-label">Property</span><span class="meta-val">'+addr+'</span></td>';
+  h+='<td><span class="meta-label">Seller</span><span class="meta-val">'+seller+'</span></td>';
+  h+='<td><span class="meta-label">Finish</span><span class="meta-val">'+finName+'</span></td>';
+  if(agent){
+    h+='<td><span class="meta-label">Referring Agent</span><span class="meta-val">'+agent+(brok?' — '+brok:'')+'</span></td>';
+  } else {
+    h+='<td><span class="meta-label">Rooms</span><span class="meta-val">'+S.rooms.length+'</span></td>';
+  }
+  h+='</tr></table>';
+  h+='<div class="page-body">';
 
   // House-wide section
   if(hwChecked.length>0){
-    h+='<div class="section"><div class="section-title">🏡 House-Wide Items</div>';
-    h+='<div class="hw-grid">';
-    hwChecked.forEach(function(item){h+='<div class="hw-tag">'+item+'</div>';});
-    h+='</div></div>';
+    h+='<div class="section-title">🏡 House-Wide Items</div>';
+    h+='<div class="hw-wrap">';
+    hwChecked.forEach(function(item){h+='<span class="hw-tag">'+item+'</span>';});
+    h+='</div>';
   }
 
   // Rooms
-  h+='<div class="section"><div class="section-title">🚶 Room Walk</div>';
+  h+='<div class="section-title">🚶 Room Walk</div>';
+
 
   S.rooms.forEach(function(r){
     var d=r.d;
-    var fins2=['Satin Nickel','Matte Black','Venetian Bronze'];
-    h+='<div class="room-card">';
-    h+='<div class="room-header"><span class="room-icon">'+r.icon+'</span><span class="room-name">'+r.name+'</span></div>';
-    h+='<div class="room-body">';
-    h+='<div class="room-grid">';
 
-    // Paint
-    if(d.paintTier){
-      h+='<div class="room-section"><div class="rs-label">Paint</div>';
-      h+='<div class="rs-val">Tier '+d.paintTier+'</div></div>';
-    }
-
-    // Helper: render selBox array as badges in the report
-    function arrBadges(arr,defLabel){
-      if(!arr||!arr.length)return '';
+    function itemLines(arr, label){
+      if(!arr||!arr.length) return '';
       return arr.map(function(s){
-        var name=(DESC[s.id]||defLabel||'').split(' - ')[0]||defLabel;
-        return '<span class="badge">'+defLabel+' ×'+s.qty+'</span><div class="rs-desc">'+name+'</div>';
+        var name=(DESC[s.id]||label||'Unknown');
+        return '<div class="item-line"><span class="item-qty">\xd7'+s.qty+'</span><span class="item-name">'+name+'</span></div>';
       }).join('');
     }
 
-    // Door hardware
-    var dhParts=[];
-    dhParts.push(arrBadges(d.passageKnob,'Pass Knob'));
-    dhParts.push(arrBadges(d.passageLever,'Pass Lever'));
-    dhParts.push(arrBadges(d.privacyKnob,'Priv Knob'));
-    dhParts.push(arrBadges(d.privacyLever,'Priv Lever'));
-    dhParts.push(arrBadges(d.entry,'Entry'));
-    dhParts.push(arrBadges(d.hinge,'Hinges'));
-    dhParts.push(arrBadges(d.hingeStopSolid,'Door Stop (Solid)'));
-    dhParts.push(arrBadges(d.hingeStopPin,'Door Stop (Pin)'));
-    var dhFiltered=dhParts.filter(function(p){return p;});
-    if(dhFiltered.length>0){
-      h+='<div class="room-section"><div class="rs-label">Door Hardware</div><div class="rs-val">'+dhFiltered.join('')+'</div></div>';
+    var rows=[];
+    if(d.paintTier) rows.push({label:'Paint', content:'Tier '+d.paintTier+(d.paintTier===1?' \u2014 Touch-up':d.paintTier===2?' \u2014 Walls Only':' \u2014 Full Room')});
+
+    var dhLines='';
+    dhLines+=itemLines(d.passageKnob,'Passage Knob');
+    dhLines+=itemLines(d.passageLever,'Passage Lever');
+    dhLines+=itemLines(d.privacyKnob,'Privacy Knob');
+    dhLines+=itemLines(d.privacyLever,'Privacy Lever');
+    dhLines+=itemLines(d.entry,'Entry Hardware');
+    dhLines+=itemLines(d.hinge,'Door Hinges (3-pack)');
+    dhLines+=itemLines(d.hingeStopSolid,'Door Stop \u2014 Solid Mount');
+    dhLines+=itemLines(d.hingeStopPin,'Door Stop \u2014 Hinge Pin');
+    if(dhLines) rows.push({label:'Door Hardware', content:dhLines});
+
+    var lightLines='';
+    lightLines+=itemLines(d.flush,'Flush Mount Fixture');
+    if(d.can6Qty>0) lightLines+='<div class="item-line"><span class="item-qty">\xd7'+d.can6Qty+'</span><span class="item-name">6" Can Light Retrofit (HALO)</span></div>';
+    if(d.can4Qty>0) lightLines+='<div class="item-line"><span class="item-qty">\xd7'+d.can4Qty+'</span><span class="item-name">4" Can Light Retrofit (EnviroLite)</span></div>';
+    lightLines+=itemLines(d.deco,'Decorative Fixture');
+    lightLines+=itemLines(d.vanity,'Vanity Light Bar');
+    if(lightLines) rows.push({label:'Light Fixtures', content:lightLines});
+
+    var bulbLines=itemLines(d.bulb,'LED Bulbs');
+    if(bulbLines) rows.push({label:'Bulbs', content:bulbLines});
+    var smokeLines=itemLines(d.smoke,'Smoke/CO Detector');
+    if(smokeLines) rows.push({label:'Smoke/CO', content:smokeLines});
+    var regLines=itemLines(d.reg,'Air Register');
+    if(regLines) rows.push({label:'Air Register', content:regLines});
+
+    var bathLines='';
+    bathLines+=itemLines(d.faucet,'Sink Faucet');
+    bathLines+=itemLines(d.showerHead,'Shower Head');
+    bathLines+=itemLines(d.toiletSeat,'Toilet Seat');
+    bathLines+=itemLines(d.showerTrim,'Tub/Shower Trim Kit');
+    bathLines+=itemLines(d.tubSpout,'Tub Spout');
+    bathLines+=itemLines(d.tubWO,'Tub Waste & Overflow');
+    bathLines+=itemLines(d.showerDrain,'Shower Drain Cover');
+    bathLines+=itemLines(d.bathHW,'Bath Hardware Set');
+    bathLines+=itemLines(d.robeHook,'Robe Hook');
+    VALVES.forEach(function(v){var c=d['valveCount_'+v.k]||0;if(c>0)bathLines+='<div class="item-line"><span class="item-qty">\xd7'+c+'</span><span class="item-name">'+v.n+' Valve'+(v.danger?' \u26a0 Verify trim':'')+'</span></div>';});
+    if(bathLines) rows.push({label:'Plumbing Fixtures', content:bathLines});
+
+    var plbBadges='';
+    if(d.angleStopQty>0)plbBadges+='<span class="badge">Angle Stops \xd7'+d.angleStopQty+'</span>';
+    if(d.toiletAngleQty>0)plbBadges+='<span class="badge">Toilet Stops \xd7'+d.toiletAngleQty+'</span>';
+    if(d.supplyLineQty>0)plbBadges+='<span class="badge">Faucet Lines \xd7'+d.supplyLineQty+'</span>';
+    if(d.toiletSupplyQty>0)plbBadges+='<span class="badge">Toilet Lines \xd7'+d.toiletSupplyQty+'</span>';
+    if(d.ptrapQty>0)plbBadges+='<span class="badge">P-Traps \xd7'+d.ptrapQty+'</span>';
+    if(d.escutcheonQty>0)plbBadges+='<span class="badge">Escutcheons \xd7'+d.escutcheonQty+'</span>';
+    if(d.popUpDrainQty>0)plbBadges+='<span class="badge">Pop-Up Drains \xd7'+d.popUpDrainQty+'</span>';
+    if(d.recessedTPQty>0)plbBadges+='<span class="badge">Recessed TP \xd7'+d.recessedTPQty+'</span>';
+    if(d.sinkStrainerQty>0)plbBadges+='<span class="badge">Sink Strainers \xd7'+d.sinkStrainerQty+'</span>';
+    if(d.snappyTrapQty>0)plbBadges+='<span class="badge">Snappy Trap Kits \xd7'+d.snappyTrapQty+'</span>';
+    if(d.dishwasherQty>0)plbBadges+='<span class="badge">Dishwasher Line \xd7'+d.dishwasherQty+'</span>';
+    if(plbBadges) rows.push({label:'Plumbing Trim', content:plbBadges});
+
+    var cabLines=itemLines(d.cabPull,'Cabinet Pull');
+    cabLines+=itemLines(d.cabKnob,'Cabinet Knob');
+    if(cabLines){
+      var cabExtra='';
+      if(d.holeSpacing)cabExtra+=' <span class="badge">Hole Spacing: '+d.holeSpacing+'</span>';
+      if(d.drawerPullQty)cabExtra+=' <span class="badge">Drawer Qty: '+d.drawerPullQty+'</span>';
+      if(d.doorPullQty)cabExtra+=' <span class="badge">Door Qty: '+d.doorPullQty+'</span>';
+      rows.push({label:'Cabinet Hardware', content:cabLines+cabExtra});
     }
 
-    // Light fixtures
-    var lightParts=[];
-    lightParts.push(arrBadges(d.flush,'Flush Mount'));
-    if(d.can6Qty>0)lightParts.push('<span class="badge">6" Can Retrofit ×'+d.can6Qty+'</span>');
-    if(d.can4Qty>0)lightParts.push('<span class="badge">4" Can Retrofit ×'+d.can4Qty+'</span>');
-    lightParts.push(arrBadges(d.deco,'Decorative'));
-    lightParts.push(arrBadges(d.vanity,'Vanity Light'));
-    var lightFiltered=lightParts.filter(function(p){return p;});
-    if(lightFiltered.length>0){
-      h+='<div class="room-section"><div class="rs-label">Light Fixtures</div><div class="rs-val">'+lightFiltered.join('')+'</div></div>';
-    }
+    var elecLines='';
+    ELEC.coverUp.forEach(function(item){var q=d['cup_'+item.id];if(q>0)elecLines+='<div class="item-line"><span class="item-qty">\xd7'+q+'</span><span class="item-name">Cover-Up: '+item.name+'</span></div>';});
+    ELEC.plates.forEach(function(item){var q=d['plt_'+item.id];if(q>0)elecLines+='<div class="item-line"><span class="item-qty">\xd7'+q+'</span><span class="item-name">Plate: '+item.name+'</span></div>';});
+    ELEC.decora.forEach(function(item){var q=d['dev_'+item.id];if(q>0)elecLines+='<div class="item-line"><span class="item-qty">\xd7'+q+'</span><span class="item-name">Device: '+item.name+'</span></div>';});
+    ELEC.standard.forEach(function(item){var q=d['std_'+item.id];if(q>0)elecLines+='<div class="item-line"><span class="item-qty">\xd7'+q+'</span><span class="item-name">Std: '+item.name+'</span></div>';});
+    if(elecLines) rows.push({label:'\u26a1 Electrical', content:elecLines});
 
-    // Bulbs
-    var bulbBadges=arrBadges(d.bulb,'Bulbs');
-    if(bulbBadges){
-      h+='<div class="room-section"><div class="rs-label">Bulbs</div><div class="rs-val">'+bulbBadges+'</div></div>';
-    }
+    var drywallBadges='';
+    if(d.patchMinor>0)drywallBadges+='<span class="badge">Minor \xd7'+d.patchMinor+'</span>';
+    if(d.patchMedium>0)drywallBadges+='<span class="badge">Medium \xd7'+d.patchMedium+'</span>';
+    if(d.patchBad>0)drywallBadges+='<span class="badge red">Major \xd7'+d.patchBad+'</span>';
+    if(drywallBadges) rows.push({label:'Drywall', content:drywallBadges});
 
-    // Smoke/CO
-    var smokeBadges=arrBadges(d.smoke,'Detector');
-    if(smokeBadges){
-      h+='<div class="room-section"><div class="rs-label">Smoke/CO Detector</div><div class="rs-val">'+smokeBadges+'</div></div>';
-    }
+    if(rows.length===0&&!d.notes&&(!r.photos||!r.photos.length)) return;
 
-    // Register
-    var regBadges=arrBadges(d.reg,'Register');
-    if(regBadges){
-      h+='<div class="room-section"><div class="rs-label">Air Register</div><div class="rs-val">'+regBadges+'</div></div>';
-    }
-
-    // Bath fixtures
-    var bathParts=[];
-    bathParts.push(arrBadges(d.faucet,'Faucet'));
-    bathParts.push(arrBadges(d.showerHead,'Shower Head'));
-    bathParts.push(arrBadges(d.toiletSeat,'Toilet Seat'));
-    bathParts.push(arrBadges(d.showerTrim,'Tub/Shower Trim'));
-    bathParts.push(arrBadges(d.tubSpout,'Tub Spout'));
-    bathParts.push(arrBadges(d.tubWO,'Tub Waste & Overflow Trim'));
-    bathParts.push(arrBadges(d.showerDrain,'Shower Drain'));
-    bathParts.push(arrBadges(d.bathHW,'Bath HW Set'));
-    bathParts.push(arrBadges(d.robeHook,'Robe Hook'));
-    // Valve count badges
-    VALVES.forEach(function(v){var c=d['valveCount_'+v.k]||0;if(c>0)bathParts.push('<span class="badge'+(v.danger?' red':'')+'">'+v.n+' ×'+c+'</span>');});
-    var bathFiltered=bathParts.filter(function(p){return p;});
-    if(bathFiltered.length>0){
-      h+='<div class="room-section"><div class="rs-label">Plumbing Fixtures</div><div class="rs-val">'+bathFiltered.join('')+'</div></div>';
-    }
-
-    // Plumbing trim (qty fields)
-    var plbParts=[];
-    if(d.angleStopQty>0)plbParts.push('Angle Stops ×'+d.angleStopQty);
-    if(d.toiletAngleQty>0)plbParts.push('Toilet Stops ×'+d.toiletAngleQty);
-    if(d.supplyLineQty>0)plbParts.push('Faucet Lines ×'+d.supplyLineQty);
-    if(d.toiletSupplyQty>0)plbParts.push('Toilet Lines ×'+d.toiletSupplyQty);
-    if(d.ptrapQty>0)plbParts.push('P-Traps ×'+d.ptrapQty);
-    if(d.escutcheonQty>0)plbParts.push('Escutcheons ×'+d.escutcheonQty);
-    if(d.popUpDrainQty>0)plbParts.push('Pop-Up Drains ×'+d.popUpDrainQty);
-    if(d.recessedTPQty>0)plbParts.push('Recessed TP Holders ×'+d.recessedTPQty);
-    if(d.sinkStrainerQty>0)plbParts.push('Sink Strainers ×'+d.sinkStrainerQty);
-    if(d.snappyTrapQty>0)plbParts.push('Snappy Trap Kits ×'+d.snappyTrapQty);
-    if(d.dishwasherQty>0)plbParts.push('Dishwasher Lines ×'+d.dishwasherQty);
-    if(plbParts.length>0){
-      h+='<div class="full-row"><div class="rs-label">Plumbing Trim</div>';
-      h+='<div class="rs-val">'+plbParts.map(function(p){return '<span class="badge">'+p+'</span>';}).join('')+'</div></div>';
-    }
-
-    // Cabinet hardware
-    var cabBadges=[];
-    cabBadges.push(arrBadges(d.cabPull,'Pulls'));
-    cabBadges.push(arrBadges(d.cabKnob,'Knobs'));
-    var cabFiltered=cabBadges.filter(function(p){return p;});
-    if(cabFiltered.length>0){
-      h+='<div class="full-row"><div class="rs-label">Cabinet Hardware</div>';
-      h+='<div class="rs-val">'+cabFiltered.join('');
-      if(d.holeSpacing)h+='<div class="rs-desc">Hole Spacing: '+d.holeSpacing;
-      if(d.drawerPullQty)h+=' · Drawer Pulls: '+d.drawerPullQty;
-      if(d.doorPullQty)h+=' · Door Pulls: '+d.doorPullQty;
-      if(d.holeSpacing)h+='</div>';
-      h+='</div></div>';
-    }
-
-    h+='</div>'; // end room-grid
-
-    // Electrical devices (if any)
-    var elecRows=[];
-    // Cover-ups
-    ELEC.coverUp.forEach(function(item){var q=d['cup_'+item.id];if(q>0)elecRows.push({name:'Cover-Up: '+item.name,qty:q});});
-    // Plates
-    ELEC.plates.forEach(function(item){var q=d['plt_'+item.id];if(q>0)elecRows.push({name:'Plate: '+item.name,qty:q});});
-    // Decora
-    ELEC.decora.forEach(function(item){var q=d['dev_'+item.id];if(q>0)elecRows.push({name:'Device: '+item.name,qty:q});});
-    // Standard
-    ELEC.standard.forEach(function(item){var q=d['std_'+item.id];if(q>0)elecRows.push({name:'Std: '+item.name,qty:q});});
-
-    if(elecRows.length>0){
-      h+='<div class="elec-section"><div class="rs-label">⚡ Electrical Devices</div>';
-      elecRows.forEach(function(row){
-        h+='<div class="elec-row"><span class="elec-name">'+row.name+'</span><span class="elec-qty">×'+row.qty+'</span></div>';
-      });
-      h+='</div>';
-    }
-
-    // Photos
+    h+='<div class="room-card">';
+    h+='<div class="room-header"><span class="room-header-text">'+r.icon+' '+r.name+'</span></div>';
+    h+='<table class="room-rows">';
+    rows.forEach(function(row){
+      h+='<tr><td class="row-label">'+row.label+'</td><td class="row-val">'+row.content+'</td></tr>';
+    });
     if(r.photos&&r.photos.length>0){
-      h+='<div class="photo-section"><div class="rs-label">📷 Walk Photos ('+r.photos.length+')</div>';
-      h+='<div class="photo-row">';
-      // Convert blob to data URL for embedding in HTML
+      var ph='<div class="photo-wrap">';
       for(var pi=0;pi<r.photos.length;pi++){
-        var photoSrc=r.photos[pi].dataUrl||(r.photos[pi].b64?'data:image/jpeg;base64,'+r.photos[pi].b64:'');
-        if(photoSrc){
-          h+='<img class="photo-thumb" src="'+photoSrc+'">';
-        }
+        var ps=r.photos[pi].dataUrl||(r.photos[pi].b64?'data:image/jpeg;base64,'+r.photos[pi].b64:'');
+        if(ps)ph+='<img class="photo-thumb" src="'+ps+'">';
       }
-      h+='</div></div>';
+      ph+='</div>';
+      h+='<tr><td class="row-label">\ud83d\udcf7 Photos</td><td class="row-val">'+ph+'</td></tr>';
     }
-
-    // Notes
     if(d.notes&&d.notes.trim()){
-      h+='<div class="notes-section"><div class="rs-label">📝 Notes</div>';
-      h+='<div class="notes-text">'+d.notes.replace(/\n/g,'<br>')+'</div></div>';
+      h+='<tr class="notes-row"><td class="row-label">\ud83d\udcdd Notes</td><td class="row-val notes-text">'+d.notes.replace(/\n/g,'<br>')+'</td></tr>';
     }
-
-    h+='</div></div>'; // end room-body, room-card
+    h+='</table></div>';
   });
 
-  h+='</div>'; // end section
-
-  // Footer with signature
-  h+='<div class="footer">';
-  h+='<div><strong>LMC Contracting</strong><br>Pre-Listing Market Prep Program</div>';
-  h+='<div class="sig-block">';
-  var sigDataUrl='';
-  try{sigDataUrl=sigC?sigC.toDataURL():'';} catch(e){}
-  if(sigDataUrl&&sigDataUrl.length>100){
-    h+='<img src="'+sigDataUrl+'" style="height:50px;margin-bottom:4px;display:block;margin:0 auto 4px;"><div style="font-size:11px;color:#666;">Field Tech Signature</div>';
-  } else {
-    h+='<div class="sig-line"></div><div style="font-size:11px;color:#888;">Field Tech Signature</div>';
-  }
+  // Footer
+  h+='<div class="footer-bar">';
+  h+='<div class="footer-left"><strong>LMC Contracting</strong> \u00b7 Pre-Listing Market Prep \u00b7 Lic #603383</div>';
+  h+='<div class="footer-right">'+today+'<br>'+addr.split(',')[0]+'</div>';
   h+='</div>';
-  h+='<div style="text-align:right;">'+today+'<br><span style="color:'+RED+';">'+addr.split(',')[0]+'</span></div>';
+
   h+='</div>';
 
 
@@ -2190,23 +2131,121 @@ async function generateFieldCrewDoc(){
   return h;
 }
 
+// Lazy-load a script tag, resolves when loaded
+function loadScript(src) {
+  return new Promise(function(resolve, reject) {
+    // Check if already loaded
+    if (document.querySelector('script[src="' + src + '"]') && window._scriptLoaded && window._scriptLoaded[src]) {
+      return resolve();
+    }
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function() {
+      if (!window._scriptLoaded) window._scriptLoaded = {};
+      window._scriptLoaded[src] = true;
+      resolve();
+    };
+    s.onerror = function() { reject(new Error('Failed to load: ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+
+// Convert an HTML string to a PDF Blob using jsPDF + html2canvas
+// Self-loads CDN dependencies if not already present
+async function htmlToPdfBlob(htmlContent) {
+  // Ensure libraries are loaded
+  if (typeof html2canvas === 'undefined') {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+  }
+  if (typeof window.jspdf === 'undefined') {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+
+  return new Promise(function(resolve, reject) {
+    // Render HTML in a hidden iframe so styles are fully applied
+    var iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1100px;height:1px;border:none;visibility:hidden;';
+    document.body.appendChild(iframe);
+
+    var iDoc = iframe.contentDocument || iframe.contentWindow.document;
+    iDoc.open(); iDoc.write(htmlContent); iDoc.close();
+
+    // Wait for images/fonts to settle
+    setTimeout(function() {
+      try {
+        var body = iDoc.body;
+        var totalH = Math.max(body.scrollHeight, 500);
+        iframe.style.height = totalH + 'px';
+
+        html2canvas(body, {
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: true,
+          scrollX: 0,
+          scrollY: 0,
+          width: 1100,
+          height: totalH,
+          windowWidth: 1100,
+          windowHeight: totalH
+        }).then(function(canvas) {
+          document.body.removeChild(iframe);
+          var imgData = canvas.toDataURL('image/jpeg', 0.85);
+          var jsPDF = window.jspdf.jsPDF;
+          // Letter page: 215.9mm x 279.4mm
+          var pageW = 215.9, pageH = 279.4;
+          var imgW = pageW;
+          var imgH = canvas.height * (pageW / canvas.width);
+          var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+          var y = 0;
+          while (y < imgH) {
+            if (y > 0) doc.addPage();
+            doc.addImage(imgData, 'JPEG', 0, -y, imgW, imgH);
+            y += pageH;
+          }
+          var pdfBytes = doc.output('arraybuffer');
+          resolve(new Blob([pdfBytes], { type: 'application/pdf' }));
+        }).catch(function(e) {
+          document.body.removeChild(iframe);
+          reject(e);
+        });
+      } catch(e) {
+        document.body.removeChild(iframe);
+        reject(e);
+      }
+    }, 800);
+  });
+}
+
 async function uploadReportToJT(jobId, htmlContent, suffix){
-  // Convert HTML to a Blob
-  var blob = new Blob([htmlContent], {type:'text/html'});
   var addr = (document.getElementById('f-addr').value||'').trim().split(',')[0]||'Walk';
-  var filename = addr.replace(/[^a-zA-Z0-9]/g,'-')+(suffix||'-Walk-Report')+'.html';
+  var baseName = addr.replace(/[^a-zA-Z0-9]/g,'-')+(suffix||'-Walk-Report');
+
+  // Convert HTML → PDF blob
+  var blob, filename, mimeType;
+  try {
+    blob = await htmlToPdfBlob(htmlContent);
+    filename = baseName + '.pdf';
+    mimeType = 'application/pdf';
+  } catch(convErr) {
+    // Fallback to HTML if PDF conversion fails
+    console.warn('PDF conversion failed, uploading HTML:', convErr.message);
+    blob = new Blob([htmlContent], {type:'text/html'});
+    filename = baseName + '.html';
+    mimeType = 'text/html';
+  }
 
   // Step 1: get upload URL
   var upResp = await jtQ({createUploadRequest:{'$':{
     organizationId:ORG,
     size:blob.size,
-    type:'text/html'
+    type:mimeType
   },createdUploadRequest:{id:{},url:{},method:{},headers:{}}}});
   var up = gc(upResp,'createUploadRequest');
   if(!up||!up.id) throw new Error('No upload URL for report');
 
-  // Step 2: PUT to GCS
-  var putResp = await fetch(up.url,{method:up.method||'PUT',headers:up.headers||{'content-type':'text/html'},body:blob});
+  // Step 2: PUT to GCS — must use ALL headers from JT response (GCS signed URL enforces them)
+  var putHeaders = up.headers || {'content-type': mimeType};
+  var putResp = await fetch(up.url,{method:up.method||'PUT',headers:putHeaders,body:blob});
   if(!putResp.ok) throw new Error('Report upload HTTP '+putResp.status);
 
   // Step 3: attach to job Files tab
@@ -2694,9 +2733,7 @@ async function pushToJT(){
       }catch(e){jl('Agent: '+e.message,'err');}
     }
 
-    // 10. DOCUMENTS
-    // Documents created manually in JobTread
-    jl('\u2139 In JobTread: Documents tab \u2192 create Proposal & PO','info');
+    // 10. DOCUMENTS (auto-generated below)
 
     // Generate and upload walk report
     try{
@@ -2817,6 +2854,111 @@ async function pushToJT(){
       }
     }catch(_pe){
       jl('\u26a0 Proposal: '+_pe.message,'err');
+    }
+
+    // Auto-create Purchase Order — Home Depot, materials only
+    // Materials cost codes: Electrical (22PCgcVGSyrS), Plumbing (22PCgcVGSyrT),
+    //   Mechanical (22PCgcVGSyrU), Doors (22PCgcVGSyrX)
+    // Cost type for materials: 22PCgcVGSyrr
+    try {
+      jl('Generating Purchase Order (Home Depot, materials)...','info');
+      var MATS_COST_CODES = new Set([
+        '22PCgcVGSyrS', // 1000 Electrical
+        '22PCgcVGSyrT', // 1100 Plumbing
+        '22PCgcVGSyrU', // 1200 Mechanical
+        '22PCgcVGSyrX', // 1500 Doors
+        '22PCgcVGSyrp', // 3100 Misc (registers, covers, etc)
+      ]);
+      var MATS_TYPE_ID = '22PCgcVGSyrr'; // Materials cost type
+      var HD_VENDOR_ID = '22PEnZwGDc7H'; // Home Depot vendor account
+      var PO_TEMPLATE_ID = '22PCgcVGSysM'; // Purchase Order template
+
+      // Read template fields
+      var poTplResp = await jtQ({documentTemplate:{'$':{id:PO_TEMPLATE_ID},name:{},footer:{},fromName:{},fromOrganizationName:{},fromAddress:{},fromEmailAddress:{},fromPhoneNumber:{},dueDays:{},showChildCosts:{},showQuantity:{}}});
+      var poTpl = (poTplResp&&poTplResp.documentTemplate)||{};
+
+      // Read budget items again (or reuse allItems/allGroups from proposal if still in scope — but we're in a separate try block so re-fetch)
+      var poTreeResp = await jtQ({job:{'$':{id:jobId},costGroups:{'$':{size:100},nodes:{id:{},name:{},parentCostGroup:{id:{}}}},costItems:{'$':{size:100},nodes:{id:{},name:{},description:{},quantity:{},unitCost:{},unitCost:{},unitPrice:{},costGroup:{id:{}},costCode:{id:{}},costType:{id:{}},unit:{id:{}}}}}});
+      var poGroups = (((poTreeResp.job||{}).costGroups||{}).nodes)||[];
+      var poItems  = (((poTreeResp.job||{}).costItems||{}).nodes)||[];
+
+      // Filter to materials cost type AND allowed cost codes
+      var matItems = poItems.filter(function(it){
+        var typeId = (it.costType&&it.costType.id)||'';
+        var codeId = (it.costCode&&it.costCode.id)||'';
+        return typeId === MATS_TYPE_ID && MATS_COST_CODES.has(codeId);
+      });
+
+      if (matItems.length === 0) {
+        jl('\u2139 No materials items found for PO — skipping','info');
+      } else {
+        // Build a group map so we can group by cost group name
+        var poGroupMap = {};
+        poGroups.forEach(function(g){ poGroupMap[g.id] = g; });
+
+        // Build grouped line items: group by parent cost group name
+        var poGroupedItems = {}; // groupName -> [items]
+        var poGroupOrder = [];
+        matItems.forEach(function(it){
+          var gid = (it.costGroup&&it.costGroup.id)||'ROOT';
+          var gname = (poGroupMap[gid]&&poGroupMap[gid].name)||'General';
+          if(!poGroupedItems[gname]){ poGroupedItems[gname]=[]; poGroupOrder.push(gname); }
+          poGroupedItems[gname].push(it);
+        });
+
+        // Build lineItems array: newCostGroup with nested newCostItem
+        var poLineItems = poGroupOrder.map(function(gname){
+          return {
+            _type:'costGroup',
+            name:gname,
+            lineItems: poGroupedItems[gname].map(function(it){
+              return {
+                _type:'costItem',
+                name:it.name||'Item',
+                description:it.description||'',
+                quantity:it.quantity||1,
+                unitCost:it.unitCost||0,
+                unitPrice:it.unitCost||0, // PO: cost = price (vendor cost)
+                costCodeId:(it.costCode&&it.costCode.id)||'22PCgcVGSyrr',
+                costTypeId:MATS_TYPE_ID,
+                unitId:(it.unit&&it.unit.id)||'22PCgcVGSyr7',
+                sourceCostItemId:it.id
+              };
+            })
+          };
+        });
+
+        var poArgs = {
+          jobId:jobId,
+          accountId:HD_VENDOR_ID,
+          type:'purchaseOrder',
+          name:'Home Depot Materials — '+(addr||''),
+          subject:'PO — '+(addr||''),
+          footer:poTpl.footer||'',
+          fromName:poTpl.fromName||'LMC Contracting',
+          dueDays:poTpl.dueDays||7,
+          showChildCosts:poTpl.showChildCosts!==false,
+          showQuantity:poTpl.showQuantity!==false,
+          includeInBudget:false,
+          taxRate:0,
+          toName:'Home Depot',
+          lineItems:poLineItems
+        };
+        if(poTpl.fromOrganizationName)poArgs.fromOrganizationName=poTpl.fromOrganizationName;
+        if(poTpl.fromAddress)poArgs.fromAddress=poTpl.fromAddress;
+        if(poTpl.fromEmailAddress)poArgs.fromEmailAddress=poTpl.fromEmailAddress;
+        if(poTpl.fromPhoneNumber)poArgs.fromPhoneNumber=poTpl.fromPhoneNumber;
+
+        var poDocResp = await jtQ({createDocument:{'$':poArgs,createdDocument:{id:{},subject:{},price:{}}}});
+        var poDoc = gc(poDocResp,'createDocument');
+        if(poDoc&&poDoc.id){
+          jl('\u2705 PO created: $'+(poDoc.price||0).toFixed(2)+' to Home Depot — review in Documents tab','ok');
+        } else {
+          jl('\u26a0 PO: createDocument returned no document','err');
+        }
+      }
+    } catch(_poe) {
+      jl('\u26a0 PO: '+_poe.message,'err');
     }
 
     jl('','');
