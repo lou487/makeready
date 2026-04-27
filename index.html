@@ -2977,9 +2977,9 @@ async function pushToJT(){
       if(d.patchMedium>0)addRI('22PViGQepPH8',d.patchMedium,G.drywall,'Medium Drywall Patches');
       if(d.patchBad>0)addRI('22PViGQepPH8',d.patchBad,G.drywall,'Major Drywall Patches');
       // Paint tiers — T1/T2/T3 per room
-      if(d.paintTier===1){addRI('22PVVUFVW6f2',1,G.paint,'T1 Paint Labor');addRI('22PVVUFVW6f3',1,G.paint,'T1 Paint Materials');}
-      if(d.paintTier===2){addRI('22PVVUHC4TCP',1,G.paint,'T2 Paint Labor');addRI('22PVVUHC4TCQ',1,G.paint,'T2 Paint Materials');}
-      if(d.paintTier===3){addRI('22PVVUHmdhTS',1,G.paint,'T3 Paint Labor');addRI('22PVVUHmdhTT',1,G.paint,'T3 Paint Materials');}
+      if(d.paintTier===1){addRI('22PPCa4iqaQv',1,G.paint,'T1 Paint Labor');addRI('22PPCcP2agQJ',1,G.paint,'T1 Paint Materials');}
+      if(d.paintTier===2){addRI('22PVGqMMrmwv',1,G.paint,'T2 Paint Labor');addRI('22PVGqwg2MWr',1,G.paint,'T2 Paint Materials');}
+      if(d.paintTier===3){addRI('22PVGrQYcpqC',1,G.paint,'T3 Paint Labor');addRI('22PVGrs8tLT3',1,G.paint,'T3 Paint Materials');}
     });
 
     // Push all items WITH costGroupId so they nest into their room group (matches Jackson structure)
@@ -3230,7 +3230,7 @@ async function pushToJT(){
         var poArgs = {
           jobId:jobId,
           accountId:HD_VENDOR_ID,
-          type:'purchaseOrder',
+          type:'vendorOrder',
           name:'Home Depot Materials — '+(addr||''),
           subject:'PO — '+(addr||''),
           footer:poTpl.footer||'',
