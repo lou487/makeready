@@ -2902,6 +2902,7 @@ async function pushToJT(){
 
     // 8. ROOM ITEMS — iterate selBox arrays + qty fields
     var roomItems=[];
+    var paintItems=[];
     S.rooms.forEach(function(r){
       var d=r.d;
       var rn=r.name;
@@ -2976,10 +2977,18 @@ async function pushToJT(){
       if(d.patchMinor>0)addRI('22PViGQepPH8',d.patchMinor,G.drywall,'Minor Drywall Patches');
       if(d.patchMedium>0)addRI('22PViGQepPH8',d.patchMedium,G.drywall,'Medium Drywall Patches');
       if(d.patchBad>0)addRI('22PViGQepPH8',d.patchBad,G.drywall,'Major Drywall Patches');
-      // Paint tiers — T1/T2/T3 per room
-      if(d.paintTier===1){addRI('22PPCa4iqaQv',1,G.paint,'T1 Paint Labor');addRI('22PPCcP2agQJ',1,G.paint,'T1 Paint Materials');}
-      if(d.paintTier===2){addRI('22PVGqMMrmwv',1,G.paint,'T2 Paint Labor');addRI('22PVGqwg2MWr',1,G.paint,'T2 Paint Materials');}
-      if(d.paintTier===3){addRI('22PVGrQYcpqC',1,G.paint,'T3 Paint Labor');addRI('22PVGrs8tLT3',1,G.paint,'T3 Paint Materials');}
+      // Paint tiers — T1/T2/T3 per room (use Per Room unit, exact catalog pricing)
+      var PAINT_UNIT='22PVGnxPBwm3'; // Per Room
+      var PAINT_TIERS={
+        1:{labor:{id:'22PPCa4iqaQv',cost:87.5,price:125.00,name:'T1 Paint Labor'},mat:{id:'22PPCcP2agQJ',cost:35,price:50.00,name:'T1 Paint Materials'}},
+        2:{labor:{id:'22PVGqMMrmwv',cost:216,price:308.57,name:'T2 Paint Labor'},mat:{id:'22PVGqwg2MWr',cost:199,price:284.29,name:'T2 Paint Materials'}},
+        3:{labor:{id:'22PVGrQYcpqC',cost:432,price:617.14,name:'T3 Paint Labor'},mat:{id:'22PVGrs8tLT3',cost:305,price:435.71,name:'T3 Paint Materials'}}
+      };
+      if(d.paintTier&&PAINT_TIERS[d.paintTier]){
+        var pt=PAINT_TIERS[d.paintTier];
+        paintItems.push({id:pt.labor.id,qty:1,grp:G.paint,name:rn+' \u2014 '+pt.labor.name,cost:pt.labor.cost,price:pt.labor.price,laborCode:'22PV6dcbCjTD',unit:PAINT_UNIT,groupId:targetGroupId});
+        paintItems.push({id:pt.mat.id,qty:1,grp:G.paint,name:rn+' \u2014 '+pt.mat.name,cost:pt.mat.cost,price:pt.mat.price,laborCode:'22PCgcVGSyrf',unit:PAINT_UNIT,groupId:targetGroupId});
+      }
     });
 
     // Push all items WITH costGroupId so they nest into their room group (matches Jackson structure)
@@ -3010,12 +3019,29 @@ async function pushToJT(){
       }
       var ccId=resolveCostCode(item.grp);
       var ctId=resolveCostType(item.name,item.grp);
-      var itemArgs={jobId:jobId,name:item.name||'Item',organizationCostItemId:item.id,quantity:item.qty||1,unitPrice:unitPrice,unitCost:unitCost,costCodeId:ccId,costTypeId:ctId,unitId:'22PCgcVGSyr7',description:'Finish: '+finName+(item.room?' | Room: '+item.room:''),showDescription:true,showQuantity:true};
+      var itemArgs={jobId:jobId,name:item.name||'Item',organizationCostItemId:item.id,quantity:item.qty||1,unitPrice:unitPrice,unitCost:unitCost,costCodeId:ccId,costTypeId:ctId,unitId:'22PCgcVGSyr7',showDescription:true,showQuantity:true};
       if(targetGroupId)itemArgs.costGroupId=targetGroupId;
       try{
         await jtQ({createCostItem:{'$':itemArgs,createdCostItem:{id:{}}}});
         jl('\u2713 '+item.name,'ok');
       }catch(e){jl('\u26a0 '+item.name+': '+e.message,'err');}
+    }
+
+    // Push paint tier items separately — use Per Room unit and correct cost codes
+    for(var pi=0;pi<paintItems.length;pi++){
+      var pitem=paintItems[pi];
+      var paintGrpId=null;
+      // Find the paint group under the room group
+      try{
+        var pArgs={jobId:jobId,name:pitem.name,organizationCostItemId:pitem.id,
+          quantity:1,unitPrice:pitem.price,unitCost:pitem.cost,
+          costCodeId:pitem.laborCode==='22PV6dcbCjTD'?'22PV6dcbCjTD':'22PCgcVGSyrf',
+          costTypeId:pitem.laborCode==='22PV6dcbCjTD'?'22PCgcVGSyrq':'22PCgcVGSyrr',
+          unitId:'22PVGnxPBwm3',showDescription:false,showQuantity:true};
+        if(pitem.groupId)pArgs.costGroupId=pitem.groupId;
+        await jtQ({createCostItem:{'$':pArgs,createdCostItem:{id:{}}}});
+        jl('\u2713 '+pitem.name,'ok');
+      }catch(e){jl('\u26a0 '+pitem.name+': '+e.message,'err');}
     }
 
     // 9. AGENT
