@@ -1234,8 +1234,8 @@ var HINGE_BY_FIN = [
 ];
 
 // Get the correct passage item for current house settings
-function getHWPassage(){ return (HW_MAP[S.hwStyle]&&HW_MAP[S.hwStyle][S.hwBrand]) ? HW_MAP[S.hwStyle][S.hwBrand].passage[S.finish] : null; }
-function getHWPrivacy(){ return (HW_MAP[S.hwStyle]&&HW_MAP[S.hwStyle][S.hwBrand]) ? HW_MAP[S.hwStyle][S.hwBrand].privacy[S.finish] : null; }
+function getHWPassage(){ var m=(HW_MAP[S.hwStyle]&&HW_MAP[S.hwStyle][S.hwBrand]); return (m&&m.passage&&m.passage[S.finish])||null; }
+function getHWPrivacy(){ var m=(HW_MAP[S.hwStyle]&&HW_MAP[S.hwStyle][S.hwBrand]); return (m&&m.privacy&&m.privacy[S.finish])||null; }
 function getHWHinge(){   return HINGE_BY_FIN[S.finish] || HINGE_BY_FIN[0]; }
 
 function setHWStyle(style){
@@ -1342,7 +1342,8 @@ function setValve(rid,k,el){
 }
 function updSum(rid){
   var r=getR(rid);if(!r)return;
-  var d=r.d,p=[];
+  var d=r.d||(r.d={});
+  var p=[];
   function hasItems(arr){return arr&&arr.length>0;}
   if(d.paintTier)p.push('T'+d.paintTier+' Paint');
   if(hasItems(d.passageKnob)||hasItems(d.passageLever)||hasItems(d.privacyKnob)||hasItems(d.privacyLever)||hasItems(d.entry))p.push('Door HW');
@@ -1525,7 +1526,7 @@ function bldRoom(r){
 }
 
 function bldRoomBody(r){
-  var d=r.d;
+  var d=r.d||(r.d={});
   var fin=S.finish;
   var s='';
 
