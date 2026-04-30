@@ -2548,7 +2548,13 @@ async function uploadReportToJT(jobId, htmlContent, suffix){
 
 
 // ═══════ MODULE-LEVEL GLOBALS (used by uploadReportToJT and other top-level helpers) ═══════
-var GK='22TN7BjW2xxVRX5wKXnkeRKu9TUwacQyKw';
+// Grant key is stored in this browser's localStorage, NOT in this file. To reset the saved key:
+// open DevTools (F12) -> Console tab -> run: localStorage.removeItem('lmc_jt_grant_key'); location.reload();
+var GK = localStorage.getItem('lmc_jt_grant_key') || '';
+if (!GK) {
+  GK = (prompt('Enter JobTread Grant Key (saved to this browser only -- never uploaded):') || '').trim();
+  if (GK) localStorage.setItem('lmc_jt_grant_key', GK);
+}
 var ORG='22PCgcUejSvr';
 var JT='https://api.jobtread.com/pave';
 async function jtQ(q){
