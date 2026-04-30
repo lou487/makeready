@@ -1167,6 +1167,11 @@ function adjR(rid,key,d){
   var el=document.getElementById('qv-'+rid+'-'+key);
   if(el)el.textContent=r.d[key];
   updSum(rid);
+  // Valve counts: re-render the room body so the conditional trim picker shows/hides
+  if(key && key.indexOf('valveCount_')===0){
+    var body=document.getElementById('rbody-'+rid);
+    if(body){body.innerHTML=bldRoomBody(r);if(r.photos&&r.photos.length)renderPhotos(rid);}
+  }
 }
 function adjH(id,d){
   HW[id]=Math.max(0,(HW[id]||1)+d);
@@ -1176,10 +1181,13 @@ function adjH(id,d){
 function showHide(id,show){var el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
 
 /* ═══════════ SELBOX — collapsible multi-select with quantity ═══════════ */
-function selBox(rid,key,label,icon,options){
+function selBox(rid,key,label,icon,options,stateKey){
+  // stateKey lets multiple selBoxes share a data key but have independent open/filter state
+  // (used for the per-valve trim pickers in bathrooms — all write to d.showerTrim but stay independent)
+  stateKey = stateKey || key;
   var r=getR(rid);
   var sels=(r.d&&r.d[key])||[];
-  var openKey=rid+'__'+key;
+  var openKey=rid+'__'+stateKey;
   var isOpen=window.__selboxOpen&&window.__selboxOpen[openKey]===true;
   var totalQty=sels.reduce(function(a,s){return a+(s.qty||0);},0);
   var summary=sels.length===0?'Tap to add':sels.length+' item'+(sels.length>1?'s':'')+' / '+totalQty+' total';
@@ -1202,8 +1210,8 @@ function selBox(rid,key,label,icon,options){
   // Pick hero image: first option that has an IMG entry
   var heroOpt = options.find(function(o){return IMG[o.id];});
   var heroUrl = heroOpt ? IMG[heroOpt.id] : null;
-  var html='<div class="selbox'+(isOpen?' open selbox-pending':'')+'" id="sb-'+rid+'-'+key+'">';
-  html+='<div class="selbox-hdr" onclick="selboxToggle(\''+rid+'\',\''+key+'\')">';
+  var html='<div class="selbox'+(isOpen?' open selbox-pending':'')+'" id="sb-'+rid+'-'+stateKey+'">';
+  html+='<div class="selbox-hdr" onclick="selboxToggle(\''+rid+'\',\''+stateKey+'\')">';
   html+='<div class="selbox-hdr-imgwrap">';
   html+=heroUrl?'<img src="'+heroUrl+'" alt="" loading="lazy">':'<span class="ph">'+(icon||'📦')+'</span>';
   if(totalQty>0)html+='<span class="selbox-hdr-count">'+totalQty+'</span>';
@@ -1236,18 +1244,18 @@ function selBox(rid,key,label,icon,options){
   // Action button row (always visible) — opens/closes options panel
   html+='<div class="selbox-actions">';
   if(isOpen){
-    html+='<button class="selbox-done-btn" onclick="selboxToggle(\''+rid+'\',\''+key+'\')">Done</button>';
+    html+='<button class="selbox-done-btn" onclick="selboxToggle(\''+rid+'\',\''+stateKey+'\')">Done</button>';
   }else{
-    html+='<button class="selbox-add-btn" onclick="selboxToggle(\''+rid+'\',\''+key+'\')">'+(sels.length>0?'+ Add Another':'+ Add')+'</button>';
+    html+='<button class="selbox-add-btn" onclick="selboxToggle(\''+rid+'\',\''+stateKey+'\')">'+(sels.length>0?'+ Add Another':'+ Add')+'</button>';
   }
   html+='</div>';
   // Options panel (only renders when open)
   html+='<div class="selbox-options">';
   if(hasFins){
     html+='<div class="selbox-filter">';
-    html+='<button class="selbox-fchip'+(fin==='all'?' on':'')+'" onclick="selboxFilter(\''+rid+'\',\''+key+'\',\'all\')">All</button>';
+    html+='<button class="selbox-fchip'+(fin==='all'?' on':'')+'" onclick="selboxFilter(\''+rid+'\',\''+stateKey+'\',\'all\')">All</button>';
     finList.forEach(function(f){
-      html+='<button class="selbox-fchip'+(fin===f?' on':'')+'" onclick="selboxFilter(\''+rid+'\',\''+key+'\',\''+f+'\')">'+f+'</button>';
+      html+='<button class="selbox-fchip'+(fin===f?' on':'')+'" onclick="selboxFilter(\''+rid+'\',\''+stateKey+'\',\''+f+'\')">'+f+'</button>';
     });
     html+='</div>';
   }
@@ -1971,7 +1979,7 @@ function bldRoomBody(r){
         var compatibleTrims = SHOWER_TRIM.filter(filterFn);
         if(compatibleTrims.length){
           s+='<div style="margin:0 0 10px 14px;border-left:3px solid var(--red);padding-left:10px;">';
-          s+=selBox(r.id,'showerTrim',v.n+' Trim Kit','🎚️',compatibleTrims);
+          s+=selBox(r.id,'showerTrim',v.n+' Trim Kit','🎚️',compatibleTrims,'showerTrim_'+v.k);
           s+='</div>';
         }
       }
