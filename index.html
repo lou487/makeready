@@ -346,6 +346,19 @@ textarea{resize:none;min-height:56px;}
 .selbox-opt-price{font-size:11px;color:var(--red);font-weight:700;padding:0 6px 8px;}
 .selbox-opt-add{display:none;}
 .selbox-empty{padding:12px;text-align:center;font-size:11px;color:var(--muted);font-style:italic;grid-column:1/-1;}
+
+/* qRow with optional product thumbnail */
+.qrow{display:flex;align-items:center;gap:0;}
+.qrow-img,.qrow-img-ph{width:44px;height:44px;flex-shrink:0;background:#f7f6f4;border:1px solid #ebe7e0;border-radius:5px;margin-right:10px;}
+.qrow-img:not(.qrow-img-ph){object-fit:contain;padding:3px;}
+.qrow-img-ph{display:flex;align-items:center;justify-content:center;font-size:20px;color:#c5beb4;}
+
+/* Door brand/style cards on Client tab — now with hero photo */
+.hw-brand-card{display:flex !important;gap:12px;align-items:center;padding:10px 12px !important;text-align:left !important;cursor:pointer;}
+.hw-brand-img,.hw-brand-img-ph{width:60px;height:60px;flex-shrink:0;background:#f7f6f4;border:1px solid #ebe7e0;border-radius:6px;}
+.hw-brand-img:not(.hw-brand-img-ph){object-fit:contain;padding:5px;}
+.hw-brand-img-ph{display:flex;align-items:center;justify-content:center;font-size:28px;color:#c5beb4;}
+.hw-brand-info{flex:1;min-width:0;}
 </style>
 </head>
 <body>
@@ -1110,9 +1123,13 @@ function mkPcard(item,selId,groupSel,rid){
 }
 
 
-function qRow(rid,key,lbl,sub){
+function qRow(rid,key,lbl,sub,itemId){
   var r=getR(rid),v=(r.d&&r.d[key])||0;
-  return '<div class="qrow"><div class="qlbl">'+lbl+(sub?'<span class="qlbl-sub">'+sub+'</span>':'')+'</div>'
+  var imgUrl = itemId ? IMG[itemId] : null;
+  var imgHtml = imgUrl
+    ? '<img class="qrow-img" src="'+imgUrl+'" alt="" loading="lazy">'
+    : (itemId ? '<div class="qrow-img qrow-img-ph">📦</div>' : '');
+  return '<div class="qrow">'+imgHtml+'<div class="qlbl">'+lbl+(sub?'<span class="qlbl-sub">'+sub+'</span>':'')+'</div>'
     +'<div class="qctrl"><button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\''+',-1)">−</button>'
     +'<div class="qval" id="qv-'+rid+'-'+key+'">'+v+'</div>'
     +'<button class="qbtn" onclick="adjR(\''+rid+'\',\''+key+'\',1)">+</button></div></div>';
@@ -1506,10 +1523,19 @@ function renderBrandGrid(){
   if(!brands.find(function(b){return b.key===S.hwBrand;})) S.hwBrand = brands.length ? brands[0].key : '';
   grid.innerHTML = brands.map(function(b){
     var active = b.key===S.hwBrand;
-    return '<div class="fin-opt'+(active?' on':'')+'" onclick="setHWBrand(\''+b.key+'\')" style="text-align:left;padding:10px 12px;">'
-      +'<div class="fin-name" style="font-size:13px;">'+b.label+'</div>'
-      +'<div class="fin-sub">'+b.sub+'</div>'
-      +'</div>';
+    // Hero image: representative passage item at current finish for this style+brand
+    var map = HW_MAP[S.hwStyle] && HW_MAP[S.hwStyle][b.key];
+    var rep = map && map.passage && (map.passage[S.finish] || map.passage[0]);
+    var heroUrl = rep && IMG[rep.id];
+    var img = heroUrl
+      ? '<img class="hw-brand-img" src="'+heroUrl+'" alt="" loading="lazy">'
+      : '<div class="hw-brand-img hw-brand-img-ph">📦</div>';
+    return '<div class="fin-opt hw-brand-card'+(active?' on':'')+'" onclick="setHWBrand(\''+b.key+'\')">'
+      + img
+      + '<div class="hw-brand-info">'
+      + '<div class="fin-name">'+b.label+'</div>'
+      + '<div class="fin-sub">'+b.sub+'</div>'
+      + '</div></div>';
   }).join('');
 }
 
@@ -1900,13 +1926,13 @@ function bldRoomBody(r){
     s+=selBox(r.id,'robeHook','Additional Robe Hook','🪝',ROBE_HOOK);
 
     s+='<div class="sh">🔧 Plumbing Trim & Components</div>';
-    s+=qRow(r.id,'angleStopQty','Faucet Angle Stops','3/8" comp shutoff valves');
-    s+=qRow(r.id,'toiletAngleQty','Toilet Angle Stops','7/8" ballcock shutoff valves');
-    s+=qRow(r.id,'supplyLineQty','Faucet Supply Lines','Braided faucet supply lines');
-    s+=qRow(r.id,'toiletSupplyQty','Toilet Supply Lines','Toilet fill supply lines');
-    s+=qRow(r.id,'ptrapQty','P-Traps','Under vanity sink — double vanity = 2');
-    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','Pipe cover rings');
-    s+=qRow(r.id,'popUpDrainQty','Pop-Up Drain Replacements','Bathroom sink drain assembly');
+    s+=qRow(r.id,'angleStopQty','Faucet Angle Stops','3/8" comp shutoff valves',PLB.angleStop.id);
+    s+=qRow(r.id,'toiletAngleQty','Toilet Angle Stops','7/8" ballcock shutoff valves',PLB.toiletAngle.id);
+    s+=qRow(r.id,'supplyLineQty','Faucet Supply Lines','Braided faucet supply lines',PLB.supplyLine.id);
+    s+=qRow(r.id,'toiletSupplyQty','Toilet Supply Lines','Toilet fill supply lines',PLB.supplyLine.id);
+    s+=qRow(r.id,'ptrapQty','P-Traps','Under vanity sink — double vanity = 2',PLB.ptrap.id);
+    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','Pipe cover rings',PLB.escutcheon.id);
+    s+=qRow(r.id,'popUpDrainQty','Pop-Up Drain Replacements','Bathroom sink drain assembly',PLB.popUpDrain.id);
     s+=qRow(r.id,'recessedTPQty','Recessed TP Holders','In-wall recessed style');
 
     // VALVE COUNT — each valve type gets its own quantity
@@ -1940,29 +1966,29 @@ function bldRoomBody(r){
       +'<option value="measure"'+(d.holeSpacing==='measure'?' selected':'')+'>⚠️ Needs measuring</option>'
       +'</select></div>';
     s+='<div class="sh">🚰 Kitchen Plumbing</div>';
-    s+=qRow(r.id,'angleStopQty','Faucet Angle Stops','Under-sink shutoff');
-    s+=qRow(r.id,'supplyLineQty','Supply Lines','Braided');
-    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','');
-    s+=qRow(r.id,'sinkStrainerQty','Sink Strainers','Single bowl=1, double=2');
-    s+=qRow(r.id,'snappyTrapQty','Snappy Trap Kits','For double-bowl sinks');
-    s+=qRow(r.id,'dishwasherQty','Dishwasher Lines','');
-    s+=qRow(r.id,'ptrapQty','P-Traps','Single-bowl sink option');
+    s+=qRow(r.id,'angleStopQty','Faucet Angle Stops','Under-sink shutoff',PLB.angleStop.id);
+    s+=qRow(r.id,'supplyLineQty','Supply Lines','Braided',PLB.supplyLine.id);
+    s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','',PLB.escutcheon.id);
+    s+=qRow(r.id,'sinkStrainerQty','Sink Strainers','Single bowl=1, double=2',PLB.sinkStrainer.id);
+    s+=qRow(r.id,'snappyTrapQty','Snappy Trap Kits','For double-bowl sinks',PLB.snappyTrap.id);
+    s+=qRow(r.id,'dishwasherQty','Dishwasher Lines','',PLB.dishwasher.id);
+    s+=qRow(r.id,'ptrapQty','P-Traps','Single-bowl sink option',PLB.ptrap.id);
   }
 
   // ELECTRICAL DEVICES (all rooms — uses ELEC arrays with cup_/plt_/dev_/std_ keys)
   s+='<div class="sh">⚡ Electrical Devices</div>';
   s+='<div class="a-info" style="font-size:10px;">Count quantity of each device or plate type for this room.</div>';
   ELEC.coverUp.forEach(function(item){
-    s+=qRow(r.id,'cup_'+item.id,'Cover-Up: '+item.name,'$'+item.price.toFixed(2)+' ea');
+    s+=qRow(r.id,'cup_'+item.id,'Cover-Up: '+item.name,'$'+item.price.toFixed(2)+' ea',item.id);
   });
   ELEC.plates.forEach(function(item){
-    s+=qRow(r.id,'plt_'+item.id,'Plate: '+item.name,'$'+item.price.toFixed(2)+' ea');
+    s+=qRow(r.id,'plt_'+item.id,'Plate: '+item.name,'$'+item.price.toFixed(2)+' ea',item.id);
   });
   ELEC.decora.forEach(function(item){
-    s+=qRow(r.id,'dev_'+item.id,'Device: '+item.name,'$'+item.price.toFixed(2)+' ea');
+    s+=qRow(r.id,'dev_'+item.id,'Device: '+item.name,'$'+item.price.toFixed(2)+' ea',item.id);
   });
   ELEC.standard.forEach(function(item){
-    s+=qRow(r.id,'std_'+item.id,'Std: '+item.name,'$'+item.price.toFixed(2)+' ea');
+    s+=qRow(r.id,'std_'+item.id,'Std: '+item.name,'$'+item.price.toFixed(2)+' ea',item.id);
   });
 
   // WALL PATCH
