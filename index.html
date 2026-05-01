@@ -2552,6 +2552,10 @@ async function generateFieldCrewDoc(){
   h+='.task-qty{background:#fff5f5;color:'+RED+';border:1px solid #ffcdd2;padding:1px 7px;border-radius:3px;font-weight:700;font-size:11px;margin-right:6px;white-space:nowrap;}';
   h+='.task-name{font-weight:600;font-size:13px;color:#1a1a1a;}';
   h+='.notes-bar{background:#fff8e1;border-left:3px solid #f9a825;padding:8px 14px;font-size:12px;color:#5d4037;font-style:italic;margin-top:4px;}';
+  h+='.room-photos{padding:10px 14px;background:#fafaf8;border-top:1px solid #f0f0f0;}';
+  h+='.room-photos-label{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}';
+  h+='.room-photos-grid{display:flex;flex-wrap:wrap;gap:6px;}';
+  h+='.room-photo-thumb{width:140px;height:105px;object-fit:cover;border:1px solid #ddd;border-radius:4px;}';
   h+='.warn-bar{background:#fff5f5;border-left:3px solid '+RED+';padding:8px 14px;font-size:12px;color:#5d2828;margin-bottom:10px;}';
   h+='.signoff-table{width:100%;border-collapse:collapse;border:2px dashed #aaa;border-radius:4px;margin-top:20px;}';
   h+='.signoff-table td{padding:16px 18px;vertical-align:bottom;border-right:1px dashed #ccc;}';
@@ -2712,7 +2716,19 @@ async function generateFieldCrewDoc(){
       if(d.notes&&d.notes.trim()){
         h+='<div class="notes-bar"><strong>Notes:</strong> '+d.notes+'</div>';
       }
-      
+
+      // Site photos so the field crew can see the actual conditions
+      if(r.photos&&r.photos.length>0){
+        h+='<div class="room-photos">';
+        h+='<div class="room-photos-label">📷 Site Photos ('+r.photos.length+')</div>';
+        h+='<div class="room-photos-grid">';
+        r.photos.forEach(function(p){
+          var ps=p.dataUrl||(p.b64?'data:image/jpeg;base64,'+p.b64:'');
+          if(ps)h+='<img class="room-photo-thumb" src="'+ps+'">';
+        });
+        h+='</div></div>';
+      }
+
       h+='</div>';
     });
   }
