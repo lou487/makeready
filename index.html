@@ -393,8 +393,8 @@ textarea{resize:none;min-height:56px;}
     <div class="ctitle"><span class="ctitle-icon">👤</span>Seller / Owner</div>
     <div class="fg"><label class="lbl">Seller Name</label><input type="text" id="f-seller" placeholder="Full name"></div>
     <div class="row2">
-      <div class="fg"><label class="lbl">Phone</label><input type="tel" id="f-phone" placeholder="(707) 000-0000"></div>
-      <div class="fg"><label class="lbl">Email</label><input type="email" id="f-email" placeholder="seller@email.com"></div>
+      <div class="fg"><label class="lbl">Phone</label><input type="text" inputmode="tel" id="f-phone" placeholder="(707) 000-0000"></div>
+      <div class="fg"><label class="lbl">Email</label><input type="text" inputmode="email" id="f-email" placeholder="seller@email.com"></div>
     </div>
   </div>
 
@@ -403,8 +403,8 @@ textarea{resize:none;min-height:56px;}
     <div class="fg"><label class="lbl">Agent Name</label><input type="text" id="f-agent" placeholder="Agent full name"></div>
     <div class="fg"><label class="lbl">Brokerage</label><input type="text" id="f-brokerage" placeholder="Brokerage name"></div>
     <div class="row2">
-      <div class="fg"><label class="lbl">Agent Phone</label><input type="tel" id="f-agent-phone" placeholder="(707) 000-0000"></div>
-      <div class="fg"><label class="lbl">Agent Email</label><input type="email" id="f-agent-email" placeholder="agent@brokerage.com"></div>
+      <div class="fg"><label class="lbl">Agent Phone</label><input type="text" inputmode="tel" id="f-agent-phone" placeholder="(707) 000-0000"></div>
+      <div class="fg"><label class="lbl">Agent Email</label><input type="text" inputmode="email" id="f-agent-email" placeholder="agent@brokerage.com"></div>
     </div>
     <div class="fg"><label class="lbl">Target List Date</label><input type="date" id="f-listdate"></div>
   </div>
@@ -2880,8 +2880,22 @@ async function uploadReportToJT(jobId, htmlContent, suffix){
 
 
 // ═══════ MODULE-LEVEL GLOBALS (used by uploadReportToJT and other top-level helpers) ═══════
-// Grant key is stored in this browser's localStorage, NOT in this file. To reset the saved key:
-// open DevTools (F12) -> Console tab -> run: localStorage.removeItem('lmc_jt_grant_key'); location.reload();
+// Grant key — stored in this browser's localStorage, NOT in this file. Three ways to set it:
+//   1) Visit ?key=<your-key> in the URL once → auto-saved, key stripped from URL after.
+//   2) Type/paste it into the prompt that appears if no key is saved yet.
+//   3) Reset with: localStorage.removeItem('lmc_jt_grant_key'); location.reload(); in DevTools.
+(function(){
+  try {
+    var p = new URLSearchParams(window.location.search);
+    var urlKey = p.get('key');
+    if (urlKey && urlKey.length > 20) {
+      localStorage.setItem('lmc_jt_grant_key', urlKey.trim());
+      p.delete('key');
+      var qs = p.toString();
+      window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash);
+    }
+  } catch(e){}
+})();
 var GK = localStorage.getItem('lmc_jt_grant_key') || '';
 if (!GK) {
   GK = (prompt('Enter JobTread Grant Key (saved to this browser only -- never uploaded):') || '').trim();
