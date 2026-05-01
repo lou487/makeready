@@ -1982,6 +1982,19 @@ function bldRoomBody(r){
           s+=selBox(r.id,'showerTrim',v.n+' Trim Kit','🎚️',compatibleTrims,'showerTrim_'+v.k);
           s+='</div>';
         }
+        // Notes + photo capture for valves needing field documentation (unknown brand, not upgradeable).
+        // "Paint the existing" is the contingency when no trim swap is possible — needs a photo + note.
+        if(v.k==='unknown'||v.k==='not-upgradeable'){
+          var noteKey='valveNote_'+v.k;
+          var notes=(d[noteKey]||'').replace(/"/g,'&quot;');
+          s+='<div style="margin:0 0 12px 14px;border-left:3px solid #888;padding:8px 10px;background:#fafaf8;border-radius:4px;">';
+          s+='<div style="font-size:11px;font-weight:600;color:#666;margin-bottom:6px;">📝 Document this valve — paint contingency</div>';
+          s+='<textarea placeholder="Brand/model if visible, condition, paint plan, anything the field crew needs to know..." style="width:100%;font-size:11px;padding:6px;min-height:50px;border:1px solid #ddd;border-radius:4px;font-family:var(--sans);" onchange="setRV(\''+r.id+'\',\''+noteKey+'\',this.value)">'+notes+'</textarea>';
+          s+='<label style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px dashed var(--red);color:var(--red);font-size:11px;font-weight:600;padding:6px 12px;border-radius:5px;margin-top:8px;cursor:pointer;">';
+          s+='<input type="file" accept="image/*" capture="environment" style="display:none" onchange="capturePhoto(\''+r.id+'\',this)">';
+          s+='📷 Add Photo of '+v.n+'</label>';
+          s+='</div>';
+        }
       }
     });
   }
