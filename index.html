@@ -1822,6 +1822,7 @@ function bldRoom(r){
 function bldRoomBody(r){
   var d=r.d||(r.d={});
   var fin=S.finish;
+  var finNames=['Satin Nickel','Matte Black','Venetian Bronze'];
   var s='';
 
   // PAINT
@@ -1841,7 +1842,6 @@ function bldRoomBody(r){
   var hwPass = getHWPassage();
   var hwPriv = getHWPrivacy();
   var hwHinge = getHWHinge();
-  var finNames = ['Satin Nickel','Matte Black','Venetian Bronze'];
   var styleLabel = S.hwStyle==='knob'?'Knob':'Lever';
   var brandLabel = (HW_BRANDS[S.hwStyle]||[]).find(function(b){return b.key===S.hwBrand;});
   brandLabel = brandLabel ? brandLabel.label : '';
