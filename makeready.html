@@ -393,6 +393,7 @@ textarea{resize:none;min-height:56px;}
     <button class="rchip" onclick="addRoom('laundry','🧺','Laundry')"><span>🧺</span>Laundry</button>
     <button class="rchip" onclick="addRoom('office','💼','Office')"><span>💼</span>Office</button>
     <button class="rchip" onclick="addRoom('garage','🚗','Garage')"><span>🚗</span>Garage</button>
+    <button class="rchip" onclick="addRoom('entryway','🚪','Entryway')"><span>🚪</span>Entryway</button>
   </div>
   <div id="room-list"></div>
 </div>
@@ -457,11 +458,50 @@ var DOOR_ENTRY=[
   {id:'22PVPTFTuMJp',name:'Kwikset Balboa VB',price:39.70,fin:'Venetian Bronze'}
 ];
 
-// ── LIGHT FIXTURES (flush mount by finish) ──
+// ── INDOOR DOOR HARDWARE ──
+var DOOR_HINGE=[
+  {id:'22PVPfT9Hv85',name:'Hinge 3-Pack Satin Nickel',price:16.50,fin:'Satin Nickel'},
+  {id:'22PVPfgVEfSx',name:'Hinge 3-Pack Matte Black',price:15.64,fin:'Matte Black'},
+  {id:'22PVPftVVnn6',name:'Hinge 3-Pack Oil-Rubbed Bronze',price:17.30,fin:'Oil-Rubbed Bronze'}
+];
+// Door stops by finish (0=SN, 1=MB, 2=VB/ORB) — sourced from LMC Selections - Door Hardware template
+var DOOR_STOP_RIGID=[
+  {id:'22PWqm425RgU',name:'Everbilt (5-Pack) Satin Nickel Solid Door Stop',price:4.49,fin:'Satin Nickel'},
+  {id:'22PWqm425RgW',name:'Everbilt Solid Door Stop — Matte Black 28207',price:5.79,fin:'Matte Black'},
+  {id:'22PWqm425RgY',name:'Everbilt Oil-Rubbed Bronze Solid Door Stop',price:5.39,fin:'Oil-Rubbed Bronze'}
+];
+var DOOR_STOP_HINGE=[
+  {id:'22PWqm425RgM',name:'Everbilt Satin Nickel Hinge Pin Door Stop',price:6.27,fin:'Satin Nickel'},
+  {id:'22PWqm425RgP',name:'Everbilt Matte Black Hinge Pin Door Stop',price:6.27,fin:'Matte Black'},
+  {id:'22PWqm425RgR',name:'Everbilt Oil-Rubbed Bronze Hinge Pin Door Stop',price:5.39,fin:'Oil-Rubbed Bronze'}
+];
+
+// ── LIGHT FIXTURES (flush mount by finish: 0=SN, 1=MB, 2=VB/ORB) ──
 var FLUSH=[
-  [{id:'22PVPuX7beu7',name:'Hampton Bay Flaxmere 12" BN',price:39.33},{id:'22PVPxpDcvV4',name:'14" BN LED Flush Mount',price:64.94}],
-  [{id:'22PVPuX7beu8',name:'Hampton Bay Flaxmere 12" MB 2-Pack',price:70.83},{id:'22PVPxpDcvV5',name:'Flaxmere 14" MB',price:55.07}],
-  [{id:'22PVPuX7beu9',name:'Hampton Bay Chilton 15" ORB',price:62.96}]
+  // Satin Nickel / Brushed Nickel
+  [
+    {id:'22PVPnSWSU4k',name:'Hampton Bay Flaxmere 12" BN 5CCT',price:39.33},
+    {id:'22PVPx2mbjgr',name:'14" BN Dimmable LED Selectable',price:64.94},
+    {id:'22PPJrQWqYty',name:'Comm Elec 11" BN Frosted Glass 2-Pack',price:16.06},
+    {id:'22PPJppNFUuX',name:'Stetson 11" BN 5CCT',price:42.83},
+    {id:'22PPJsjjRMfZ',name:'Calloway 19" BN',price:114.24},
+    {id:'22PPJqU6sCF3',name:'Chilton 15" BN',price:65.67},
+    {id:'22PPJmCzNZRt',name:'Flaxmere 12" BN 3CCT 2-Pack',price:70.83}
+  ],
+  // Matte Black
+  [
+    {id:'22PPJmpcW8ec',name:'Flaxmere 12" MB 3CCT 2-Pack',price:70.83},
+    {id:'22PVPp8Eewuu',name:'Flaxmere 12" MB 5CCT 2-Pack',price:70.83},
+    {id:'22PVPxJ8tScf',name:'Flaxmere 14" MB 3CCT',price:55.07},
+    {id:'22PVPzi7azZH',name:'Southbourne 15.5" MB 3-Light Semi-Flush',price:141.70},
+    {id:'22PPJt8wN4Y4',name:'Calloway 19" MB',price:114.24}
+  ],
+  // Venetian Bronze / Oil-Rubbed Bronze
+  [
+    {id:'22PPJqjvCHFH',name:'Chilton 15" ORB',price:62.96},
+    {id:'22PPJrvMXvNb',name:'Comm Elec 11" ORB 2-Pack',price:28.91},
+    {id:'22PPJnPVaPk4',name:'Stetson 11" Satin Bronze',price:51.39}
+  ]
 ];
 // Decorative
 var DECO=[
@@ -471,13 +511,38 @@ var DECO=[
   {id:'22PVQ5KgFvz2',name:'Hastings Industrial Drum ORB',price:157.46}
 ];
 // Can retrofit
-var CAN6={id:'22PVPuX7beuA',name:'HALO LT 5/6" LED Retrofit',price:20.43};
+var CAN6={id:'22PVPuX7beuA',name:'HALO LT 6" LED Retrofit',price:20.43};
 var CAN4={id:'22PVPuX7beuB',name:'EnviroLite 4" LED Retrofit',price:14.24};
-// Vanity lights by finish
+// Tub spout options (Moen 3994 with diverter)
+var TUB_SPOUT=[
+  {id:'22PWDQN3HeQh',name:'Moen Tub Spout with Diverter — BN',price:28.00,fin:'Brushed Nickel'},
+  {id:'22PWDQNr9Rwg',name:'Moen Tub Spout with Diverter — MB',price:28.00,fin:'Matte Black'},
+  {id:'22PWDQPczPhK',name:'Moen Tub Spout with Diverter — ORB',price:28.00,fin:'Oil-Rubbed Bronze'}
+];
+// Shower drain covers (Moen M5103) — provisional pricing, verify before proposal
+var SHOWER_DRAIN=[
+  {id:'22PWDQKQTwbj',name:'Moen 4" Square Shower Drain — BN',price:35.00,fin:'Brushed Nickel'},
+  {id:'22PWDQLBGgMZ',name:'Moen 4" Square Shower Drain — MB',price:35.00,fin:'Matte Black'},
+  {id:'22PWDQM6zGJ9',name:'Moen 4" Square Shower Drain — ORB',price:35.00,fin:'Oil-Rubbed Bronze'}
+];
+// Vanity lights by finish (0=SN, 1=MB, 2=VB/ORB)
 var VANITY=[
-  [{id:'22PVPuX7beuC',name:'Ashhurst 3-Light BN',price:89.73},{id:'22PVPxpDcvV6',name:'Marsden 4-Light BN',price:141.70}],
-  [{id:'22PVPuX7beuD',name:'Eastburn 3-Light MB',price:110.20}],
-  [{id:'22PVPuX7beuE',name:'Ashhurst 3-Light ORB',price:89.73},{id:'22PVPxpDcvV7',name:'Ashhurst 4-Light ORB',price:110.20}]
+  // Satin Nickel / Brushed Nickel
+  [
+    {id:'22PVPsPUbFQN',name:'Hampton Bay Ashhurst 3-Light BN',price:89.73},
+    {id:'22PVPxWfVryJ',name:'Hampton Bay Marsden 4-Light BN',price:141.70}
+  ],
+  // Matte Black
+  [
+    {id:'22PVPsdfCxbA',name:'Hampton Bay Eastburn 3-Light MB',price:110.20},
+    {id:'22PTpwk2aS8S',name:'Vaxcel Park Ridge 2-Light MB',price:94.49},
+    {id:'22PTpwzQCy8w',name:'Vaxcel Park Ridge 4-Light MB',price:173.23}
+  ],
+  // Venetian Bronze / Oil-Rubbed Bronze
+  [
+    {id:'22PVPt8M27q8',name:'Hampton Bay Ashhurst 3-Light ORB',price:89.73},
+    {id:'22PVPxkm4KT8',name:'Hampton Bay Ashhurst 4-Light ORB',price:110.20}
+  ]
 ];
 // Bulbs
 var BULBS=[
@@ -511,7 +576,9 @@ var ELEC={
     {id:'22PVQBeygdHx',name:'2-Gang Rocker Switch Plate',price:3.07},
     {id:'22PVP8cdJrAY',name:'3-Gang Rocker/Toggle Plate',price:5.90},
     {id:'22PW9kLihCRA',name:'Phone Jack Plate',price:6.17},
-    {id:'22PPFXrjWyXi',name:'Coaxial Cable Plate',price:6.04}
+    {id:'22PPFXrjWyXi',name:'Coaxial Cable Plate',price:6.04},
+    {id:'22PWH4JptF5a',name:'4-Gang Decora Plate',price:8.50},
+    {id:'22PWH4KY3P8T',name:'4-Gang Toggle Plate',price:8.50}
   ],
   decora:[
     {id:'22PNUVgrq9cs',name:'Leviton Decora 15A TR Outlet',price:4.93},
@@ -532,15 +599,21 @@ var BATH_HW=[
   {id:'22PVTPwC2tQ3',name:'MOEN Genta 3-pc Set',price:133.84,fin:'Matte Black'},
   {id:'22PVTPwC2tQ4',name:'Delta Porter 4-pc Set',price:126.31,fin:'Oil Rubbed Bronze'}
 ];
+// ── ROBE HOOKS (separate purchase) ──
+var ROBE_HOOK=[
+  {id:'22PVTPwC2tQ5',name:'MOEN Banbury Double Robe Hook',price:36.20,fin:'Brushed Nickel'},
+  {id:'22PVTPwC2tQ6',name:'MOEN Genta Single Robe Hook',price:37.77,fin:'Matte Black'},
+  {id:'22PVTQLvH8sN',name:'Delta Porter Wall Mount Robe Hook',price:40.91,fin:'Oil Rubbed Bronze'}
+];
 var BATH_FAU=[
   {id:'22PVTXhdLTfs',name:'MOEN Banbury Centerset',price:124.43,fin:'Brushed Nickel'},
   {id:'22PVTXhdLTft',name:'MOEN Banbury Centerset',price:124.43,fin:'Matte Black'},
   {id:'22PVTXwmntYs',name:'MOEN Banbury Centerset',price:155.93,fin:'Mediterranean Bronze'}
 ];
 var SHOWER_H=[
-  {id:'22PVTYN2tzs9',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Brushed Nickel'},
-  {id:'22PVTYf7Rjhf',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Matte Black'},
-  {id:'22PVTYwYVTRS',name:'MOEN Attract Magnetix Dual Shower',price:140.18,fin:'Mediterranean Bronze'}
+  {id:'22PVTYN2tzs9',name:'MOEN Attract Magnetix — Brushed Nickel',price:140.18,fin:'Brushed Nickel'},
+  {id:'22PVTYf7Rjhf',name:'MOEN Attract Magnetix — Matte Black',price:140.18,fin:'Matte Black'},
+  {id:'22PVTYwYVTRS',name:'MOEN Attract Magnetix — Med. Bronze',price:140.18,fin:'Mediterranean Bronze'}
 ];
 var TOILET_S=[
   {id:'22PVTZAEcb6m',name:'BEMIS Weston Soft Close Elongated',price:69.27},
@@ -605,7 +678,7 @@ var VALVES=[
 
 // ═══════════ HELPERS ═══════════
 
-var DESC={"22PVPKTZB6A7": "Kwikset Cove knob - Satin Nickel, hall/closet passage, Microban antimicrobial", "22PVPLmRRLGA": "Kwikset Balboa lever - Satin Nickel, hall/closet passage", "22PVPTFTuMJp": "Kwikset Tustin lever - Venetian Bronze, hall/closet passage", "22PPFiRxVCMd": "Kwikset Cove knob - Satin Nickel, bed/bath privacy with lock", "22PPJPLR8AAu": "Kwikset Cove knob - Matte Black, bed/bath privacy with lock", "22PPFiRvqpC8": "Polo knob - Venetian Bronze, bed/bath privacy with lock", "22PPFjNK2qMn": "Kwikset Balboa lever - Satin Nickel, bed/bath privacy with lock", "22PPJQicPsZU": "Kwikset Balboa lever - Matte Black, bed/bath privacy with lock", "22PVPuX7beu7": "Hampton Bay Flaxmere 12in - Brushed Nickel, 3-CCT LED flush mount", "22PVPuX7beu8": "Hampton Bay Flaxmere 12in - Matte Black, 3-CCT LED flush mount", "22PVPuX7beu9": "Hampton Bay Chilton 15in - Oil-Rubbed Bronze, adjustable CCT LED flush", "22PVPxpDcvV4": "Hampton Bay Flaxmere 14in - Brushed Nickel, selectable CCT LED flush", "22PVPxpDcvV5": "Hampton Bay Flaxmere 14in - Matte Black, selectable CCT LED flush", "22PVPuX7beuA": "HALO LT 5/6in retrofit kit - white baffle trim, 5-CCT, 750 lm", "22PVPuX7beuB": "EnviroLite 4in retrofit kit - white trim, daylight LED, slim profile", "22PVPuX7beuC": "Hampton Bay Ashhurst 3-light - Brushed Nickel, frosted glass vanity bar", "22PVPuX7beuD": "Hampton Bay Eastburn 3-light - Matte Black, clear glass, 22in vanity bar", "22PVPuX7beuE": "Hampton Bay Ashhurst 3-light - Oil-Rubbed Bronze, frosted glass vanity bar", "22PVPxpDcvV6": "Hampton Bay Marsden 4-light - Brushed Nickel, clear glass, 32.5in vanity bar", "22PVPxpDcvV7": "Hampton Bay Ashhurst 4-light - Oil-Rubbed Bronze, frosted glass, 32.75in", "22PVPyVmq8kS": "Hampton Bay Castleford 3-light - Oil-Rubbed Bronze chandelier, clear glass shades", "22PVPzxqgdYz": "Hampton Bay Southbourne 3-light - Matte Black farmhouse semi-flush, 15.5in", "22PVQ4skJPBQ": "Hampton Bay Moreland 5-light - Oil-Rubbed Bronze wagon wheel chandelier", "22PVQ5KgFvz2": "Hampton Bay Hastings 4-light - Oil-Rubbed Bronze vintage drum chandelier", "22PVPuX7beuF": "Feit A19 60W equiv - dimmable LED frosted, standard base E26", "22PVPuX7beuG": "Feit A19 60W equiv - filament clear glass, warm vintage look E26", "22PVQ4skJPBM": "Feit BA10 candelabra - 60W equiv filament, E12 base, chandelier/sconce", "22PVQ4skJPBN": "Feit G25 globe - 60W equiv filament clear, vanity/decorative E26", "22PVQ4skJPBP": "Feit G25 globe - 60W equiv filament white, vanity/decorative E26", "22PVTPwC2tQ2": "Moen Banbury 4-pc - Spot Resist Brushed Nickel: 24in bar, ring, TP holder, robe hook", "22PVTPwC2tQ3": "Moen Genta 3-pc - Matte Black: 24in towel bar, paper holder, towel ring", "22PVTPwC2tQ4": "Delta Porter 4-pc - Oil-Rubbed Bronze: 24in bar, ring, TP holder, towel hook", "22PVTXhdLTfs": "Moen Banbury faucet - Spot Resist Brushed Nickel, 4in centerset 2-handle, WaterSense, drain incl", "22PVTXhdLTft": "Moen Banbury faucet - Matte Black, 4in centerset 2-handle, WaterSense, drain included", "22PVTXwmntYs": "Moen Banbury faucet - Mediterranean Bronze, 4in centerset 2-handle, drain included", "22PVTYN2tzs9": "Moen Attract Magnetix - Brushed Nickel, 6-spray dual handheld+fixed, magnetic dock, 1.75 GPM", "22PVTYf7Rjhf": "Moen Attract Magnetix - Matte Black, 6-spray dual handheld+fixed, magnetic dock, 1.75 GPM", "22PVTYwYVTRS": "Moen Attract Magnetix - Mediterranean Bronze, 6-spray dual handheld+fixed, 1.75 GPM", "22PVTZAEcb6m": "BEMIS Weston - Elongated bowl, white, soft close, enameled wood, never loosens, chrome hinge", "22PVTZN7DzYg": "BEMIS Weston - Round bowl, white, soft close, enameled wood, never loosens, chrome hinge", "22PVWU72XDUt": "Franklin Brass Adjusta-Pull - Satin Nickel bar pull, adjustable 3 to 5in hole spacing", "22PVWU72XDUu": "Franklin Brass Adjusta-Pull - Matte Black bar pull, adjustable 3 to 5in hole spacing", "22PVWU72XDUv": "Franklin Brass Adjusta-Pull - Champagne Bronze bar pull, adjustable 3 to 5in hole spacing", "22PVVRMYQsFD": "Franklin Brass Fulton knob - Satin Nickel, 1-3/16in round cabinet knob", "22PVVRLi8q6Z": "Franklin Brass Fulton knob - Matte Black, 1-3/16in round cabinet knob", "22PMzpqhYMcA": "Franklin Brass knob - Champagne Bronze, 1-3/16in round cabinet knob", "22PLidsWNdYp": "SharkBite angle stop - 1/2in PTC x 7/8in ballcock x 12in, toilet water supply", "22PLictfFuRM": "SharkBite angle stop - 1/2in PTC x 3/8in compression quarter-turn, sink supply", "22PMzkaL2eTH": "BrassCraft supply line - 3/8in comp x 1/2in FIP x 30in, braided polymer faucet", "22PLihEi33Hz": "P-trap - 1-1/2in to 1-1/4in heavy duty plastic adjustable with reducing washer", "22PMzkaL2eTI": "Snappy Trap - 1-1/2in all-in-one drain kit for double bowl kitchen sink", "22PLihfEsfeL": "Escutcheon - 1/2in copper tube size flange, chrome-plated steel, small pipe cover", "22PVVRMCQsFA": "Escutcheon - 1-1/2in x 3in chrome-plated steel low-pattern flange, large pipe cover", "22PVScAuHEv7": "Floor register - 4x10 white steel, 2-way adjustable damper", "22PVSdyhK8Te": "Floor register - 4x8 white steel, 2-way adjustable (Everbilt)", "22PVSdyhK8Tg": "Floor register - 2x10 white steel, 2-way adjustable (Everbilt)", "22PVSdyhKVN2": "Floor register - 2x12 white steel, 2-way adjustable (Everbilt)", "22PVSdyhKVN4": "Floor register - 2x14 white steel, 2-way adjustable (Everbilt)", "22PVSf6QFNqJ": "Wall/ceiling register - 4x10 white steel, 2-way adjustable", "22PVSfMg5CAM": "Wall/ceiling register - 4x12 white steel, 2-way adjustable", "22PVSfaDBtaX": "Wall/ceiling register - 6x10 white steel, 2-way adjustable", "22PVSf6QFNqL": "Wall/ceiling register - 8x6 white steel, 2-way (Everbilt)", "22PVSg9vxALY": "Wall/ceiling register - 14x4 white steel, 2-way (Everbilt)", "22PVSg9vxALa": "Wall/ceiling register - 14x6 white steel, 2-way (Everbilt)", "22PVSnfWPtFy": "Honeywell Home X1N - non-programmable digital thermostat, simple 1-stage heat/cool", "22PVSnw5sz95": "Ecobee Smart Thermostat Essential - WiFi, app control, voice compatible", "22PVSCAcunNJ": "Kidde 10-year - Battery smoke+CO combo, 30CUD10, sealed lithium, no wiring needed", "22PVSCAcunNK": "Kidde 10-year - Battery smoke only, 20SD10, sealed lithium, no CO detection", "22PVSCAcunNL": "Kidde hardwired - Interconnected smoke, AA backup battery, 20SAR", "22PVPA4XbxLK": "CE Cover-Up plate - 1-gang duplex, white textured/paintable, hides old switch hole", "22PPFWLyyfFk": "CE Cover-Up plate - 1-gang duplex midway, white smooth finish", "22PVPAc76cfU": "CE Cover-Up plate - 1-gang toggle, white smooth finish", "22PPFVEDBGuf": "Leviton wall plate - 1-gang duplex outlet, white midway nylon", "22PPFVqFkepG": "Leviton wall plate - 2-gang duplex outlet, white midway nylon", "22PTpnC9hXqY": "Leviton wall plate - 3-gang rocker switch, white midway nylon", "22PPFWuxJFdF": "Leviton wall plate - 1-gang blank, white midway nylon (covers unused box)", "22PNUST7QMYH": "Leviton wall plate - 1-gang decora jumbo, white (larger coverage area)", "22PVQBeygdHx": "Leviton wall plate - 2-gang rocker switch, white midway nylon", "22PVP8cdJrAY": "Leviton wall plate - 3-gang toggle switch, white midway nylon", "22PPFXrjWyXi": "Leviton wall plate - coaxial cable/F-connector, white", "22PNUVgrq9cs": "Leviton TR outlet - 15A tamper-resistant decora duplex receptacle, white", "22PLy3vvsCHs": "Leviton GFCI outlet - 15A self-test SmartlockPro, white (wet areas/bathrooms)", "22PNURteXhDX": "Leviton single-pole switch - 15A decora, white, 5601-2WS", "22PTpjEDhV7g": "Leviton 3-way switch - 15A decora, white, for multi-location control", "22PVSAzmQbWH": "Leviton SureSlide dimmer - LED/CFL/incandescent, single or 3-way, white", "22PVS9JJ4Gwq": "Leviton standard outlet - 15A duplex 5320-W, white (direct broken swap)", "22PVS9bfvz7a": "Leviton toggle switch - 15A standard 1451-2W, white (direct broken swap)"};
+var DESC={"22PVPKTZB6A7": "Kwikset Cove knob - Matte Black, hall/closet passage, Microban antimicrobial", "22PVPLmRRLGA": "Kwikset Balboa lever - Satin Nickel, hall/closet passage", "22PVPTFTuMJp": "Kwikset Tustin lever - Venetian Bronze, hall/closet passage", "22PPFiRxVCMd": "Kwikset Cove knob - Satin Nickel, bed/bath privacy with lock", "22PPJPLR8AAu": "Kwikset Cove knob - Matte Black, bed/bath privacy with lock", "22PPFiRvqpC8": "Polo knob - Venetian Bronze, bed/bath privacy with lock", "22PPFjNK2qMn": "Kwikset Balboa lever - Satin Nickel, bed/bath privacy with lock", "22PPJQicPsZU": "Kwikset Balboa lever - Matte Black, bed/bath privacy with lock", "22PVPuX7beu7": "Hampton Bay Flaxmere 12in - Brushed Nickel, 3-CCT LED flush mount", "22PVPuX7beu8": "Hampton Bay Flaxmere 12in - Matte Black, 3-CCT LED flush mount", "22PVPuX7beu9": "Hampton Bay Chilton 15in - Oil-Rubbed Bronze, adjustable CCT LED flush", "22PVPxpDcvV4": "Hampton Bay Flaxmere 14in - Brushed Nickel, selectable CCT LED flush", "22PVPxpDcvV5": "Hampton Bay Flaxmere 14in - Matte Black, selectable CCT LED flush", "22PVPuX7beuA": "HALO LT 6in retrofit kit - white baffle trim, 5-CCT, 750 lm", "22PVPuX7beuB": "EnviroLite 4in retrofit kit - white trim, daylight LED, slim profile", "22PVPuX7beuC": "Hampton Bay Ashhurst 3-light - Brushed Nickel, frosted glass vanity bar", "22PVPuX7beuD": "Hampton Bay Eastburn 3-light - Matte Black, clear glass, 22in vanity bar", "22PVPuX7beuE": "Hampton Bay Ashhurst 3-light - Oil-Rubbed Bronze, frosted glass vanity bar", "22PVPxpDcvV6": "Hampton Bay Marsden 4-light - Brushed Nickel, clear glass, 32.5in vanity bar", "22PVPxpDcvV7": "Hampton Bay Ashhurst 4-light - Oil-Rubbed Bronze, frosted glass, 32.75in", "22PVPyVmq8kS": "Hampton Bay Castleford 3-light - Oil-Rubbed Bronze chandelier, clear glass shades", "22PVPzxqgdYz": "Hampton Bay Southbourne 3-light - Matte Black farmhouse semi-flush, 15.5in", "22PVQ4skJPBQ": "Hampton Bay Moreland 5-light - Oil-Rubbed Bronze wagon wheel chandelier", "22PVQ5KgFvz2": "Hampton Bay Hastings 4-light - Oil-Rubbed Bronze vintage drum chandelier", "22PVPuX7beuF": "Feit A19 60W equiv - dimmable LED frosted, standard base E26", "22PVPuX7beuG": "Feit A19 60W equiv - filament clear glass, warm vintage look E26", "22PVQ4skJPBM": "Feit BA10 candelabra - 60W equiv filament, E12 base, chandelier/sconce", "22PVQ4skJPBN": "Feit G25 globe - 60W equiv filament clear, vanity/decorative E26", "22PVQ4skJPBP": "Feit G25 globe - 60W equiv filament white, vanity/decorative E26", "22PVTPwC2tQ2": "Moen Banbury 4-pc - Spot Resist Brushed Nickel: 24in bar, ring, TP holder, robe hook", "22PVTPwC2tQ3": "Moen Genta 3-pc - Matte Black: 24in towel bar, paper holder, towel ring", "22PVTPwC2tQ4": "Delta Porter 4-pc - Oil-Rubbed Bronze: 24in bar, ring, TP holder, towel hook", "22PVTXhdLTfs": "Moen Banbury faucet - Spot Resist Brushed Nickel, 4in centerset 2-handle, WaterSense, drain incl", "22PVTXhdLTft": "Moen Banbury faucet - Matte Black, 4in centerset 2-handle, WaterSense, drain included", "22PVTXwmntYs": "Moen Banbury faucet - Mediterranean Bronze, 4in centerset 2-handle, drain included", "22PVTYN2tzs9": "Moen Attract Magnetix - Brushed Nickel, 6-spray dual handheld+fixed, magnetic dock, 1.75 GPM", "22PVTYf7Rjhf": "Moen Attract Magnetix - Matte Black, 6-spray dual handheld+fixed, magnetic dock, 1.75 GPM", "22PVTYwYVTRS": "Moen Attract Magnetix - Mediterranean Bronze, 6-spray dual handheld+fixed, 1.75 GPM", "22PVTZAEcb6m": "BEMIS Weston - Elongated bowl, white, soft close, enameled wood, never loosens, chrome hinge", "22PVTZN7DzYg": "BEMIS Weston - Round bowl, white, soft close, enameled wood, never loosens, chrome hinge", "22PVWU72XDUt": "Franklin Brass Adjusta-Pull - Satin Nickel bar pull, adjustable 3 to 5in hole spacing", "22PVWU72XDUu": "Franklin Brass Adjusta-Pull - Matte Black bar pull, adjustable 3 to 5in hole spacing", "22PVWU72XDUv": "Franklin Brass Adjusta-Pull - Champagne Bronze bar pull, adjustable 3 to 5in hole spacing", "22PVVRMYQsFD": "Franklin Brass Fulton knob - Satin Nickel, 1-3/16in round cabinet knob", "22PVVRLi8q6Z": "Franklin Brass Fulton knob - Matte Black, 1-3/16in round cabinet knob", "22PMzpqhYMcA": "Franklin Brass knob - Champagne Bronze, 1-3/16in round cabinet knob", "22PLidsWNdYp": "SharkBite angle stop - 1/2in PTC x 7/8in ballcock x 12in, toilet water supply", "22PLictfFuRM": "SharkBite angle stop - 1/2in PTC x 3/8in compression quarter-turn, sink supply", "22PMzkaL2eTH": "BrassCraft supply line - 3/8in comp x 1/2in FIP x 30in, braided polymer faucet", "22PLihEi33Hz": "P-trap - 1-1/2in to 1-1/4in heavy duty plastic adjustable with reducing washer", "22PMzkaL2eTI": "Snappy Trap - 1-1/2in all-in-one drain kit for double bowl kitchen sink", "22PLihfEsfeL": "Escutcheon - 1/2in copper tube size flange, chrome-plated steel, small pipe cover", "22PVVRMCQsFA": "Escutcheon - 1-1/2in x 3in chrome-plated steel low-pattern flange, large pipe cover", "22PVScAuHEv7": "Floor register - 4x10 white steel, 2-way adjustable damper", "22PVSdyhK8Te": "Floor register - 4x8 white steel, 2-way adjustable (Everbilt)", "22PVSdyhK8Tg": "Floor register - 2x10 white steel, 2-way adjustable (Everbilt)", "22PVSdyhKVN2": "Floor register - 2x12 white steel, 2-way adjustable (Everbilt)", "22PVSdyhKVN4": "Floor register - 2x14 white steel, 2-way adjustable (Everbilt)", "22PVSf6QFNqJ": "Wall/ceiling register - 4x10 white steel, 2-way adjustable", "22PVSfMg5CAM": "Wall/ceiling register - 4x12 white steel, 2-way adjustable", "22PVSfaDBtaX": "Wall/ceiling register - 6x10 white steel, 2-way adjustable", "22PVSf6QFNqL": "Wall/ceiling register - 8x6 white steel, 2-way (Everbilt)", "22PVSg9vxALY": "Wall/ceiling register - 14x4 white steel, 2-way (Everbilt)", "22PVSg9vxALa": "Wall/ceiling register - 14x6 white steel, 2-way (Everbilt)", "22PVSnfWPtFy": "Honeywell Home X1N - non-programmable digital thermostat, simple 1-stage heat/cool", "22PVSnw5sz95": "Ecobee Smart Thermostat Essential - WiFi, app control, voice compatible", "22PVSCAcunNJ": "Kidde 10-year - Battery smoke+CO combo, 30CUD10, sealed lithium, no wiring needed", "22PVSCAcunNK": "Kidde 10-year - Battery smoke only, 20SD10, sealed lithium, no CO detection", "22PVSCAcunNL": "Kidde hardwired - Interconnected smoke, AA backup battery, 20SAR", "22PVPA4XbxLK": "CE Cover-Up plate - 1-gang duplex, white textured/paintable, hides old switch hole", "22PPFWLyyfFk": "CE Cover-Up plate - 1-gang duplex midway, white smooth finish", "22PVPAc76cfU": "CE Cover-Up plate - 1-gang toggle, white smooth finish", "22PPFVEDBGuf": "Leviton wall plate - 1-gang duplex outlet, white midway nylon", "22PPFVqFkepG": "Leviton wall plate - 2-gang duplex outlet, white midway nylon", "22PTpnC9hXqY": "Leviton wall plate - 3-gang rocker switch, white midway nylon", "22PPFWuxJFdF": "Leviton wall plate - 1-gang blank, white midway nylon (covers unused box)", "22PNUST7QMYH": "Leviton wall plate - 1-gang decora jumbo, white (larger coverage area)", "22PVQBeygdHx": "Leviton wall plate - 2-gang rocker switch, white midway nylon", "22PVP8cdJrAY": "Leviton wall plate - 3-gang toggle switch, white midway nylon", "22PPFXrjWyXi": "Leviton wall plate - coaxial cable/F-connector, white", "22PNUVgrq9cs": "Leviton TR outlet - 15A tamper-resistant decora duplex receptacle, white", "22PLy3vvsCHs": "Leviton GFCI outlet - 15A self-test SmartlockPro, white (wet areas/bathrooms)", "22PNURteXhDX": "Leviton single-pole switch - 15A decora, white, 5601-2WS", "22PTpjEDhV7g": "Leviton 3-way switch - 15A decora, white, for multi-location control", "22PVSAzmQbWH": "Leviton SureSlide dimmer - LED/CFL/incandescent, single or 3-way, white", "22PVS9JJ4Gwq": "Leviton standard outlet - 15A duplex 5320-W, white (direct broken swap)", "22PVS9bfvz7a": "Leviton toggle switch - 15A standard 1451-2W, white (direct broken swap)"};
 
 function pImg(id){ return ''; }
 
@@ -735,10 +808,11 @@ function delPhoto(rid,idx){
 
 
 function selProd(rid,key,val,el,grp){
-  if(rid){var r=getR(rid);if(r){r.d[key]=val;updSum(rid);}}
+  var isOn=el.classList.contains('on');
+  if(rid){var r=getR(rid);if(r){r.d[key]=isOn?null:val;updSum(rid);}}
   var container=el.parentNode;
   container.querySelectorAll('.pcard').forEach(function(c){c.classList.remove('on');});
-  el.classList.add('on');
+  if(!isOn)el.classList.add('on');
   autoSave();
 }
 function setPT(rid,tier,el){
@@ -777,6 +851,16 @@ function updSum(rid){
   if(d.cabPullId)p.push('Cabinet HW');
   var el=document.getElementById('rsum-'+rid);
   if(el)el.textContent=p.length?p.join(' · '):'Tap to expand';
+}
+
+function rebuildRegCards(rid,regType){
+  var d=getR(rid).d||{};
+  var items=regType==='floor'?REG_FL:REG_WL;
+  var grp=document.querySelector('#rcard-'+rid+' .grp-reg');
+  if(!grp)return;
+  grp.innerHTML=items.map(function(item){return mkPcard(item,'regId','grp-reg',rid);}).join('');
+  // restore selection highlight
+  if(d.regId){grp.querySelectorAll('.pcard').forEach(function(c){if(c.onclick&&c.onclick.toString().indexOf(d.regId)>=0)c.classList.add('on');});}
 }
 
 // ═══════════ NAVIGATION ═══════════
@@ -866,9 +950,26 @@ function bldRoom(r){
   s+='<div class="lbl" style="margin:8px 0 5px;">Privacy — Bed / Bath</div>';
   s+='<div class="grp-privacy">'+DOOR_PRIV.map(function(item){return mkPcard(item,'privacyId','grp-privacy',r.id);}).join('')+'</div>';
   s+=qRow(r.id,'privacyQty','Privacy Qty','');
-  s+='<div class="lbl" style="margin:8px 0 5px;">Entry / Exterior</div>';
-  s+='<div class="grp-entry">'+DOOR_ENTRY.map(function(item){return mkPcard(item,'entryId','grp-entry',r.id);}).join('')+'</div>';
-  s+=qRow(r.id,'entryQty','Entry Qty','');
+  if(r.type==='entryway'){
+    s+='<div class="lbl" style="margin:8px 0 5px;">Entry / Exterior Locksets</div>';
+    s+='<div class="a-info" style="font-size:10px;">Exterior door hardware — deadbolts, combo sets. Select and enter qty for each exterior door.</div>';
+    s+='<div class="grp-entry">'+DOOR_ENTRY.map(function(item){return mkPcard(item,'entryId','grp-entry',r.id);}).join('')+'</div>';
+    s+=qRow(r.id,'entryQty','Exterior Door Qty','');
+  }
+
+  // INTERIOR HINGES & DOOR STOPS (all rooms)
+  s+='<div class="sh" style="margin-top:10px;">🔧 Interior Hinges & Door Stops</div>';
+  s+='<div class="a-info" style="font-size:10px;">Hinge packs are 3 per pack. Count packs needed for this room\'s doors.</div>';
+  s+='<div class="lbl" style="margin-bottom:5px;">Interior Door Hinges</div>';
+  s+='<div class="grp-hinge">'+DOOR_HINGE.map(function(item){return mkPcard(item,'hingeId','grp-hinge',r.id);}).join('')+'</div>';
+  s+=qRow(r.id,'hingeQty','Hinge Packs (3/pack)','');
+  s+='<div class="lbl" style="margin:8px 0 5px;">Door Stop Type</div>';
+  s+='<div class="grp-doorstop" style="display:flex;flex-direction:column;gap:0;">';
+  s+=togRow(r.id,'doorStopRigid','Rigid Wall/Floor Stop','Mounts on wall or floor behind door','');
+  s+=togRow(r.id,'doorStopHinge','Hinge Pin Stop','Clips onto door hinge pin — no drilling','');
+  s+='</div>';
+  s+=qRow(r.id,'doorStopQty','Door Stop Qty','# of door stops this room');
+
   s+='<div class="sh">💡 Lighting</div>';
 
   // Flush mount
@@ -890,8 +991,8 @@ function bldRoom(r){
   s+=qRow(r.id,'can6Qty','6" Can Qty','');
   s+=qRow(r.id,'can4Qty','4" Can Qty','');
 
-  // Decorative (living/dining only)
-  if(r.type==='living'||r.type==='dining'){
+  // Decorative (living/dining/kitchen)
+  if(r.type==='living'||r.type==='dining'||r.type==='kitchen'){
     s+='<div class="lbl" style="margin:8px 0 6px;">Decorative Fixture (optional)</div>';
     s+='<div class="grp-deco">'+DECO.map(function(item){return mkPcard(item,'decoId','grp-deco',r.id);}).join('')+'</div>';
   }
@@ -930,7 +1031,7 @@ function bldRoom(r){
 
   // HEAT REGISTER
   s+='<div class="sh">🌡 Heat Register</div>';
-  s+='<div class="fg"><label class="lbl">Register Type</label><select onchange="setRV(\''+r.id+'\',\'regType\',this.value);document.getElementById(\'reg-body-'+r.id+'\').style.display=this.value?\'block\':\'none\'">'
+  s+='<div class="fg"><label class="lbl">Register Type</label><select onchange="setRV(\''+r.id+'\',\'regType\',this.value);document.getElementById(\'reg-body-'+r.id+'\').style.display=this.value?\'block\':\'none\';rebuildRegCards(\''+r.id+'\',this.value)">'
     +'<option value="">None</option>'
     +'<option value="floor"'+(d.regType==='floor'?' selected':'')+'>Floor Register</option>'
     +'<option value="wall"'+(d.regType==='wall'?' selected':'')+'>Wall / Ceiling Register</option>'
@@ -959,6 +1060,7 @@ function bldRoom(r){
     var vanItems=VANITY[fin]||VANITY[0];
     s+='<div class="grp-vanity">'+vanItems.map(function(item){return mkPcard(item,'vanityId','grp-vanity',r.id);}).join('')+'</div>';
     s+=togRow(r.id,'hasVanityLight','Vanity Light Replacement','','');
+    s+=qRow(r.id,'vanityQty','Vanity Light Qty','# of vanity light bars');
 
     // Faucet
     s+='<div class="lbl" style="margin:8px 0 6px;">Vanity Faucet</div>';
@@ -974,6 +1076,16 @@ function bldRoom(r){
       +'<label class="tog"><input type="checkbox"'+(d.bathHW?' checked':'')+' onchange="setRV(\''+r.id+'\',\'bathHW\',this.checked);showHide(\'bhw-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
     s+='<div id="bhw-body-'+r.id+'" style="display:'+(d.bathHW?'block':'none')+'">';
     s+='<div class="grp-bathHW">'+BATH_HW.map(function(item){return mkPcard(item,'bathHWId','grp-bathHW',r.id);}).join('')+'</div>';
+    s+=qRow(r.id,'bathHWQty','Bath Hardware Set Qty','# of sets');
+    s+='</div>';
+
+    // Robe hook (separate)
+    s+='<div class="lbl" style="margin:8px 0 6px;">Robe Hook (separate)</div>';
+    s+='<div class="trow"><div class="tlbl">Add Robe Hook<span class="tlbl-sub">Standalone — not part of hardware set</span></div>'
+      +'<label class="tog"><input type="checkbox"'+(d.robeHook?' checked':'')+' onchange="setRV(\''+r.id+'\',\'robeHook\',this.checked);showHide(\'rh-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="rh-body-'+r.id+'" style="display:'+(d.robeHook?'block':'none')+'">';
+    s+='<div class="grp-robehook">'+ROBE_HOOK.map(function(item){return mkPcard(item,'robeHookId','grp-robehook',r.id);}).join('')+'</div>';
+    s+=qRow(r.id,'robeHookQty','Robe Hook Qty','# of robe hooks');
     s+='</div>';
 
     // Toilet seat
@@ -1003,17 +1115,29 @@ function bldRoom(r){
     s+='<div id="sh-body-'+r.id+'" style="display:'+(d.showerHead&&!locked?'block':'none')+'">';
     s+='<div class="grp-shower">'+SHOWER_H.map(function(item){return mkPcard(item,'showerHeadId','grp-shower',r.id);}).join('')+'</div>';
     s+='</div>';
-    s+=togRow(r.id,'tubSpout','Tub Spout Replacement','Placeholder — office orders after valve confirmed','');
+    s+='<div class="lbl" style="margin:8px 0 5px;">Tub Spout</div>';
+s+='<div class="grp-tubSpout">'+TUB_SPOUT.map(function(item){return mkPcard(item,'tubSpoutId','grp-tubSpout',r.id);}).join('')+'</div>';
+
+    // Shower drain cover
+    s+='<div class="lbl" style="margin:8px 0 5px;">Shower Drain Cover</div>';
+    s+='<div class="trow"><div class="tlbl">Replace Shower Drain Cover<span class="tlbl-sub">Moen 4" Square M5103</span></div>'
+      +'<label class="tog"><input type="checkbox"'+(d.showerDrain?' checked':'')+' onchange="setRV(\''+r.id+'\',\'showerDrain\',this.checked);showHide(\'sd-body-'+r.id+'\',this.checked)"><span class="tog-sl"></span></label></div>';
+    s+='<div id="sd-body-'+r.id+'" style="display:'+(d.showerDrain&&!locked?'block':'none')+'">';
+    s+='<div class="grp-showerDrain">'+SHOWER_DRAIN.map(function(item){return mkPcard(item,'showerDrainId','grp-showerDrain',r.id);}).join('')+'</div>';
+    s+=qRow(r.id,'showerDrainQty','Shower Drain Qty','# of drains');
+    s+='</div>';
     s+='</div>';
 
     // Plumbing trim
     s+='<div class="sh">🔧 Plumbing Trim</div>';
-    s+=qRow(r.id,'angleStopQty','Angle Stops (vanity)','Under-sink shutoff valves');
-    s+=qRow(r.id,'toiletAngleQty','Toilet Angle Stops','');
-    s+=qRow(r.id,'supplyLineQty','Supply Lines','Faucet supply lines');
+    s+=qRow(r.id,'angleStopQty','Faucet Angle Stops','Under-sink shutoff valves (3/8" comp)');
+    s+=qRow(r.id,'toiletAngleQty','Toilet Angle Stops','7/8" ballcock shutoff valves');
+    s+=qRow(r.id,'supplyLineQty','Faucet Supply Lines','Braided faucet supply lines');
+    s+=qRow(r.id,'toiletSupplyQty','Toilet Supply Lines','Toilet fill supply lines');
     s+=togRow(r.id,'ptrap','P-Trap Replacement','Under vanity sink','');
     s+=qRow(r.id,'escutcheonQty','Escutcheon Plates','Pipe cover rings');
     s+=togRow(r.id,'popUpDrain','Pop-Up Drain Replacement','Bathroom sink drain','');
+    s+=togRow(r.id,'recessedTP','Recessed TP Holder','In-wall recessed style — field verify wall type','');
   }
 
   // ── KITCHEN ──
@@ -1056,6 +1180,13 @@ function bldRoom(r){
   s+='<div class="photo-grid" id="pgrid-'+r.id+'"></div>';
   s+='<button type="button" class="photo-add" onclick="document.getElementById(\'pinput-'+r.id+'\').click()" style="-webkit-appearance:none;">'+'<span class="photo-add-icon">📷</span><span>Add Photo</span></button>';
   s+='<input type="file" accept="image/*" capture="environment" id="pinput-'+r.id+'" style="display:none" onchange="handlePhoto(\"'+r.id+'\",this)">';
+
+  // WALL PATCH
+  s+='<div class="sh">🪣 Wall Patch</div>';
+  s+='<div class="a-info" style="font-size:10px;">Count patches needed per level. Minor=nail holes/dings, Medium=1-4" holes, Bad=large or water damage.</div>';
+  s+=qRow(r.id,'patchMinor','Minor Patches','Nail holes, dings, small repairs');
+  s+=qRow(r.id,'patchMedium','Medium Patches','1–4 inch holes, moderate damage');
+  s+=qRow(r.id,'patchBad','Bad Patches','Large holes, water damage, major repair');
 
   s+='<div class="sh">📝 Notes</div>';
   s+='<textarea placeholder="Room notes, flags, conditions..." onchange="setRV(\''+r.id+'\',\'notes\',this.value)">'+(d.notes||'')+'</textarea>';
@@ -1413,9 +1544,11 @@ async function generateWalkReport(){
     var bathParts=[];
     if(d.faucetId){var faucN=DESC[d.faucetId]||'Faucet';bathParts.push('<span class="badge">Faucet</span><div class="rs-desc">'+faucN.split(' - ')[0]+'</div>');}
     if(d.bathHWId){var bhN=DESC[d.bathHWId]||'Bath HW';bathParts.push('<span class="badge">Bath HW Set</span><div class="rs-desc">'+bhN.split(' - ')[0]+'</div>');}
+    if(d.robeHookId&&d.robeHook){var rhN=DESC[d.robeHookId]||'Robe Hook';bathParts.push('<span class="badge">Robe Hook</span><div class="rs-desc">'+rhN.split(' - ')[0]+'</div>');}
     if(d.toiletSeatId){var tsN=DESC[d.toiletSeatId]||'Toilet Seat';bathParts.push('<span class="badge">Toilet Seat</span><div class="rs-desc">'+tsN.split(' - ')[0]+'</div>');}
     if(d.showerHeadId){var shN=DESC[d.showerHeadId]||'Shower Head';bathParts.push('<span class="badge">Shower Head</span><div class="rs-desc">'+shN.split(' - ')[0]+'</div>');}
-    if(d.tubSpout)bathParts.push('<span class="badge red">Tub Spout — Verify</span>');
+    if(d.tubSpoutId){var tsN2=DESC[d.tubSpoutId]||'Tub Spout';bathParts.push('<span class="badge">Tub Spout</span><div class="rs-desc">'+tsN2.split(' - ')[0]+'</div>');}
+    if(d.showerDrainId&&d.showerDrain){var sdN=DESC[d.showerDrainId]||'Shower Drain';bathParts.push('<span class="badge">Shower Drain</span><div class="rs-desc">'+sdN.split(' - ')[0]+'</div>');}
     if(d.valve)bathParts.push('<span class="badge red">Valve ID: '+d.valve+'</span>');
     if(bathParts.length>0){
       h+='<div class="room-section"><div class="rs-label">Plumbing Fixtures</div><div class="rs-val">'+bathParts.join('')+'</div></div>';
@@ -1425,7 +1558,8 @@ async function generateWalkReport(){
     var plbParts=[];
     if(d.angleStopQty>0)plbParts.push('Angle Stops ×'+d.angleStopQty);
     if(d.toiletAngleQty>0)plbParts.push('Toilet Stops ×'+d.toiletAngleQty);
-    if(d.supplyLineQty>0)plbParts.push('Supply Lines ×'+d.supplyLineQty);
+    if(d.supplyLineQty>0)plbParts.push('Faucet Lines ×'+d.supplyLineQty);
+    if(d.toiletSupplyQty>0)plbParts.push('Toilet Lines ×'+d.toiletSupplyQty);
     if(d.ptrap)plbParts.push('P-Trap');
     if(d.escutcheonQty>0)plbParts.push('Escutcheons ×'+d.escutcheonQty);
     if(d.popUpDrain)plbParts.push('Pop-Up Drain');
@@ -1635,7 +1769,8 @@ async function pushToJT(){
       try{
         var _logNotes='Property Walk — '+addr+'\n\nRooms photographed:';
         _photoRooms.forEach(function(r){_logNotes+='\n'+r.name+': '+r.photos.length+' photo'+(r.photos.length!==1?'s':'');});
-        var _dlResp=await jtQ({createDailyLog:{'$':{jobId:jobId,date:new Date().toISOString().split('T')[0],notes:_logNotes},createdDailyLog:{id:{}}}});
+        var _now=new Date();var _localDate=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'-'+String(_now.getDate()).padStart(2,'0');
+        var _dlResp=await jtQ({createDailyLog:{'$':{jobId:jobId,date:_localDate,notes:_logNotes},createdDailyLog:{id:{}}}});
         var _dlId=gc(_dlResp,'createDailyLog').id;
         if(!_dlId)throw new Error('Daily log creation failed: '+JSON.stringify(_dlResp));
         var _totalPushed=0;
@@ -1768,19 +1903,30 @@ async function pushToJT(){
       ELEC.standard.forEach(function(item){if(d['std_'+item.id]>0)addRI(item.id,d['std_'+item.id],G.device,'Std: '+item.name);});
 
       // Bath
-      if(d.vanityId&&d.hasVanityLight)addRI(d.vanityId,1,G.light,'Vanity Light Bar');
+      if(d.vanityId&&d.hasVanityLight)addRI(d.vanityId,d.vanityQty||1,G.light,'Vanity Light Bar');
       if(d.faucetId)addRI(d.faucetId,1,G.plumbing,'Faucet');
-      if(d.bathHWId)addRI(d.bathHWId,1,G.plumbing,'Bath Hardware Set');
+      if(d.bathHWId)addRI(d.bathHWId,d.bathHWQty||1,G.plumbing,'Bath Hardware Set');
+      if(d.robeHookId&&d.robeHook)addRI(d.robeHookId,d.robeHookQty||1,G.plumbing,'Robe Hook');
       if(d.toiletSeatId)addRI(d.toiletSeatId,1,G.plumbing,'Toilet Seat');
       if(d.showerHeadId)addRI(d.showerHeadId,1,G.plumbing,'Shower Head');
-      if(d.tubSpout)addRI('22PVVRcJQ6pd',1,G.plumbing,'Tub Spout — Verify');
+      // Interior hinges and door stops
+      if(d.hingeId&&d.hingeQty>0)addRI(d.hingeId,d.hingeQty,G.door,rn+' — Door Hinges ('+d.hingeQty+' packs)');
+      if(d.doorStopRigid&&d.doorStopQty>0)addRI((DOOR_STOP_RIGID[S.finish]||DOOR_STOP_RIGID[0]).id,d.doorStopQty,G.door,rn+' — Rigid Door Stops');
+      if(d.doorStopHinge&&d.doorStopQty>0)addRI((DOOR_STOP_HINGE[S.finish]||DOOR_STOP_HINGE[0]).id,d.doorStopQty,G.door,rn+' — Hinge Pin Door Stops');
+      if(d.tubSpoutId)addRI(d.tubSpoutId,1,G.plumbing,'Tub Spout');
+      if(d.showerDrainId&&d.showerDrain)addRI(d.showerDrainId,d.showerDrainQty||1,G.plumbing,'Shower Drain Cover');
       // Plumbing trim
       if(d.angleStopQty>0)addRI(PLB.angleStop.id,d.angleStopQty,G.plumbing,'Angle Stops');
       if(d.toiletAngleQty>0)addRI(PLB.toiletAngle.id,d.toiletAngleQty,G.plumbing,'Toilet Angle Stops');
-      if(d.supplyLineQty>0)addRI(PLB.supplyLine.id,d.supplyLineQty,G.plumbing,'Supply Lines');
+      if(d.supplyLineQty>0)addRI(PLB.supplyLine.id,d.supplyLineQty,G.plumbing,'Faucet Supply Lines');
+      if(d.toiletSupplyQty>0)addRI(PLB.supplyLine.id,d.toiletSupplyQty,G.plumbing,'Toilet Supply Lines');
       if(d.ptrap)addRI(PLB.ptrap.id,1,G.plumbing,'P-Trap');
       if(d.escutcheonQty>0)addRI(PLB.escutcheon.id,d.escutcheonQty,G.plumbing,'Escutcheons');
       if(d.popUpDrain)addRI(PLB.popUpDrain.id,1,G.plumbing,'Pop-Up Drain');
+      if(d.recessedTP)addRI('22PWKES7hY4J',1,G.plumbing,'Recessed TP Holder — Field Verify');
+      if(d.patchMinor>0)addRI('22PViGQepPH8',d.patchMinor,G.drywall,rn+' — Minor Drywall Patches');
+      if(d.patchMedium>0)addRI('22PViGQepPH8',d.patchMedium,G.drywall,rn+' — Medium Drywall Patches');
+      if(d.patchBad>0)addRI('22PViGQepPH8',d.patchBad,G.drywall,rn+' — Major Drywall Patches');
       // Kitchen
       if(d.cabPullId){var pqty=(d.drawerPullQty||0)+(d.doorPullQty||0);if(pqty>0)addRI(d.cabPullId,pqty,G.cabinet,'Cabinet Pulls ('+d.holeSpacing+')');}
       if(d.sinkStrainer)addRI(PLB.sinkStrainer.id,1,G.plumbing,'Sink Strainer');
